@@ -1,6 +1,26 @@
 import multer from "multer";
 import { isProduction } from "../config.js";
 
+/**
+ * An error carrying an HTTP status. `errorHandler` below reads `status`, so
+ * a route can `throw httpError(409, "Email already registered")` and get the
+ * right response without assembling one itself.
+ */
+export function httpError(status, message) {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+}
+
+/**
+ * Express 4 does not catch a rejected promise from a handler, so every async
+ * route is wrapped in this. Without it a failed query hangs the request
+ * instead of reaching `errorHandler`.
+ */
+export function asyncRoute(handler) {
+  return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
+}
+
 export function notFound(req, res) {
   if (req.path.startsWith("/api/")) {
     return res.status(404).json({ error: "Not found" });

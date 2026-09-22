@@ -19,17 +19,17 @@ the next push — ask again each time.
 When you are ready to push, ask in a form the user can answer directly, naming
 what you intend to do:
 
-> Ready to push 2 commits to `origin/development`. Push now?
+> Ready to push 2 commits to `origin/dev`. Push now?
 
 ### Never push to `main`
 
 `main` is the deployed branch and is off limits to agents. Do not push to it,
 do not merge into it locally and push the result, and do not force-push it.
 
-Work goes to `development` or to a short-lived branch taken from it:
+Work goes to `dev` or to a short-lived branch taken from it:
 
 ```sh
-git checkout development
+git checkout dev
 git checkout -b feature/short-description
 ```
 

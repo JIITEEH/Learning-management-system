@@ -1,5 +1,9 @@
 # Learning Management System
 
+A website where a school runs its classes online. Teachers post lessons, give
+assignments and quizzes, and record grades. Students get the materials, submit
+work, and see how they're doing.
+
 Courses, lessons, enrolment, assignments, and grading — built on five
 foundations carried over from the thesis management system: **accounts**,
 **roles**, **permissions**, **file uploads**, and **schedules**.

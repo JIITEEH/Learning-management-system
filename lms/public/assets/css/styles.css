@@ -1,0 +1,66 @@
+/* ==========================================================================
+   Learning Management System — design tokens
+   All colour, type, and spacing values live here. Add new values to :root
+   rather than hard-coding them in a rule below.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* Charcoal ramp — near-black at the edges, barely lifted at the centre */
+  --color-black-950: #020304;
+  --color-charcoal-900: #060709;
+  --color-charcoal-800: #0a0c0f;
+  --color-charcoal-700: #101318;
+  --color-charcoal-600: #1a1f27;
+
+  /* Page background, painted in three layers:
+     1. a tight cool lift high on the page, so the top reads as lit
+     2. a vignette that crushes the corners toward black
+     3. a base fade that bottoms out just above pure black
+     Multiple soft stops per layer keep the falloff from banding. */
+  --gradient-page:
+    radial-gradient(
+      85% 55% at 50% 4%,
+      rgb(31 38 48 / 0.95) 0%,
+      rgb(22 27 34 / 0.55) 28%,
+      rgb(12 15 19 / 0.18) 52%,
+      rgb(6 7 9 / 0) 74%
+    ),
+    radial-gradient(
+      130% 110% at 50% 40%,
+      rgb(2 3 4 / 0) 32%,
+      rgb(2 3 4 / 0.45) 72%,
+      rgb(2 3 4 / 0.82) 100%
+    ),
+    linear-gradient(
+      180deg,
+      var(--color-charcoal-800) 0%,
+      var(--color-charcoal-900) 48%,
+      var(--color-black-950) 100%
+    );
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Matches the foot of the gradient so overscroll never flashes white. */
+  background-color: var(--color-black-950);
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-image: var(--gradient-page);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: var(--color-black-950);
+}

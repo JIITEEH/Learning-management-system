@@ -18,7 +18,7 @@
     "lint:fix": "eslint . --fix"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -70,7 +70,7 @@ not an enum — adding a fourth needs no schema change.
 
 ## Running it
 
-Requires Node 20+ and a MySQL 8 server.
+Requires Node 22.13+ and a MySQL 8 server.
 
 ```sh
 cd lms

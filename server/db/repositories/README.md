@@ -23,10 +23,11 @@ One file per domain, named after its schema file and its route:
 | `users.repo.js` | `schema/01_identity.sql` | `routes/users.js`, `routes/auth.js` |
 | `roles.repo.js` | `schema/01_identity.sql` | `routes/roles.js` |
 | `permissions.repo.js` | `schema/01_identity.sql` | `routes/permissions.js`, `middleware/auth.js` |
+| `courses.repo.js` | `schema/02_catalog.sql` | `routes/courses.js`, `middleware/courseAccess.js` |
+| `enrollments.repo.js` | `schema/03_enrollment.sql` | `routes/enrollments.js`, `routes/courses.js` |
 
-Only the identity domain is implemented so far. Courses, lessons, enrollment,
-assignments, files and schedules get a repository each as their routes are
-built, following the same naming.
+Lessons, assignments, files and schedules get a repository each as their
+routes are built, following the same naming.
 
 Routes import them under a namespace, so a call says which table it touches:
 

@@ -9,8 +9,151 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/styles.css">
-<script type="module" src="../assets/js/main.js"></script>
+<script type="module" src="../assets/js/pages/course.js"></script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="shell">
+  <header class="topbar" data-shell></header>
+
+  <main class="stack stack-wide" id="main">
+
+    <!-- Shown for a course that does not exist, and equally for one this
+         account may not see: the server gives both the same answer. -->
+    <section class="card" data-missing hidden>
+      <h1>Course not found</h1>
+      <p class="card-intro">
+        There is no course at this address that your account can open. If you
+        were given a join code, use it on the Courses page.
+      </p>
+      <div class="actions"><a class="btn" href="courses.html">Back to courses</a></div>
+    </section>
+
+    <section class="card" aria-labelledby="course-title" data-course hidden>
+      <span class="tag-row" data-tags></span>
+      <h1 id="course-title" class="course-title" data-title>—</h1>
+      <p class="card-intro" data-byline></p>
+
+      <div class="tabs" role="tablist" aria-label="Course sections">
+        <button class="tab" type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true">Overview</button>
+        <button class="tab" type="button" role="tab" id="tab-people" aria-controls="panel-people" aria-selected="false" tabindex="-1" data-managers-only hidden>People</button>
+        <button class="tab" type="button" role="tab" id="tab-lessons" aria-controls="panel-lessons" aria-selected="false" tabindex="-1">Lessons</button>
+        <button class="tab" type="button" role="tab" id="tab-assignments" aria-controls="panel-assignments" aria-selected="false" tabindex="-1">Assignments</button>
+        <button class="tab" type="button" role="tab" id="tab-schedule" aria-controls="panel-schedule" aria-selected="false" tabindex="-1">Schedule</button>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------ Overview -->
+    <section class="card" role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" hidden>
+      <h2>About this course</h2>
+      <p class="card-intro prose" data-description></p>
+
+      <div data-managers-only hidden>
+        <div class="inset join-panel">
+          <div>
+            <h3>Join code</h3>
+            <p class="field-hint">Students type this on the Courses page to enroll themselves. It only works while the course is open.</p>
+          </div>
+          <p class="join-code" data-join-code>—</p>
+          <button class="btn" type="button" data-new-code>Make a new code</button>
+        </div>
+
+        <h3 class="subhead">Status</h3>
+        <p class="notice notice-error" data-status-notice hidden></p>
+        <form class="form" data-status-form novalidate>
+          <div class="field">
+            <label for="course-status">Who can see this course</label>
+            <select class="select" id="course-status" name="status" aria-describedby="status-hint">
+              <option value="draft">Draft: only the instructor and administrators</option>
+              <option value="published">Open: enrolled students, and new students can join</option>
+              <option value="archived">Archived: enrolled students can still look, nobody new can join</option>
+            </select>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" type="submit">Save status</button>
+          </div>
+        </form>
+
+        <h3 class="subhead">Details</h3>
+        <p class="notice notice-error" data-details-notice hidden></p>
+        <form class="form" data-details-form novalidate>
+          <div class="form-row">
+            <div class="field">
+              <label for="course-code">Course code</label>
+              <input class="input" id="course-code" name="code" maxlength="32" required
+                     autocapitalize="characters" spellcheck="false">
+            </div>
+            <div class="field">
+              <label for="course-title-input">Title</label>
+              <input class="input" id="course-title-input" name="title" maxlength="200" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="course-description">Description</label>
+            <textarea class="textarea" id="course-description" name="description"></textarea>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" type="submit">Save details</button>
+            <button class="btn btn-danger" type="button" data-delete hidden>Delete course</button>
+          </div>
+          <p class="field-hint" data-delete-hint hidden>An open course must be archived before it can be deleted.</p>
+        </form>
+      </div>
+    </section>
+
+    <!-- -------------------------------------------------------- People -->
+    <section class="card" role="tabpanel" id="panel-people" aria-labelledby="tab-people" hidden>
+      <div class="card-head">
+        <h2>People</h2>
+        <span class="tag" data-roster-count>—</span>
+      </div>
+
+      <p class="notice notice-error" data-people-notice hidden></p>
+      <form class="form join-form" data-add-form novalidate>
+        <div class="field">
+          <label for="add-email">Add a student by email address</label>
+          <input class="input" id="add-email" name="email" type="email" autocomplete="off" required>
+        </div>
+        <button class="btn btn-primary" type="submit">Add</button>
+      </form>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Email address</th>
+              <th scope="col">Enrolled</th>
+              <th scope="col">Status</th>
+              <th scope="col"><span class="visually-hidden">Action</span></th>
+            </tr>
+          </thead>
+          <tbody data-roster></tbody>
+        </table>
+      </div>
+      <p class="empty" data-roster-empty hidden>Nobody is enrolled yet. Share the join code, or add students above.</p>
+    </section>
+
+    <!-- The next roadmap steps fill these in. -->
+    <section class="card" role="tabpanel" id="panel-lessons" aria-labelledby="tab-lessons" hidden>
+      <h2>Lessons</h2>
+      <p class="empty">Modules and lessons arrive in the next step of the build.</p>
+    </section>
+
+    <section class="card" role="tabpanel" id="panel-assignments" aria-labelledby="tab-assignments" hidden>
+      <h2>Assignments</h2>
+      <p class="empty">Assignments and submissions arrive in a later step of the build.</p>
+    </section>
+
+    <section class="card" role="tabpanel" id="panel-schedule" aria-labelledby="tab-schedule" hidden>
+      <h2>Schedule</h2>
+      <p class="empty">Weekly class meetings arrive in a later step of the build.</p>
+    </section>
+
+  </main>
+</div>
+
+<div class="toasts" role="status" aria-live="polite" data-toasts></div>
 </body>
 </html>

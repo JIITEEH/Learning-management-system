@@ -94,8 +94,9 @@ password, the role and permission routes, and the account lifecycle an
 administrator moves through. Every SQL statement behind them lives in
 `server/db/repositories/`.
 
-Six route modules are still stubs answering `501 Not Implemented` —
-`courses`, `enrollments`, `lessons`, `assignments`, `files`, and `schedules`.
+Courses and enrollments are implemented too. Four route modules are still
+stubs answering `501 Not Implemented`: `lessons`, `assignments`, `files`, and
+`schedules`.
 
 In the browser, the way in is built: the front page, signing in, registering,
 the account page with its change-password form, and a styled 404. The bar
@@ -112,6 +113,11 @@ chooses their permissions. `admin.html` links to both, with counts. Each
 screen switches off the controls the viewer's permissions do not cover; the
 server checks the same permissions again on every request.
 
-Still empty shells with a blank `<body>`: `courses`, `course`, `lesson`,
-`assignments`, `schedule`, and `files`. Courses come next, per
+`courses.html` lists the courses an account teaches or takes (every course,
+for an administrator), lets a student join one with a code, and lets an
+instructor create one. `course.html` shows one course in tabs; its Overview
+and People tabs work, and the rest wait for later steps.
+
+Still empty shells with a blank `<body>`: `lesson`, `assignments`,
+`schedule`, and `files`. Modules and lessons come next, per
 [ROADMAP.md](ROADMAP.md).

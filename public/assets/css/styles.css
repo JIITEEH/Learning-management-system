@@ -150,6 +150,7 @@
   --measure: 62ch;
   --stack-max: 820px;
   --stack-wide-max: 1120px;
+  --join-code-tracking: 0.12em;
 
   --z-sticky: 20;
   --z-drawer: 40;
@@ -1235,6 +1236,72 @@ time,
 .link-card p { color: var(--chalk-muted); }
 
 /* ==========================================================================
+   Courses — the list of course cards, and one course's page
+   ========================================================================== */
+
+.course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--card-gap); }
+.course-card { align-content: start; }
+.course-card h3 { color: var(--chalk); font-size: var(--text-lg); }
+
+.tag-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.course-title { margin-top: var(--space-4); }
+
+/* A description keeps the line breaks its author typed. */
+.prose { white-space: pre-line; max-width: var(--measure); }
+
+/* The join form and the add-a-student form: the field grows, the button
+   sits at the end of the same line, and both stack on a phone. */
+.join-form { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: end; }
+.join-form .field { flex: 1 1 240px; }
+.join-form .btn { margin-top: 0; }
+.join-input { font-family: var(--font-mono); letter-spacing: var(--tracking-wide); text-transform: uppercase; }
+
+.join-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--space-4);
+  align-items: center;
+  margin-top: var(--space-6);
+}
+.join-code {
+  color: var(--chalk);
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: var(--join-code-tracking);
+}
+
+/* --- Tabs, drawn as the same pill row as the top bar's navigation */
+
+.tabs {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-6);
+  padding: var(--space-1);
+  overflow-x: auto;
+  border: 1px solid var(--glass-border-soft);
+  border-radius: var(--radius-full);
+  background: rgb(255 255 255 / 0.05);
+}
+
+.tab {
+  flex: none;
+  min-height: 40px;
+  padding: 0 var(--space-5);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--chalk-muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tab:hover { background: rgb(255 255 255 / 0.08); color: var(--chalk); }
+.tab[aria-selected="true"] { background-image: var(--primary-face); color: var(--primary-ink); }
+
+.select-sm { width: auto; min-height: 36px; padding-block: var(--space-1); }
+
+/* ==========================================================================
    Centred pages — sign in, register, 404
    ========================================================================== */
 
@@ -1310,6 +1377,8 @@ time,
 
   .btn, .chip, .icon-btn, .stepper-btn { min-height: 44px; }
   .perm-row:not(.perm-row-check) { grid-template-columns: minmax(0, 1fr); }
+  .join-panel { grid-template-columns: minmax(0, 1fr); justify-items: start; }
+  .tab { min-height: 44px; }
 }
 
 /* Below this the wordmark gives way to the mark so the controls keep their

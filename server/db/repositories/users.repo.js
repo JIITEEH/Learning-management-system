@@ -35,6 +35,11 @@ export function findById(id) {
   return queryOne(`${SELECT_ACCOUNT} WHERE u.id = :id`, { id });
 }
 
+/** One account by email address, or null. No password hash. */
+export function findByEmail(email) {
+  return queryOne(`${SELECT_ACCOUNT} WHERE u.email = :email`, { email });
+}
+
 /** One account including its password hash, for verifying a sign-in. */
 export function findCredentialsByEmail(email) {
   return queryOne(`${SELECT_CREDENTIALS} WHERE u.email = :email`, { email });

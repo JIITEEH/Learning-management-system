@@ -37,6 +37,9 @@ build.
 - Quizzes with server-side auto-grading (roadmap step 10 — the largest
   single feature, and the one with no equivalent in ThesisTrack)
 - Notifications and a deadline calendar (roadmap step 11)
+- An audit log recording who changed what, such as an administrator
+  removing a student from a course (roadmap step 5 asks for it; this
+  project's database has no table for it yet)
 - Discussion forums
 - Parent accounts
 - Analytics and charts
@@ -61,7 +64,7 @@ Status is one of: **done**, **partly done**, **to do**.
 
 | # | Step | Status |
 |---|------|--------|
-| 5 | Courses and enrollment | **to do** |
+| 5 | Courses and enrollment | **done** |
 | 6 | Modules and lessons | **to do** |
 | 7 | Assignments and submissions | **to do** |
 | 8 | Grading and gradebook | **to do** |
@@ -89,11 +92,11 @@ inventory, and which step fills each one.
 | `login.html`, `register.html` | Signed out | 4 — **built** |
 | `account.html` | Every signed-in account | 4 — **built** |
 | `dashboard.html` | Every role, different content | 9 |
-| `courses.html` | Students and instructors | 5 |
-| `course.html` | One course, tabbed | 5 |
+| `courses.html` | Students and instructors | 5 — **built** |
+| `course.html` | One course, tabbed | 5 — **built** (Overview and People; the other tabs wait for steps 6 and 7) |
 | `lesson.html` | A lesson and its files | 6 |
 | `assignments.html` | Assignments and submissions | 7 |
-| `schedule.html` | Weekly meetings | 5 |
+| `schedule.html` | Weekly meetings | 5 — not built: step 5 in the roadmap does not include schedules, so it follows as its own piece |
 | `files.html` | Uploads the viewer may see | 6 |
 | `users.html`, `roles.html`, `admin.html` | Administrators | 4 — **built** |
 | `404.html` | Everyone | 4 — **built** |

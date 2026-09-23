@@ -7,9 +7,14 @@
 -- Tables: courses, modules, lessons
 -- Depends on: 01_identity (courses.instructor_id -> users.id)
 
+-- `code` is the public catalogue code a school prints ("CS101"). `join_code`
+-- is the secret an instructor hands to their class so students can enroll
+-- themselves; it is random, and can be replaced if it leaks, without the
+-- course's public code changing.
 CREATE TABLE courses (
   id             INT UNSIGNED NOT NULL AUTO_INCREMENT,
   code           VARCHAR(32) NOT NULL,
+  join_code      CHAR(8) NOT NULL,
   title          VARCHAR(200) NOT NULL,
   description    TEXT NULL,
   instructor_id  INT UNSIGNED NULL,
@@ -18,6 +23,7 @@ CREATE TABLE courses (
   updated_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_courses_code (code),
+  UNIQUE KEY uq_courses_join_code (join_code),
   KEY idx_courses_instructor (instructor_id),
   KEY idx_courses_status (status),
   CONSTRAINT fk_courses_instructor

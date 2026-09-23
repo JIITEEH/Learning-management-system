@@ -18,6 +18,7 @@ INSERT INTO permissions (code, category, description) VALUES
   ('course.update',     'courses',   'Edit courses.'),
   ('course.delete',     'courses',   'Delete courses.'),
   ('course.publish',    'courses',   'Publish or archive a course.'),
+  ('course.manage_any', 'courses',   'See and manage every course, not only one''s own.'),
 
   ('lesson.read',       'content',   'View lessons.'),
   ('lesson.manage',     'content',   'Create, edit, and remove lessons and modules.'),

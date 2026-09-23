@@ -75,55 +75,55 @@ pull request route instead.
 
 - Write in the imperative mood: "Add course roster view", not "Added".
 - One logical change per commit; do not bundle unrelated edits.
-- Do not commit secrets, `.env` files, uploaded files under `lms/storage/`, or
+- Do not commit secrets, `.env` files, uploaded files under `storage/`, or
   anything already in `.gitignore`.
 
 ## Project conventions
 
 A Learning Management System: plain HTML and JavaScript in the browser,
-Node/Express on the server, MySQL for storage. Everything lives under `lms/`.
+Node/Express on the server, MySQL for storage. Everything lives under ``.
 
 ### Server
 
-- `lms/server/` is native ES modules (`"type": "module"`). Use `import`, and
+- `server/` is native ES modules (`"type": "module"`). Use `import`, and
   include the `.js` extension in relative imports — Node requires it.
-- **SQL lives in `lms/server/db/repositories/`, and nowhere else.** A route
+- **SQL lives in `server/db/repositories/`, and nowhere else.** A route
   that needs data calls a repository function; it does not write a query. See
-  `lms/server/db/repositories/README.md`.
-- Every query goes through the helpers in `lms/server/db/pool.js`. Use
+  `server/db/repositories/README.md`.
+- Every query goes through the helpers in `server/db/pool.js`. Use
   named placeholders (`:userId`) and never interpolate values into SQL.
 - Repositories return rows as the database spells them (`full_name`). Turning
   a row into JSON is the route's job, because different endpoints return
   different views of the same record.
 - Repositories never decide who may do what — no `req`, no permission checks.
   Authorization stays in the routes so it can be reviewed in one place.
-- Add a resource by adding a router under `lms/server/routes/`, a matching
+- Add a resource by adding a router under `server/routes/`, a matching
   `<resource>.repo.js` under `db/repositories/`, and mounting the router in
   `routes/index.js`. One module per resource, same name in both places.
-- Configuration is read once in `lms/server/config.js`. Do not read
+- Configuration is read once in `server/config.js`. Do not read
   `process.env` anywhere else.
 
 ### Permissions
 
 - Access is permission-based, not role-based. Gate routes with
-  `requirePermission("course.create")` from `lms/server/middleware/auth.js`.
+  `requirePermission("course.create")` from `server/middleware/auth.js`.
   Reserve `requireRole` for the rare case where the role itself is the rule.
 - A new permission code needs a row in `permissions` and a grant in
-  `role_permissions` — add both to `lms/database/seed/`, in
+  `role_permissions` — add both to `database/seed/`, in
   `02_permissions.sql` and `03_role_permissions.sql`.
 - Permissions are read per request, not cached in the session, so that a
   revoked permission takes effect immediately. Keep it that way.
 
 ### Database
 
-Read `lms/database/README.md` before changing anything here; it is the full
+Read `database/README.md` before changing anything here; it is the full
 account. In short:
 
 - **One database, many tables.** Do not add a second MySQL schema. Courses,
   accounts, and submissions live together so foreign keys hold them
   consistent and a cross-domain write is one transaction. Separation belongs
   in the files, not in separate databases.
-- `lms/database/schema/` is the single source of truth for structure, split
+- `database/schema/` is the single source of truth for structure, split
   one file per domain and numbered in dependency order. Changing a table
   means editing the file that defines it, not writing a migration alone.
 - Adding a table means adding its `DROP TABLE` to `reset.sql` too.
@@ -137,21 +137,21 @@ account. In short:
 
 ### Uploads
 
-- Files go through `upload` in `lms/server/middleware/upload.js`. It generates
+- Files go through `upload` in `server/middleware/upload.js`. It generates
   the name on disk; never store a client-supplied filename as the path.
 - Every upload gets a row in `files` with its `owner_type` / `owner_id`. The
-  bytes live in `lms/storage/uploads/`, which is gitignored.
+  bytes live in `storage/uploads/`, which is gitignored.
 - Serve a file only after checking the requester may see what it is attached
-  to. Do not expose `lms/storage/` as a static directory.
+  to. Do not expose `storage/` as a static directory.
 
 ### Front end
 
 - **Do not add a front-end framework or bundler without asking.** The pages are
   plain HTML served as authored; there is no build step for the browser.
-- Pages talk to the server through `lms/public/assets/js/api.js`. Do not call
+- Pages talk to the server through `public/assets/js/api.js`. Do not call
   `fetch` directly from a page script.
 - All colour, type, and spacing values are custom properties in the `:root`
-  block at the top of `lms/public/assets/css/styles.css`. Add new values there
+  block at the top of `public/assets/css/styles.css`. Add new values there
   rather than hard-coding them in a rule.
 - **Accessibility** — keep visible focus styles, label every form control, and
   keep `aria-expanded` in sync on anything that expands. Images need real

@@ -24,5 +24,5 @@ dist/
 .cache/
 
 # Uploaded files are data, not source
-lms/storage/uploads/*
-!lms/storage/uploads/.gitkeep
+storage/uploads/*
+!storage/uploads/.gitkeep

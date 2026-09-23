@@ -43,9 +43,6 @@ jobs:
           --health-timeout=5s
           --health-retries=10
 
-    defaults:
-      run:
-        working-directory: lms
 
     env:
       NODE_ENV: test
@@ -64,7 +61,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-          cache-dependency-path: lms/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci

@@ -13,36 +13,37 @@ for storage.
 .
 ├── AGENTS.md                   # Rules for contributors and AI agents
 ├── PRODUCT.md                  # What this is for, and for whom
-└── lms/
-    ├── package.json
-    ├── .env.example            # Copy to .env and fill in
-    ├── database/               # See database/README.md
-    │   ├── reset.sql           # Drops every table
-    │   ├── schema/             # Structure, one file per domain
-    │   ├── seed/               # Roles and permission codes
-    │   └── migrations/         # Dated changes, once there is real data
-    ├── scripts/db.mjs          # npm run db:setup, db:migrate, db:status
-    ├── server/
-    │   ├── server.js           # Express entry point
-    │   ├── config.js           # Environment settings, read once
-    │   ├── db/
-    │   │   ├── pool.js         # MySQL pool + query helpers
-    │   │   └── repositories/   # Every SQL statement in the app, by domain
-    │   ├── middleware/
-    │   │   ├── auth.js         # Sessions, permission checks
-    │   │   ├── upload.js       # Multer storage, type and size limits
-    │   │   └── errors.js       # 404 and error handling
-    │   └── routes/             # JSON API, one module per resource
-    │       ├── auth.js         users.js     roles.js
-    │       ├── permissions.js  courses.js   lessons.js
-    │       ├── enrollments.js  assignments.js
-    │       └── files.js        schedules.js
-    ├── storage/uploads/        # Uploaded bytes — gitignored
-    └── public/                 # Everything served to the browser
-        ├── index.html
-        ├── pages/              # login, dashboard, courses, lesson,
-        │                       # users, roles, schedule, files, admin …
-        └── assets/             # css, js, img
+├── ROADMAP.md                  # The build plan, step by step
+├── package.json
+├── eslint.config.mjs
+├── .env.example                # Copy to .env and fill in
+├── database/                   # See database/README.md
+│   ├── reset.sql               # Drops every table
+│   ├── schema/                 # Structure, one file per domain
+│   ├── seed/                   # Roles and permission codes
+│   └── migrations/             # Dated changes, once there is real data
+├── scripts/db.mjs              # npm run db:setup, db:migrate, db:status
+├── server/
+│   ├── server.js               # Express entry point
+│   ├── config.js               # Environment settings, read once
+│   ├── db/
+│   │   ├── pool.js             # MySQL pool + query helpers
+│   │   └── repositories/       # Every SQL statement in the app, by domain
+│   ├── middleware/
+│   │   ├── auth.js             # Sessions, permission checks
+│   │   ├── upload.js           # Multer storage, type and size limits
+│   │   └── errors.js           # 404 and error handling
+│   └── routes/                 # JSON API, one module per resource
+│       ├── auth.js             users.js     roles.js
+│       ├── permissions.js      courses.js   lessons.js
+│       ├── enrollments.js      assignments.js
+│       └── files.js            schedules.js
+├── storage/uploads/            # Uploaded bytes — gitignored
+└── public/                     # Everything served to the browser
+    ├── index.html
+    ├── pages/                  # login, dashboard, courses, lesson,
+    │                           # users, roles, schedule, files, admin …
+    └── assets/                 # css, js, img
 ```
 
 Pages in `public/` are served static and call the JSON API under `/api`
@@ -80,11 +81,6 @@ cp .env.example .env        # then fill in your database credentials
 npm run db:setup            # creates the database, schema, then seed
 npm run dev                 # http://localhost:3000
 ```
-
-The application lives in `lms/`, but the repository root forwards the same
-scripts, so `npm run dev`, `npm start`, `npm run lint`, and the `db:*` scripts
-all work from either directory. Only `npm install` needs `lms/` — the root has
-no dependencies of its own.
 
 `npm run dev` uses Node's own `--watch`, so edits to the server restart it.
 Pages under `public/` are served as authored and need no restart, but there is

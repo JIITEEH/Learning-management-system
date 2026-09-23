@@ -28,7 +28,7 @@ one. Each file's header says which ones it depends on.
 
 ## Commands
 
-Run from `lms/`. All of them read the connection settings from `.env` through
+Run from ``. All of them read the connection settings from `.env` through
 `server/config.js`, so they always reach the same database the server does.
 
 | Command | What it does |

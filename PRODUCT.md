@@ -51,9 +51,9 @@ management system:
 
 - Sessions are cookie-based and server-side; permissions are read per request
   so a revocation takes effect immediately.
-- Uploaded files live in `lms/storage/uploads/`, outside the served directory,
+- Uploaded files live in `storage/uploads/`, outside the served directory,
   and are only released after an access check.
-- The schema in `lms/database/schema/` is the source of truth for structure,
+- The schema in `database/schema/` is the source of truth for structure,
   split one file per domain. Seed data is structural only — roles and
   permission codes.
 

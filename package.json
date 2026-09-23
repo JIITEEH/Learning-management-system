@@ -1,21 +1,35 @@
 {
-  "name": "web-portfolio",
+  "name": "lms",
   "version": "0.1.0",
   "private": true,
-  "description": "Repository root. The application lives in lms/; these scripts forward to it so npm run works from either directory.",
+  "description": "Learning Management System",
+  "type": "module",
+  "main": "server/server.js",
   "scripts": {
-    "dev": "npm --prefix lms run dev",
-    "start": "npm --prefix lms start",
-    "lint": "npm --prefix lms run lint",
-    "lint:fix": "npm --prefix lms run lint:fix",
-    "db:setup": "npm --prefix lms run db:setup",
-    "db:schema": "npm --prefix lms run db:schema",
-    "db:seed": "npm --prefix lms run db:seed",
-    "db:reset": "npm --prefix lms run db:reset",
-    "db:migrate": "npm --prefix lms run db:migrate",
-    "db:status": "npm --prefix lms run db:status"
+    "start": "node server/server.js",
+    "dev": "node --watch server/server.js",
+    "db:setup": "node scripts/db.mjs setup",
+    "db:schema": "node scripts/db.mjs schema",
+    "db:seed": "node scripts/db.mjs seed",
+    "db:reset": "node scripts/db.mjs reset",
+    "db:migrate": "node scripts/db.mjs migrate",
+    "db:status": "node scripts/db.mjs status",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "engines": {
     "node": ">=22.13"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "multer": "^2.4.0",
+    "mysql2": "^3.11.5"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.5",
+    "globals": "^17.12.0"
   }
 }

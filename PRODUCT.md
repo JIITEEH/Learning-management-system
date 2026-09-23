@@ -91,6 +91,9 @@ their courses, deadlines, and submission forms.
 
 ## Status
 
-Scaffolding. The schema and the API routing are in place; every route handler
-answers `501 Not Implemented` and every page is blank apart from the shared
-stylesheet.
+Accounts, roles, and permissions work; courses, lessons, assignments, files,
+and schedules are not built yet.
+
+The exact state is recorded once, in the "Status" section of
+[README.md](README.md), rather than restated here — two copies drift apart and
+then neither can be trusted.

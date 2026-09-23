@@ -74,7 +74,6 @@ not an enum — adding a fourth needs no schema change.
 Requires Node 22.13+ and a MySQL 8 server.
 
 ```sh
-cd lms
 npm install
 cp .env.example .env        # then fill in your database credentials
 
@@ -90,6 +89,15 @@ database, but any route that touches one will fail until MySQL is up and
 
 ## Status
 
-Scaffolding only. The schema and the API routing are in place; every route
-handler currently answers `501 Not Implemented`, and every page in `public/`
-is blank apart from the shared stylesheet. Screens and handlers come next.
+Accounts work end to end: registering, signing in and out, changing a
+password, the role and permission routes, and the account lifecycle an
+administrator moves through. Every SQL statement behind them lives in
+`server/db/repositories/`.
+
+Six route modules are still stubs answering `501 Not Implemented` —
+`courses`, `enrollments`, `lessons`, `assignments`, `files`, and `schedules`.
+
+The shared page shell and the design system exist, and `public/pages/dashboard.html`
+is built. The remaining pages in `public/pages/` are shells that load
+`assets/js/main.js` with an empty `<body>`, so they render the shell and nothing
+inside it yet. Courses come next, per [ROADMAP.md](ROADMAP.md).

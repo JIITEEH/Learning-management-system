@@ -43,7 +43,6 @@ Run from ``. All of them read the connection settings from `.env` through
 Starting from nothing:
 
 ```sh
-cd lms
 cp .env.example .env     # then fill in DB_USER and DB_PASSWORD
 npm run db:setup
 npm run dev

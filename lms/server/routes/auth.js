@@ -1,18 +1,182 @@
 import { Router } from "express";
-import { requireAuth } from "../middleware/auth.js";
+import bcrypt from "bcryptjs";
+
+import { query, queryOne } from "../db/pool.js";
+import { requireAuth, permissionsFor } from "../middleware/auth.js";
+import { httpError, asyncRoute } from "../middleware/errors.js";
 
 const router = Router();
 
-const todo = (_req, res) =>
-  res.status(501).json({ error: "Not implemented" });
+const HASH_ROUNDS = 12;
+const MIN_PASSWORD = 8;
 
-router.post("/register", todo);
-router.post("/login", todo);
-router.post("/logout", todo);
+/** What goes on the session, and what the front end gets back. */
+function publicUser(row) {
+  return {
+    id: row.id,
+    email: row.email,
+    fullName: row.full_name,
+    role: row.role,
+    status: row.status,
+  };
+}
 
-// The signed-in account, plus the permission codes it currently holds —
-// the front end uses these to decide what to render.
-router.get("/me", requireAuth, todo);
-router.patch("/password", requireAuth, todo);
+const SELECT_USER = `
+  SELECT u.id, u.email, u.password_hash, u.full_name, u.status, r.name AS role
+    FROM users u
+    JOIN roles r ON r.id = u.role_id
+`;
+
+function readCredentials(body) {
+  const email = String(body?.email ?? "").trim().toLowerCase();
+  const password = String(body?.password ?? "");
+  if (!email || !password) {
+    throw httpError(400, "Email and password are required");
+  }
+  return { email, password };
+}
+
+function assertPasswordStrength(password) {
+  if (password.length < MIN_PASSWORD) {
+    throw httpError(400, `Password must be at least ${MIN_PASSWORD} characters`);
+  }
+}
+
+/**
+ * Self-registration. The role is never taken from the request — an account
+ * created this way is always a student awaiting approval. The one exception
+ * is the very first account on an empty system, which becomes an active
+ * administrator; without it there would be nobody able to approve anyone,
+ * and seed.sql holds structural rows only, never accounts.
+ */
+router.post(
+  "/register",
+  asyncRoute(async (req, res) => {
+    const { email, password } = readCredentials(req.body);
+    const fullName = String(req.body?.fullName ?? "").trim();
+
+    if (!fullName) throw httpError(400, "Full name is required");
+    if (!email.includes("@")) throw httpError(400, "Email address is not valid");
+    assertPasswordStrength(password);
+
+    const taken = await queryOne("SELECT id FROM users WHERE email = :email", { email });
+    if (taken) throw httpError(409, "That email address is already registered");
+
+    const { total } = await queryOne("SELECT COUNT(*) AS total FROM users");
+    const bootstrapping = Number(total) === 0;
+    const roleName = bootstrapping ? "admin" : "student";
+
+    const role = await queryOne("SELECT id FROM roles WHERE name = :roleName", { roleName });
+    if (!role) throw httpError(500, `The '${roleName}' role is missing — has seed.sql been run?`);
+
+    const passwordHash = await bcrypt.hash(password, HASH_ROUNDS);
+    const result = await query(
+      `INSERT INTO users (email, password_hash, full_name, role_id, status)
+       VALUES (:email, :passwordHash, :fullName, :roleId, :status)`,
+      {
+        email,
+        passwordHash,
+        fullName,
+        roleId: role.id,
+        status: bootstrapping ? "active" : "pending",
+      },
+    );
+
+    const created = await queryOne(`${SELECT_USER} WHERE u.id = :id`, { id: result.insertId });
+    res.status(201).json({ user: publicUser(created) });
+  }),
+);
+
+/**
+ * Sign in. The session id is regenerated so a fixed pre-login cookie cannot
+ * be reused after the fact.
+ */
+router.post(
+  "/login",
+  asyncRoute(async (req, res) => {
+    const { email, password } = readCredentials(req.body);
+    const account = await queryOne(`${SELECT_USER} WHERE u.email = :email`, { email });
+
+    // One message for both a missing account and a wrong password, so the
+    // response cannot be used to find out which addresses are registered.
+    const matches = account && (await bcrypt.compare(password, account.password_hash));
+    if (!matches) throw httpError(401, "Email or password is incorrect");
+
+    if (account.status === "suspended") throw httpError(403, "This account is suspended");
+    if (account.status === "pending") throw httpError(403, "This account is awaiting approval");
+
+    await new Promise((resolve, reject) => {
+      req.session.regenerate((error) => (error ? reject(error) : resolve()));
+    });
+
+    req.session.user = publicUser(account);
+    await query("UPDATE users SET last_login_at = NOW() WHERE id = :id", { id: account.id });
+
+    res.json({
+      user: req.session.user,
+      permissions: [...(await permissionsFor(account.id))].sort(),
+    });
+  }),
+);
+
+router.post("/logout", (req, res, next) => {
+  if (!req.session) return res.status(204).end();
+  req.session.destroy((error) => {
+    if (error) return next(error);
+    res.clearCookie("lms.sid");
+    res.status(204).end();
+  });
+});
+
+/**
+ * The signed-in account plus the permission codes it holds right now. Read
+ * from the database on every call, not from the session, so a permission
+ * taken away is gone the next time a page asks.
+ */
+router.get(
+  "/me",
+  requireAuth,
+  asyncRoute(async (req, res) => {
+    const account = await queryOne(`${SELECT_USER} WHERE u.id = :id`, { id: req.user.id });
+    if (!account) throw httpError(401, "Authentication required");
+
+    // The session is a cache of the row; refresh it so a renamed or
+    // re-roled account does not keep showing stale details.
+    req.session.user = publicUser(account);
+
+    res.json({
+      user: req.session.user,
+      permissions: [...(await permissionsFor(account.id))].sort(),
+    });
+  }),
+);
+
+router.patch(
+  "/password",
+  requireAuth,
+  asyncRoute(async (req, res) => {
+    const currentPassword = String(req.body?.currentPassword ?? "");
+    const newPassword = String(req.body?.newPassword ?? "");
+
+    if (!currentPassword || !newPassword) {
+      throw httpError(400, "Current and new passwords are required");
+    }
+    assertPasswordStrength(newPassword);
+
+    const account = await queryOne(`${SELECT_USER} WHERE u.id = :id`, { id: req.user.id });
+    if (!account) throw httpError(401, "Authentication required");
+
+    const matches = await bcrypt.compare(currentPassword, account.password_hash);
+    if (!matches) throw httpError(403, "Current password is incorrect");
+
+    const passwordHash = await bcrypt.hash(newPassword, HASH_ROUNDS);
+    await query("UPDATE users SET password_hash = :passwordHash WHERE id = :id", {
+      passwordHash,
+      id: account.id,
+    });
+
+    res.status(204).end();
+  }),
+);
 
 export default router;

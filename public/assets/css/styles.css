@@ -1189,7 +1189,9 @@ time,
     box-shadow: var(--glass-highlight), var(--shadow-lg);
   }
 
-  .navpill:not([data-open="true"]) { display: none; }
+  /* main.js adds data-open with no value, so test for its presence. Matching
+     data-open="true" never matched, and the menu could not be opened. */
+  .navpill:not([data-open]) { display: none; }
   .navpill-item { min-height: 46px; justify-content: flex-start; }
   .topbar { gap: var(--space-2); }
   .brand { font-size: var(--text-md); gap: var(--space-2); }

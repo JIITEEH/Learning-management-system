@@ -1,8 +1,10 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 
-import { query, queryOne, transaction } from "../db/pool.js";
-import { requireAuth, requirePermission, permissionsFor } from "../middleware/auth.js";
+import * as users from "../db/repositories/users.repo.js";
+import * as roles from "../db/repositories/roles.repo.js";
+import * as permissions from "../db/repositories/permissions.repo.js";
+import { requireAuth, requirePermission } from "../middleware/auth.js";
 import { httpError, asyncRoute } from "../middleware/errors.js";
 
 const router = Router();
@@ -10,13 +12,6 @@ const router = Router();
 const HASH_ROUNDS = 12;
 const MIN_PASSWORD = 8;
 const STATUSES = ["pending", "active", "suspended"];
-
-const SELECT_USER = `
-  SELECT u.id, u.email, u.full_name, u.status, u.role_id, u.last_login_at,
-         u.created_at, r.name AS role, r.label AS role_label
-    FROM users u
-    JOIN roles r ON r.id = u.role_id
-`;
 
 /**
  * The shape every account response uses. The column names are snake_case and
@@ -38,14 +33,14 @@ function publicUser(row) {
 }
 
 async function findUser(id) {
-  const user = await queryOne(`${SELECT_USER} WHERE u.id = :id`, { id });
+  const user = await users.findById(id);
   if (!user) throw httpError(404, "Account not found");
   return user;
 }
 
 /** True when the requester holds every code listed. */
 async function holds(req, ...codes) {
-  const held = req.permissions ?? (await permissionsFor(req.user.id));
+  const held = req.permissions ?? (await permissions.effectiveCodesFor(req.user.id));
   req.permissions = held;
   return codes.every((code) => held.has(code));
 }
@@ -56,6 +51,13 @@ function readEmail(value) {
   return email;
 }
 
+function assertStatus(status) {
+  if (!STATUSES.includes(status)) {
+    throw httpError(400, `Status must be one of: ${STATUSES.join(", ")}`);
+  }
+  return status;
+}
+
 // ---------------------------------------------------------------------------
 // Accounts
 // ---------------------------------------------------------------------------
@@ -64,20 +66,11 @@ router.get(
   "/",
   requirePermission("user.read"),
   asyncRoute(async (req, res) => {
-    const status = req.query.status ? String(req.query.status) : null;
-    if (status && !STATUSES.includes(status)) {
-      throw httpError(400, `Status must be one of: ${STATUSES.join(", ")}`);
-    }
+    const status = req.query.status ? assertStatus(String(req.query.status)) : null;
     const roleName = req.query.role ? String(req.query.role) : null;
 
-    const users = await query(
-      `${SELECT_USER}
-        WHERE (:status IS NULL OR u.status = :status)
-          AND (:roleName IS NULL OR r.name = :roleName)
-        ORDER BY u.full_name`,
-      { status, roleName },
-    );
-    res.json({ users: users.map(publicUser) });
+    const rows = await users.list({ status, roleName });
+    res.json({ users: rows.map(publicUser) });
   }),
 );
 
@@ -94,31 +87,30 @@ router.post(
       throw httpError(400, `Password must be at least ${MIN_PASSWORD} characters`);
     }
 
-    const status = req.body?.status ?? "active";
-    if (!STATUSES.includes(status)) {
-      throw httpError(400, `Status must be one of: ${STATUSES.join(", ")}`);
-    }
+    const status = assertStatus(req.body?.status ?? "active");
 
     // Handing out a role is handing out its permissions, so creating an
     // account with one takes role.manage on top of user.create.
     const roleName = String(req.body?.role ?? "student");
-    const role = await queryOne("SELECT id FROM roles WHERE name = :roleName", { roleName });
+    const role = await roles.findByName(roleName);
     if (!role) throw httpError(400, `No such role: ${roleName}`);
     if (roleName !== "student" && !(await holds(req, "role.manage"))) {
       throw httpError(403, "Assigning a role other than student requires role.manage");
     }
 
-    const taken = await queryOne("SELECT id FROM users WHERE email = :email", { email });
-    if (taken) throw httpError(409, "That email address is already registered");
+    if (await users.emailTaken(email)) {
+      throw httpError(409, "That email address is already registered");
+    }
 
-    const passwordHash = await bcrypt.hash(password, HASH_ROUNDS);
-    const result = await query(
-      `INSERT INTO users (email, password_hash, full_name, role_id, status)
-       VALUES (:email, :passwordHash, :fullName, :roleId, :status)`,
-      { email, passwordHash, fullName, roleId: role.id, status },
-    );
+    const id = await users.insert({
+      email,
+      passwordHash: await bcrypt.hash(password, HASH_ROUNDS),
+      fullName,
+      roleId: role.id,
+      status,
+    });
 
-    res.status(201).json({ user: publicUser(await findUser(result.insertId)) });
+    res.status(201).json({ user: publicUser(await findUser(id)) });
   }),
 );
 
@@ -158,11 +150,9 @@ router.patch(
     let email = user.email;
     if (req.body?.email !== undefined) {
       email = readEmail(req.body.email);
-      const taken = await queryOne(
-        "SELECT id FROM users WHERE email = :email AND id <> :id",
-        { email, id },
-      );
-      if (taken) throw httpError(409, "That email address is already registered");
+      if (await users.emailTaken(email, id)) {
+        throw httpError(409, "That email address is already registered");
+      }
     }
 
     let roleId = user.role_id;
@@ -173,18 +163,12 @@ router.patch(
       // Changing your own role is how an administrator locks themselves out.
       if (isSelf) throw httpError(409, "You cannot change your own role");
 
-      const role = await queryOne("SELECT id FROM roles WHERE name = :roleName", {
-        roleName: String(req.body.role),
-      });
+      const role = await roles.findByName(String(req.body.role));
       if (!role) throw httpError(400, `No such role: ${req.body.role}`);
       roleId = role.id;
     }
 
-    await query(
-      `UPDATE users SET full_name = :fullName, email = :email, role_id = :roleId
-        WHERE id = :id`,
-      { fullName, email, roleId, id },
-    );
+    await users.updateProfile({ id, fullName, email, roleId });
 
     res.json({ user: publicUser(await findUser(id)) });
   }),
@@ -198,7 +182,7 @@ router.delete(
     if (id === req.user.id) throw httpError(409, "You cannot delete your own account");
 
     await findUser(id);
-    await query("DELETE FROM users WHERE id = :id", { id });
+    await users.remove(id);
     res.status(204).end();
   }),
 );
@@ -209,16 +193,13 @@ router.patch(
   requirePermission("user.update"),
   asyncRoute(async (req, res) => {
     const id = Number(req.params.id);
-    const status = String(req.body?.status ?? "");
-    if (!STATUSES.includes(status)) {
-      throw httpError(400, `Status must be one of: ${STATUSES.join(", ")}`);
-    }
+    const status = assertStatus(String(req.body?.status ?? ""));
     if (id === req.user.id && status !== "active") {
       throw httpError(409, "You cannot suspend your own account");
     }
 
     await findUser(id);
-    await query("UPDATE users SET status = :status WHERE id = :id", { status, id });
+    await users.updateStatus(id, status);
     res.json({ user: publicUser(await findUser(id)) });
   }),
 );
@@ -238,30 +219,12 @@ router.get(
   asyncRoute(async (req, res) => {
     const user = await findUser(Number(req.params.id));
 
-    const fromRole = await query(
-      `SELECT p.code
-         FROM role_permissions rp
-         JOIN permissions p ON p.id = rp.permission_id
-        WHERE rp.role_id = :roleId
-        ORDER BY p.code`,
-      { roleId: user.role_id },
-    );
-
-    const overrides = await query(
-      `SELECT p.code, up.effect, up.granted_at, up.granted_by
-         FROM user_permissions up
-         JOIN permissions p ON p.id = up.permission_id
-        WHERE up.user_id = :userId
-        ORDER BY p.code`,
-      { userId: user.id },
-    );
-
     res.json({
       userId: user.id,
       role: user.role,
-      fromRole: fromRole.map((row) => row.code),
-      overrides,
-      effective: [...(await permissionsFor(user.id))].sort(),
+      fromRole: await roles.codesFor(user.role_id),
+      overrides: await users.listOverrides(user.id),
+      effective: [...(await permissions.effectiveCodesFor(user.id))].sort(),
     });
   }),
 );
@@ -284,8 +247,7 @@ router.put(
       throw httpError(400, "`overrides` must be an array of { code, effect }");
     }
 
-    const catalogue = await query("SELECT id, code FROM permissions");
-    const byCode = new Map(catalogue.map((row) => [row.code, row.id]));
+    const byCode = await permissions.idsByCode();
 
     const seen = new Set();
     const rows = entries.map((entry) => {
@@ -311,27 +273,11 @@ router.put(
       if (selfDeny) throw httpError(409, "You cannot deny yourself role.manage");
     }
 
-    await transaction(async (connection) => {
-      await connection.execute("DELETE FROM user_permissions WHERE user_id = :userId", {
-        userId: user.id,
-      });
-      for (const row of rows) {
-        await connection.execute(
-          `INSERT INTO user_permissions (user_id, permission_id, effect, granted_by)
-           VALUES (:userId, :permissionId, :effect, :grantedBy)`,
-          {
-            userId: user.id,
-            permissionId: row.permissionId,
-            effect: row.effect,
-            grantedBy: req.user.id,
-          },
-        );
-      }
-    });
+    await users.replaceOverrides(user.id, rows, req.user.id);
 
     res.json({
       userId: user.id,
-      effective: [...(await permissionsFor(user.id))].sort(),
+      effective: [...(await permissions.effectiveCodesFor(user.id))].sort(),
     });
   }),
 );

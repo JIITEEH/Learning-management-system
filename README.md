@@ -25,7 +25,9 @@ for storage.
     ├── server/
     │   ├── server.js           # Express entry point
     │   ├── config.js           # Environment settings, read once
-    │   ├── db/pool.js          # MySQL pool + query helpers
+    │   ├── db/
+    │   │   ├── pool.js         # MySQL pool + query helpers
+    │   │   └── repositories/   # Every SQL statement in the app, by domain
     │   ├── middleware/
     │   │   ├── auth.js         # Sessions, permission checks
     │   │   ├── upload.js       # Multer storage, type and size limits

@@ -55,10 +55,19 @@ Node/Express on the server, MySQL for storage. Everything lives under `lms/`.
 
 - `lms/server/` is native ES modules (`"type": "module"`). Use `import`, and
   include the `.js` extension in relative imports — Node requires it.
+- **SQL lives in `lms/server/db/repositories/`, and nowhere else.** A route
+  that needs data calls a repository function; it does not write a query. See
+  `lms/server/db/repositories/README.md`.
 - Every query goes through the helpers in `lms/server/db/pool.js`. Use
   named placeholders (`:userId`) and never interpolate values into SQL.
-- Add a resource by adding a router under `lms/server/routes/` and mounting it
-  in `routes/index.js`. One module per resource.
+- Repositories return rows as the database spells them (`full_name`). Turning
+  a row into JSON is the route's job, because different endpoints return
+  different views of the same record.
+- Repositories never decide who may do what — no `req`, no permission checks.
+  Authorization stays in the routes so it can be reviewed in one place.
+- Add a resource by adding a router under `lms/server/routes/`, a matching
+  `<resource>.repo.js` under `db/repositories/`, and mounting the router in
+  `routes/index.js`. One module per resource, same name in both places.
 - Configuration is read once in `lms/server/config.js`. Do not read
   `process.env` anywhere else.
 

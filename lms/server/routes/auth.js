@@ -1,8 +1,10 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 
-import { query, queryOne } from "../db/pool.js";
-import { requireAuth, permissionsFor } from "../middleware/auth.js";
+import * as users from "../db/repositories/users.repo.js";
+import * as roles from "../db/repositories/roles.repo.js";
+import { effectiveCodesFor } from "../db/repositories/permissions.repo.js";
+import { requireAuth } from "../middleware/auth.js";
 import { httpError, asyncRoute } from "../middleware/errors.js";
 
 const router = Router();
@@ -20,12 +22,6 @@ function publicUser(row) {
     status: row.status,
   };
 }
-
-const SELECT_USER = `
-  SELECT u.id, u.email, u.password_hash, u.full_name, u.status, r.name AS role
-    FROM users u
-    JOIN roles r ON r.id = u.role_id
-`;
 
 function readCredentials(body) {
   const email = String(body?.email ?? "").trim().toLowerCase();
@@ -47,7 +43,7 @@ function assertPasswordStrength(password) {
  * created this way is always a student awaiting approval. The one exception
  * is the very first account on an empty system, which becomes an active
  * administrator; without it there would be nobody able to approve anyone,
- * and seed.sql holds structural rows only, never accounts.
+ * and the seed holds structural rows only, never accounts.
  */
 router.post(
   "/register",
@@ -59,31 +55,27 @@ router.post(
     if (!email.includes("@")) throw httpError(400, "Email address is not valid");
     assertPasswordStrength(password);
 
-    const taken = await queryOne("SELECT id FROM users WHERE email = :email", { email });
-    if (taken) throw httpError(409, "That email address is already registered");
+    if (await users.emailTaken(email)) {
+      throw httpError(409, "That email address is already registered");
+    }
 
-    const { total } = await queryOne("SELECT COUNT(*) AS total FROM users");
-    const bootstrapping = Number(total) === 0;
+    const bootstrapping = (await users.count()) === 0;
     const roleName = bootstrapping ? "admin" : "student";
 
-    const role = await queryOne("SELECT id FROM roles WHERE name = :roleName", { roleName });
-    if (!role) throw httpError(500, `The '${roleName}' role is missing — has seed.sql been run?`);
+    const role = await roles.findByName(roleName);
+    if (!role) {
+      throw httpError(500, `The '${roleName}' role is missing — has npm run db:seed been run?`);
+    }
 
-    const passwordHash = await bcrypt.hash(password, HASH_ROUNDS);
-    const result = await query(
-      `INSERT INTO users (email, password_hash, full_name, role_id, status)
-       VALUES (:email, :passwordHash, :fullName, :roleId, :status)`,
-      {
-        email,
-        passwordHash,
-        fullName,
-        roleId: role.id,
-        status: bootstrapping ? "active" : "pending",
-      },
-    );
+    const id = await users.insert({
+      email,
+      passwordHash: await bcrypt.hash(password, HASH_ROUNDS),
+      fullName,
+      roleId: role.id,
+      status: bootstrapping ? "active" : "pending",
+    });
 
-    const created = await queryOne(`${SELECT_USER} WHERE u.id = :id`, { id: result.insertId });
-    res.status(201).json({ user: publicUser(created) });
+    res.status(201).json({ user: publicUser(await users.findById(id)) });
   }),
 );
 
@@ -95,7 +87,7 @@ router.post(
   "/login",
   asyncRoute(async (req, res) => {
     const { email, password } = readCredentials(req.body);
-    const account = await queryOne(`${SELECT_USER} WHERE u.email = :email`, { email });
+    const account = await users.findCredentialsByEmail(email);
 
     // One message for both a missing account and a wrong password, so the
     // response cannot be used to find out which addresses are registered.
@@ -110,11 +102,11 @@ router.post(
     });
 
     req.session.user = publicUser(account);
-    await query("UPDATE users SET last_login_at = NOW() WHERE id = :id", { id: account.id });
+    await users.touchLastLogin(account.id);
 
     res.json({
       user: req.session.user,
-      permissions: [...(await permissionsFor(account.id))].sort(),
+      permissions: [...(await effectiveCodesFor(account.id))].sort(),
     });
   }),
 );
@@ -137,7 +129,7 @@ router.get(
   "/me",
   requireAuth,
   asyncRoute(async (req, res) => {
-    const account = await queryOne(`${SELECT_USER} WHERE u.id = :id`, { id: req.user.id });
+    const account = await users.findById(req.user.id);
     if (!account) throw httpError(401, "Authentication required");
 
     // The session is a cache of the row; refresh it so a renamed or
@@ -146,7 +138,7 @@ router.get(
 
     res.json({
       user: req.session.user,
-      permissions: [...(await permissionsFor(account.id))].sort(),
+      permissions: [...(await effectiveCodesFor(account.id))].sort(),
     });
   }),
 );
@@ -163,17 +155,13 @@ router.patch(
     }
     assertPasswordStrength(newPassword);
 
-    const account = await queryOne(`${SELECT_USER} WHERE u.id = :id`, { id: req.user.id });
+    const account = await users.findCredentialsById(req.user.id);
     if (!account) throw httpError(401, "Authentication required");
 
     const matches = await bcrypt.compare(currentPassword, account.password_hash);
     if (!matches) throw httpError(403, "Current password is incorrect");
 
-    const passwordHash = await bcrypt.hash(newPassword, HASH_ROUNDS);
-    await query("UPDATE users SET password_hash = :passwordHash WHERE id = :id", {
-      passwordHash,
-      id: account.id,
-    });
+    await users.updatePasswordHash(account.id, await bcrypt.hash(newPassword, HASH_ROUNDS));
 
     res.status(204).end();
   }),

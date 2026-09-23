@@ -51,25 +51,63 @@ the next push — ask again each time.
 When you are ready to push, ask in a form the user can answer directly, naming
 what you intend to do:
 
-> Ready to push 2 commits to `origin/dev`. Push now?
+> Ready to push 2 commits to `origin/dev-current`. Push now?
 
-### Never push to `main`
+### Pushing to `main` takes two separate yeses
 
-`main` is the deployed branch and is off limits to agents. Do not push to it,
-do not merge into it locally and push the result, and do not force-push it.
+`main` is the branch that gets deployed — whatever sits on it is what people
+actually using the system will see. So pushing to it is allowed, but never on
+your own initiative, and never on a single yes.
 
-Work goes to `dev` or to a short-lived branch taken from it:
+Ask twice, as two separate questions, and wait for a real answer each time:
+
+1. **Confirm the intent.** Say where the commits would come from, how many
+   there are, and where `main` is now.
+
+   > `main` is at `ddf5c9c`. Moving it to `dev-current` would add 18 commits.
+   > Do you want `main` updated?
+
+2. **Confirm the act.** Only after a yes to the first, say what the push
+   itself will do. In particular, whether it only moves `main` further along
+   the same line of history — a *fast-forward*, where nothing already on
+   `main` is thrown away — or whether it rewrites the branch, which deletes
+   commits that were on it.
+
+   > This is a fast-forward, so nothing on `main` is discarded. Push now?
+
+One yes is not two. If the second answer does not arrive, or is anything other
+than a plain yes, do not push. And being told yes once does not cover the next
+push to `main`: start again at the first question every time.
+
+Two things still need the user to ask for them in so many words: force-pushing
+`main`, which deletes commits other people may already have copies of, and
+merging into `main` locally as a way around the two questions above.
+
+Where there is no hurry, the pull request route is still the better one —
+prepare the branch, draft the description, and let the user merge it. Offer
+that first. The two-question push is for when they would rather go direct.
+
+Everyday work still goes to `dev-current`, or to a short-lived branch taken
+from it:
 
 ```sh
-git checkout dev
+git checkout dev-current
 git checkout -b feature/short-description
 ```
 
-Changes reach `main` only through a pull request that the user reviews and
-merges themselves. You may prepare the branch and draft the PR description, but
-opening and merging the PR is the user's decision. If the user asks you to push
-directly to `main`, say that this rule stands against it and offer the branch +
-pull request route instead.
+`dev-current` is the working branch. There was once a `dev` branch as well,
+carrying a separate lineage of the same project that shared no common ancestor
+with this one. It was deleted so the repository holds two branches rather than
+three, and its commits were folded into `dev-current` beforehand so that none
+were lost. Do not recreate it.
+
+A new branch name also has to be added to the `branches` list in
+`.github/workflows/ci.yml`, which watches `main` and `dev-current` only. A
+branch missing from that list gets no checks at all, and silently — GitHub
+reports nothing rather than failing.
+
+When you do prepare a pull request instead, you may write the branch and draft
+the description, but opening it and merging it stay the user's decision.
 
 ### Commits
 
@@ -81,7 +119,8 @@ pull request route instead.
 ## Project conventions
 
 A Learning Management System: plain HTML and JavaScript in the browser,
-Node/Express on the server, MySQL for storage. Everything lives under ``.
+Node/Express on the server, MySQL for storage. The application sits at the
+repository root.
 
 ### Server
 
@@ -163,7 +202,6 @@ There are no tests yet. Before handing work back, run the server and exercise
 what you changed:
 
 ```sh
-cd lms
 npm run dev          # http://localhost:3000
 ```
 

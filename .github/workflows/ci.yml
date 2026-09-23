@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # The version in development, and the next LTS line.
+        node: ["22.13", "24"]
+
+    # A throwaway database for the run. It is created empty and loaded from
+    # schema.sql, so the schema is exercised on every push rather than only
+    # when somebody remembers to run it.
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+          MYSQL_DATABASE: lms
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+
+    env:
+      NODE_ENV: test
+      PORT: 3000
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ""
+      DB_NAME: lms
+      SESSION_SECRET: ci-only-not-a-real-secret
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Load the schema and the structural seed
+        run: |
+          mysql -h 127.0.0.1 -u root lms < database/schema.sql
+          mysql -h 127.0.0.1 -u root lms < database/seed.sql
+
+      - name: Boot the server and check it answers
+        run: |
+          npm start &
+          for _ in $(seq 1 30); do
+            curl -sf http://localhost:3000/api/health && break
+            sleep 1
+          done
+          curl -sf http://localhost:3000/api/health
+          # A protected route must refuse an anonymous caller.
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/auth/me)" = "401"

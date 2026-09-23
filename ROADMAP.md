@@ -53,7 +53,7 @@ Status is one of: **done**, **partly done**, **to do**.
 | # | Step | Status | Notes for this stack |
 |---|------|--------|----------------------|
 | 1 | Plan and set up the project | **partly done** | Repo, Express server, `/api/health`, `.env` and `config.js` exist. No React or Vite: the pages are served as authored. |
-| 2 | Design the database | **done** | `database/schema.sql` is the single source of truth, not numbered migrations. 14 tables, covering courses through submissions. |
+| 2 | Design the database | **done** | `database/schema/` is the single source of truth — one file per domain, numbered in dependency order. 14 tables in one database, covering courses through submissions. `migrations/` stays empty until there is real data. |
 | 3 | Accounts, sign-in and roles | **done** | Sessions are server-side via `express-session`, not a token with a `token_version`. Permissions are read per request. |
 | 4 | Page shell and design system | **to do** | Design tokens live in the `:root` block of `styles.css`. Pages are HTML files under `public/pages/`, not lazy-loaded routes. |
 

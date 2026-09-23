@@ -16,9 +16,9 @@ jobs:
         # The version in development, and the next LTS line.
         node: ["22.13", "24"]
 
-    # A throwaway database for the run. It is created empty and loaded from
-    # schema.sql, so the schema is exercised on every push rather than only
-    # when somebody remembers to run it.
+    # A throwaway database for the run. It is created empty and built by
+    # `npm run db:setup`, so the schema and the structural seed are exercised
+    # on every push rather than only when somebody remembers to run them.
     services:
       mysql:
         image: mysql:8
@@ -62,10 +62,14 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Load the schema and the structural seed
-        run: |
-          mysql -h 127.0.0.1 -u root lms < database/schema.sql
-          mysql -h 127.0.0.1 -u root lms < database/seed.sql
+      # Through the npm script, not by piping files into mysql: the script
+      # reads the same .env-backed config as the server, applies schema/ and
+      # seed/ in their numbered order, and baselines the migration ledger.
+      - name: Build the database
+        run: npm run db:setup
+
+      - name: Check the database reports itself ready
+        run: npm run db:status
 
       - name: Boot the server and check it answers
         run: |

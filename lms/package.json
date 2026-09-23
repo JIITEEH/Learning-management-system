@@ -8,8 +8,12 @@
   "scripts": {
     "start": "node server/server.js",
     "dev": "node --watch server/server.js",
-    "db:schema": "mysql -u $DB_USER -p $DB_NAME < database/schema.sql",
-    "db:seed": "mysql -u $DB_USER -p $DB_NAME < database/seed.sql",
+    "db:setup": "node scripts/db.mjs setup",
+    "db:schema": "node scripts/db.mjs schema",
+    "db:seed": "node scripts/db.mjs seed",
+    "db:reset": "node scripts/db.mjs reset",
+    "db:migrate": "node scripts/db.mjs migrate",
+    "db:status": "node scripts/db.mjs status",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },

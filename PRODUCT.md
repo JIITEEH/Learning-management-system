@@ -53,8 +53,9 @@ management system:
   so a revocation takes effect immediately.
 - Uploaded files live in `lms/storage/uploads/`, outside the served directory,
   and are only released after an access check.
-- The schema in `lms/database/schema.sql` is the source of truth for
-  structure. Seed data is structural only — roles and permission codes.
+- The schema in `lms/database/schema/` is the source of truth for structure,
+  split one file per domain. Seed data is structural only — roles and
+  permission codes.
 
 ## Evidence on Hand
 
@@ -72,7 +73,8 @@ placeholder.
 
 1. **Permissions are checked on the server.** What the front end renders is a
    convenience; the server decides what is allowed.
-2. **The schema is the contract.** Structure changes in `schema.sql` first.
+2. **The schema is the contract.** Structure changes in `database/schema/`
+   first, in the file for that domain.
 3. **Never fabricate records.** Seeded data is structural, never plausible
    fake people or courses.
 4. **No dependency creep on the front end.** Pages are served as authored.

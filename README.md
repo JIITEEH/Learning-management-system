@@ -16,9 +16,12 @@ for storage.
 └── lms/
     ├── package.json
     ├── .env.example            # Copy to .env and fill in
-    ├── database/
-    │   ├── schema.sql          # Tables, keys, constraints
-    │   └── seed.sql            # Roles and permission codes
+    ├── database/               # See database/README.md
+    │   ├── reset.sql           # Drops every table
+    │   ├── schema/             # Structure, one file per domain
+    │   ├── seed/               # Roles and permission codes
+    │   └── migrations/         # Dated changes, once there is real data
+    ├── scripts/db.mjs          # npm run db:setup, db:migrate, db:status
     ├── server/
     │   ├── server.js           # Express entry point
     │   ├── config.js           # Environment settings, read once
@@ -72,16 +75,20 @@ cd lms
 npm install
 cp .env.example .env        # then fill in your database credentials
 
-mysql -u root -p -e "CREATE DATABASE lms"
-mysql -u root -p lms < database/schema.sql
-mysql -u root -p lms < database/seed.sql
-
+npm run db:setup            # creates the database, schema, then seed
 npm run dev                 # http://localhost:3000
 ```
 
+The application lives in `lms/`, but the repository root forwards the same
+scripts, so `npm run dev`, `npm start`, `npm run lint`, and the `db:*` scripts
+all work from either directory. Only `npm install` needs `lms/` — the root has
+no dependencies of its own.
+
 `npm run dev` uses Node's own `--watch`, so edits to the server restart it.
-The server boots without a database, but any route that touches one will fail
-until MySQL is up and the schema is loaded.
+Pages under `public/` are served as authored and need no restart, but there is
+no hot reload either — reload the browser yourself. The server boots without a
+database, but any route that touches one will fail until MySQL is up and
+`db:setup` has run. `npm run db:status` says what the database currently holds.
 
 ## Status
 

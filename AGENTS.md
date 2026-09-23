@@ -68,17 +68,31 @@ Node/Express on the server, MySQL for storage. Everything lives under `lms/`.
   `requirePermission("course.create")` from `lms/server/middleware/auth.js`.
   Reserve `requireRole` for the rare case where the role itself is the rule.
 - A new permission code needs a row in `permissions` and a grant in
-  `role_permissions` — add both to `lms/database/seed.sql`.
+  `role_permissions` — add both to `lms/database/seed/`, in
+  `02_permissions.sql` and `03_role_permissions.sql`.
 - Permissions are read per request, not cached in the session, so that a
   revoked permission takes effect immediately. Keep it that way.
 
 ### Database
 
-- `lms/database/schema.sql` is the single source of truth for structure.
-  Changing a table means editing that file.
-- `seed.sql` holds structural rows only — roles and permission codes. Real
+Read `lms/database/README.md` before changing anything here; it is the full
+account. In short:
+
+- **One database, many tables.** Do not add a second MySQL schema. Courses,
+  accounts, and submissions live together so foreign keys hold them
+  consistent and a cross-domain write is one transaction. Separation belongs
+  in the files, not in separate databases.
+- `lms/database/schema/` is the single source of truth for structure, split
+  one file per domain and numbered in dependency order. Changing a table
+  means editing the file that defines it, not writing a migration alone.
+- Adding a table means adding its `DROP TABLE` to `reset.sql` too.
+- `seed/` holds structural rows only — roles and permission codes. Real
   accounts, courses, and content are created through the application, never
   seeded.
+- Apply everything through the npm scripts (`db:setup`, `db:schema`,
+  `db:seed`, `db:migrate`, `db:status`), never by piping a file into `mysql`
+  by hand — the scripts read the same `.env` the server does, so they cannot
+  reach a different database than the app.
 
 ### Uploads
 

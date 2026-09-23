@@ -2,14 +2,15 @@ import js from "@eslint/js";
 import globals from "globals";
 
 // The two halves of this project run in different places, so they get
-// different globals: server/ is Node with ES modules, public/ is the browser.
+// different globals: server/ and scripts/ are Node with ES modules, public/ is
+// the browser.
 export default [
   {
     ignores: ["node_modules/**", "storage/**"],
   },
   js.configs.recommended,
   {
-    files: ["server/**/*.js", "*.mjs"],
+    files: ["server/**/*.js", "scripts/**/*.mjs", "*.mjs"],
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: "module",

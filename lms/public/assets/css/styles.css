@@ -1,24 +1,62 @@
 /* ==========================================================================
-   Learning Management System — design tokens
-   All colour, type, and spacing values live here. Add new values to :root
-   rather than hard-coding them in a rule below.
+   Learning Management System — design system
+
+   Three sources, deliberately combined:
+
+   1. COMPOSITION comes from the Mondly LMS dashboard reference: a rounded
+      bar carrying a pill nav, then a three-column board of rounded cards
+      with insets nested inside them.
+   2. MATERIAL comes from the thesis management system (ThesisTrack,
+      client/src/styles/index.css): its Plus Jakarta Sans type, its royal
+      blue, its frosted-glass recipe, its pill controls, and its two-tone
+      focus ring.
+   3. GROUND is the charcoal gradient this project was scaffolded with,
+      kept on every page, with ThesisTrack's on-dark ink as the chalk white
+      that sits on it.
+
+   All colour, type, and spacing values live in :root. Add new values there
+   rather than hard-coding them in a rule.
    ========================================================================== */
 
 :root {
   color-scheme: dark;
 
-  /* Charcoal ramp — near-black at the edges, barely lifted at the centre */
+  /* ------------------------------------------------------------------- Type
+     Matches ThesisTrack. The face is fetched from Google Fonts by the <link>
+     in each page's head; the stack degrades to the system sans without it. */
+  --font:
+    "Plus Jakarta Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.3125rem;
+  --text-xl: 1.625rem;
+  --text-display: 3.25rem;
+
+  --leading-tight: 1.14;
+  --leading-normal: 1.55;
+  --tracking-tight: -0.03em;
+  --tracking-normal: -0.011em;
+  --tracking-wide: 0.02em;
+
+  /* ------------------------------------------- Charcoal ramp — the ground */
   --color-black-950: #020304;
   --color-charcoal-900: #060709;
   --color-charcoal-800: #0a0c0f;
   --color-charcoal-700: #101318;
   --color-charcoal-600: #1a1f27;
 
-  /* Page background, painted in three layers:
+  /* The page ground, painted in three layers:
      1. a tight cool lift high on the page, so the top reads as lit
      2. a vignette that crushes the corners toward black
      3. a base fade that bottoms out just above pure black
-     Multiple soft stops per layer keep the falloff from banding. */
+     Multiple soft stops per layer keep the falloff from banding.
+     Every page carries this; nothing else paints a page background. */
   --gradient-page:
     radial-gradient(
       85% 55% at 50% 4%,
@@ -39,6 +77,82 @@
       var(--color-charcoal-900) 48%,
       var(--color-black-950) 100%
     );
+
+  /* --------------------------------------- Chalk — ThesisTrack's on-dark ink */
+  --chalk: #f3f6ff;
+  --chalk-secondary: #c6d1ee;
+  --chalk-muted: #98a4c4;
+  --chalk-faint: #6f7b99;
+  --ink-inverse: #0a0c0f;
+
+  /* ------------------------------------------- Glass — ThesisTrack's recipe */
+  --glass-fill: linear-gradient(180deg, rgb(255 255 255 / 0.12) 0%, rgb(255 255 255 / 0.05) 100%);
+  --glass-fill-soft: linear-gradient(180deg, rgb(255 255 255 / 0.07) 0%, rgb(255 255 255 / 0.03) 100%);
+  --glass-border: rgb(255 255 255 / 0.18);
+  --glass-border-soft: rgb(255 255 255 / 0.1);
+  --glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.16);
+  --glass-highlight-strong: inset 0 1px 0 rgb(255 255 255 / 0.22);
+  --glass-blur: blur(30px) saturate(150%);
+  --glass-blur-light: blur(10px) saturate(140%);
+  --glass-hover: rgb(255 255 255 / 0.16);
+
+  /* ------------------------------------------- Primary — ThesisTrack's royal */
+  --primary: #2451d6;
+  --primary-hover: #1c42b8;
+  --primary-light: #7b9cf5;
+  --primary-soft: #eaf0ff;
+  --primary-dark: #0f2a7a;
+  --primary-ink: #ffffff;
+  --primary-face: linear-gradient(145deg, rgb(47 95 227 / 0.96), rgb(26 63 176 / 0.94));
+  --primary-face-hover: linear-gradient(145deg, rgb(58 108 240 / 0.97), rgb(30 72 196 / 0.95));
+
+  /* ------------------------------------------------- Status — ThesisTrack's */
+  --success: #079455;
+  --success-light: #5fd39b;
+  --warning: #dc6803;
+  --warning-light: #f5b167;
+  --danger: #d92d20;
+  --danger-light: #f58b82;
+  --info: #1570ef;
+  --info-light: #7db4fb;
+
+  /* ----------------------------------------------- Radii — ThesisTrack's set */
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --radius-full: 999px;
+
+  /* ------------------------------------------------------------------ Depth */
+  --shadow-sm: 0 1px 2px rgb(2 4 14 / 0.4);
+  --shadow: 0 8px 24px -12px rgb(2 4 14 / 0.7);
+  --shadow-lg: 0 50px 110px -40px rgb(2 4 14 / 0.9);
+
+  /* ------------------------------------------------------------------ Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.5rem;
+  --space-8: 3.5rem;
+
+  /* ----------------------------------------------------------------- Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 130ms;
+  --duration-base: 240ms;
+  --duration-slow: 560ms;
+
+  /* ----------------------------------------------------------------- Layout */
+  --shell-max: 1660px;
+  --card-gap: 22px;
+  --measure: 62ch;
+
+  --z-sticky: 20;
+  --z-drawer: 40;
+  --z-modal: 60;
+  --z-toast: 80;
 }
 
 /* ==========================================================================
@@ -47,15 +161,15 @@
 
 *,
 *::before,
-*::after {
-  box-sizing: border-box;
-}
+*::after { box-sizing: border-box; }
 
 html {
-  /* Matches the foot of the gradient so overscroll never flashes white. */
+  /* Matches the foot of the gradient so overscroll never flashes. */
   background-color: var(--color-black-950);
+  -webkit-text-size-adjust: 100%;
 }
 
+/* Every page, without exception, carries the charcoal ground. */
 body {
   margin: 0;
   min-height: 100dvh;
@@ -63,4 +177,1001 @@ body {
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-color: var(--color-black-950);
+  color: var(--chalk-secondary);
+  font-family: var(--font);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The surfaces we did not draw still belong to the design. */
+::selection { background: var(--primary); color: var(--primary-ink); }
+
+:root {
+  scrollbar-color: rgb(255 255 255 / 0.28) transparent;
+  scrollbar-width: thin;
+  accent-color: var(--primary);
+  caret-color: var(--primary-light);
+}
+
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.22);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover { background: rgb(255 255 255 / 0.34); background-clip: content-box; }
+
+/* ThesisTrack's two-tone ring: a light core with a dark halo, so it survives
+   any backdrop it lands on — glass, charcoal, or a blue button. */
+:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgb(0 0 0 / 0.65);
+  border-radius: var(--radius-sm);
+}
+:focus:not(:focus-visible) { outline: none; }
+
+h1, h2, h3, h4 {
+  margin: 0;
+  color: var(--chalk);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: balance;
+}
+
+h1 { font-size: var(--text-xl); }
+h2 { font-size: var(--text-lg); }
+h3 { font-size: var(--text-md); }
+h4 { font-size: var(--text-base); }
+
+p { margin: 0; max-width: var(--measure); }
+
+a { color: var(--primary-light); text-underline-offset: 0.2em; }
+a:hover { text-decoration: underline; }
+
+ul, ol { margin: 0; padding: 0; list-style: none; }
+img, svg { display: block; max-width: 100%; }
+button { font: inherit; letter-spacing: inherit; color: inherit; }
+
+/* Numbers that sit in columns must line up. */
+time,
+[data-numeric],
+.metric-value,
+.tally-value,
+.platform-hours { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: var(--space-3); left: var(--space-3);
+  z-index: var(--z-toast);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  color: var(--primary-ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-180%);
+  transition: transform var(--duration-base) var(--ease-out);
+}
+.skip-link:focus-visible { transform: translateY(0); }
+
+.muted { color: var(--chalk-muted); }
+.row { display: flex; gap: var(--space-3); align-items: center; }
+.row-between { display: flex; gap: var(--space-3); align-items: center; justify-content: space-between; }
+.push { margin-left: auto; }
+
+/* A value the system does not have yet. Never a fabricated number. */
+.placeholder { color: var(--chalk-faint); font-weight: 500; }
+
+/* ==========================================================================
+   Glass — the one material, from ThesisTrack
+   ========================================================================== */
+
+.glass {
+  border: 1px solid var(--glass-border);
+  background: var(--glass-fill);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-highlight), var(--shadow);
+}
+
+.glass-soft {
+  border: 1px solid var(--glass-border-soft);
+  background: var(--glass-fill-soft);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  box-shadow: var(--glass-highlight);
+}
+
+/* ==========================================================================
+   Shell
+   ========================================================================== */
+
+.shell {
+  max-width: var(--shell-max);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-6) var(--space-7);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .shell > * { animation: settle var(--duration-slow) var(--ease-out) backwards; }
+  /* Keyed to the cards themselves, so a non-card child (the visually hidden
+     page heading) cannot shift the sequence. */
+  .board > section:nth-of-type(1) { animation-delay: 40ms; }
+  .board > section:nth-of-type(2) { animation-delay: 80ms; }
+  .board > section:nth-of-type(3) { animation-delay: 120ms; }
+  .board > section:nth-of-type(4) { animation-delay: 160ms; }
+}
+
+@keyframes settle {
+  from { opacity: 0; transform: translateY(10px); filter: blur(5px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+
+/* ==========================================================================
+   Topbar — Mondly's bar, in ThesisTrack's glass
+   ========================================================================== */
+
+.topbar {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  background: var(--glass-fill);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-highlight), var(--shadow);
+  margin-bottom: var(--card-gap);
+}
+
+.brand {
+  display: inline-flex;
+  gap: var(--space-3);
+  align-items: center;
+  justify-self: start;
+  color: var(--chalk);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  text-decoration: none;
+}
+.brand:hover { text-decoration: none; }
+
+.brand-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px; height: 34px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--glass-fill);
+  box-shadow: var(--glass-highlight);
+  color: var(--primary-light);
+}
+.brand-mark svg { width: 19px; height: 19px; }
+
+/* --- The pill nav */
+
+.navpill {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  padding: 5px;
+  border: 1px solid var(--glass-border-soft);
+  border-radius: var(--radius-full);
+  background: rgb(255 255 255 / 0.06);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  box-shadow: var(--glass-highlight);
+}
+
+.navpill-item {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-full);
+  color: var(--chalk-secondary);
+  font-size: var(--text-base);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.navpill-item:hover { background: rgb(255 255 255 / 0.1); color: var(--chalk); text-decoration: none; }
+
+.navpill-item[aria-current="page"] {
+  border: 1px solid rgb(255 255 255 / 0.24);
+  background-image: var(--primary-face);
+  color: var(--primary-ink);
+  font-weight: 600;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.38), 0 12px 26px -12px rgb(2 4 14 / 0.55);
+}
+
+/* --- Topbar actions */
+
+.topbar-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-self: end;
+}
+
+.icon-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px; height: 40px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--chalk);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.icon-btn:hover { border-color: var(--glass-border-soft); background: rgb(255 255 255 / 0.1); }
+.icon-btn svg { width: 19px; height: 19px; }
+
+.icon-btn[data-dot="true"]::after {
+  content: "";
+  position: absolute;
+  top: 8px; right: 9px;
+  width: 8px; height: 8px;
+  border: 2px solid var(--color-charcoal-800);
+  border-radius: 50%;
+  background: var(--warning);
+}
+
+.account-btn {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  padding: 3px 10px 3px 3px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--chalk);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.account-btn:hover { border-color: var(--glass-border-soft); background: rgb(255 255 255 / 0.1); text-decoration: none; }
+.account-btn > svg { width: 15px; height: 15px; color: var(--chalk-muted); }
+
+.nav-toggle { display: none; }
+
+/* ==========================================================================
+   Avatars — neutral until there is a real person to show
+   ========================================================================== */
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: var(--avatar-size, 36px);
+  height: var(--avatar-size, 36px);
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.1);
+  color: var(--chalk-muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  overflow: hidden;
+}
+
+.avatar svg { width: 60%; height: 60%; }
+
+.avatar-stack { display: flex; }
+.avatar-stack .avatar { margin-left: -10px; }
+.avatar-stack .avatar:first-child { margin-left: 0; }
+
+/* ==========================================================================
+   Board — Mondly's three-column arrangement
+   ========================================================================== */
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--card-gap);
+}
+
+.card {
+  padding: var(--space-6);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  background: var(--glass-fill);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-highlight-strong), var(--shadow);
+}
+
+.card-activity {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  display: grid;
+  grid-template-rows: auto auto auto auto auto minmax(0, 1fr);
+  align-content: start;
+}
+.card-activity > .inset:last-child { display: grid; align-content: center; }
+.card-progress { grid-column: 2; grid-row: 1; }
+.card-feature  { grid-column: 3; grid-row: 1; }
+.card-schedule { grid-column: 2 / span 2; grid-row: 2; }
+
+.card-head {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
+
+/* A panel nested inside a card: the same material, one step quieter. */
+.inset {
+  padding: var(--space-5);
+  border: 1px solid var(--glass-border-soft);
+  border-radius: var(--radius-lg);
+  background: var(--glass-fill-soft);
+  box-shadow: var(--glass-highlight);
+}
+
+/* ==========================================================================
+   Metric — the large headline figure in a card
+   ========================================================================== */
+
+.metric { display: flex; gap: var(--space-3); align-items: baseline; }
+
+.metric-value {
+  color: var(--chalk);
+  font-size: var(--text-display);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+}
+
+.metric-value.placeholder { color: var(--chalk-faint); font-weight: 500; }
+
+.metric-label {
+  color: var(--chalk-muted);
+  font-size: var(--text-base);
+  line-height: 1.2;
+  max-width: 6ch;
+}
+
+/* ==========================================================================
+   Chips and tags
+   ========================================================================== */
+
+.chip {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 38px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  background: rgb(255 255 255 / 0.09);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--glass-highlight);
+  color: var(--chalk);
+  font-size: var(--text-base);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.chip:hover { background: var(--glass-hover); }
+.chip svg { width: 16px; height: 16px; color: var(--chalk-muted); }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px var(--space-3);
+  border: 1px solid var(--glass-border-soft);
+  border-radius: var(--radius-sm);
+  background: rgb(255 255 255 / 0.07);
+  color: var(--chalk-secondary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.tag-ok { border-color: rgb(95 211 155 / 0.32); background: rgb(7 148 85 / 0.18); color: var(--success-light); }
+.tag-info { border-color: rgb(125 180 251 / 0.32); background: rgb(21 112 239 / 0.18); color: var(--info-light); }
+.tag-warn { border-color: rgb(245 177 103 / 0.32); background: rgb(220 104 3 / 0.2); color: var(--warning-light); }
+
+.tag-live {
+  border-color: transparent;
+  background: var(--warning);
+  color: #fff;
+  font-weight: 600;
+}
+.tag-live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+/* ==========================================================================
+   Bar chart — days of the week
+   ========================================================================== */
+
+.chart {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-2);
+  align-items: end;
+  height: 200px;
+  margin: var(--space-6) 0 var(--space-3);
+}
+
+.chart-col { display: grid; align-items: end; height: 100%; }
+
+.chart-bar {
+  width: 100%;
+  height: var(--bar-height, 0%);
+  min-height: 4px;
+  border-radius: var(--radius-sm);
+  background: rgb(123 156 245 / 0.32);
+  transition: height var(--duration-slow) var(--ease-out);
+}
+
+.chart-col[data-peak="true"] .chart-bar { background-image: var(--primary-face); }
+
+/* The empty baseline that shows when no activity has been recorded. The
+   plotting area collapses too, so the card does not hold an empty void. */
+.chart[data-empty="true"] { height: 64px; margin-top: var(--space-4); }
+.chart[data-empty="true"] .chart-bar { height: 4px; background: rgb(255 255 255 / 0.12); }
+
+.chart-rule {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: var(--rule-at, 45%);
+  display: flex;
+  align-items: center;
+  border-top: 1px dashed rgb(255 255 255 / 0.3);
+}
+
+.chart-rule span {
+  padding: 3px var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-black-950);
+  color: var(--chalk);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  transform: translateY(-50%);
+}
+
+.chart-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-2);
+  color: var(--chalk-muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.chart-note { padding-top: var(--space-4); color: var(--chalk-faint); font-size: var(--text-sm); text-align: center; }
+
+/* ==========================================================================
+   Platform / course list
+   ========================================================================== */
+
+.platform-list { display: grid; gap: var(--space-4); margin-top: var(--space-5); }
+
+.platform-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.platform-icon {
+  display: grid;
+  place-items: center;
+  width: 40px; height: 40px;
+  border: 1px solid var(--glass-border-soft);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.08);
+  color: var(--chalk-muted);
+}
+.platform-icon svg { width: 18px; height: 18px; }
+
+.platform-count { color: var(--chalk-muted); font-size: var(--text-sm); }
+.platform-name { color: var(--chalk); font-weight: 500; }
+.platform-hours { color: var(--chalk); font-weight: 600; }
+.platform-hours small { color: var(--chalk-muted); font-weight: 400; }
+
+/* ==========================================================================
+   Segmented progress
+   ========================================================================== */
+
+.segments {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--seg-basis, 1fr);
+  gap: var(--space-3);
+  margin: var(--space-5) 0 var(--space-2);
+}
+
+.segment-bar { display: block; height: 7px; border-radius: var(--radius-full); background: rgb(255 255 255 / 0.12); }
+.segment[data-tone="primary"] .segment-bar { background: var(--primary-light); }
+.segment[data-tone="ok"] .segment-bar { background: var(--success-light); }
+.segment[data-tone="warn"] .segment-bar { background: var(--warning-light); }
+.segment-label { padding-top: var(--space-2); color: var(--chalk-muted); font-size: var(--text-sm); }
+
+/* ==========================================================================
+   Tally — three counts sharing one inset, divided
+   ========================================================================== */
+
+.tally {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: var(--space-6);
+  padding: var(--space-6) var(--space-3);
+}
+
+.tally-cell {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: center;
+  padding: 0 var(--space-3);
+  border-left: 1px solid var(--glass-border-soft);
+  text-align: center;
+}
+.tally-cell:first-child { border-left: 0; }
+
+.tally-mark {
+  display: grid;
+  place-items: center;
+  width: 46px; height: 46px;
+  margin-bottom: var(--space-3);
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  box-shadow: var(--glass-highlight);
+  color: #fff;
+}
+.tally-mark svg { width: 21px; height: 21px; }
+.tally-cell[data-tone="primary"] .tally-mark { background-image: var(--primary-face); }
+.tally-cell[data-tone="ok"] .tally-mark { background: var(--success); }
+.tally-cell[data-tone="warn"] .tally-mark { background: var(--warning); }
+
+.tally-value { color: var(--chalk); font-size: var(--text-xl); font-weight: 700; line-height: 1; }
+.tally-value.placeholder { color: var(--chalk-faint); font-weight: 500; }
+.tally-label { color: var(--chalk-muted); font-size: var(--text-base); }
+
+/* ==========================================================================
+   Feature card
+   ========================================================================== */
+
+.feature-tags { display: flex; gap: var(--space-2); margin-bottom: var(--space-4); }
+.card-feature h2 { font-size: var(--text-xl); margin-bottom: var(--space-3); }
+.card-feature > p { color: var(--chalk-muted); }
+
+.feature-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-5) 0;
+}
+
+.feature-split .inset { display: grid; gap: var(--space-4); align-content: start; }
+.feature-split .field-label { color: var(--chalk-muted); font-size: var(--text-base); }
+
+.meter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 38px;
+  border: 1px solid var(--glass-border-soft);
+  border-radius: var(--radius-sm);
+  background: rgb(255 255 255 / 0.07);
+  overflow: hidden;
+}
+
+.meter-fill {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: var(--meter-at, 0%);
+  min-width: 54px;
+  padding: 0 var(--space-3);
+  background-image: var(--primary-face);
+  color: var(--primary-ink);
+  font-weight: 700;
+  transition: width var(--duration-slow) var(--ease-out);
+}
+.meter-fill.placeholder { background-image: none; background: rgb(255 255 255 / 0.08); color: var(--chalk-faint); }
+
+/* ==========================================================================
+   Buttons — ThesisTrack's pills
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 var(--space-6);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  background: rgb(255 255 255 / 0.09);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--glass-highlight);
+  color: var(--chalk);
+  font-size: var(--text-base);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.btn:hover { background: var(--glass-hover); text-decoration: none; }
+.btn:active { transform: translateY(1px); }
+.btn svg { width: 17px; height: 17px; }
+
+.btn-primary {
+  border-color: rgb(255 255 255 / 0.24);
+  background-image: var(--primary-face);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.38),
+    0 12px 26px -12px rgb(2 4 14 / 0.55);
+  color: var(--primary-ink);
+}
+
+.btn-primary:hover {
+  background-image: var(--primary-face-hover);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    0 16px 30px -12px rgb(2 4 14 / 0.6);
+}
+
+.btn-lg { min-height: 56px; }
+.btn-block { width: 100%; }
+
+.btn:disabled,
+.btn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn[data-loading="true"] { position: relative; color: transparent; pointer-events: none; }
+.btn[data-loading="true"]::after {
+  content: "";
+  position: absolute;
+  width: 16px; height: 16px;
+  border: 2px solid #fff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 640ms linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* --- Round stepper buttons, as used by the schedule pager */
+
+.stepper { display: flex; gap: var(--space-3); align-items: center; }
+
+.stepper-btn {
+  display: grid;
+  place-items: center;
+  width: 38px; height: 38px;
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.09);
+  box-shadow: var(--glass-highlight);
+  color: var(--chalk);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+.stepper-btn:hover { background: var(--glass-hover); }
+.stepper-btn svg { width: 16px; height: 16px; }
+.stepper-label { color: var(--chalk); font-weight: 600; }
+
+/* ==========================================================================
+   Schedule
+   ========================================================================== */
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.session {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  min-height: 236px;
+  padding: var(--space-5);
+  border: 1px solid var(--glass-border-soft);
+  border-radius: var(--radius-lg);
+  background: var(--glass-fill-soft);
+  box-shadow: var(--glass-highlight);
+}
+
+.session-top { display: flex; gap: var(--space-3); align-items: center; justify-content: space-between; }
+.session-time { color: var(--chalk-muted); font-size: var(--text-base); }
+.session h3 { font-size: var(--text-lg); font-weight: 600; }
+.session-tag { justify-self: start; }
+
+.session-mentor {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  margin-top: auto;
+  padding-top: var(--space-4);
+}
+.session-mentor-name { color: var(--chalk); font-weight: 500; }
+.session-mentor-role { color: var(--chalk-muted); font-size: var(--text-sm); }
+
+/* The session happening now takes the primary field. */
+.session[data-now="true"] {
+  border-color: rgb(255 255 255 / 0.24);
+  background-image: var(--primary-face);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.32), 0 16px 34px -16px rgb(2 4 14 / 0.7);
+}
+.session[data-now="true"] .session-time,
+.session[data-now="true"] .session-mentor-role { color: rgb(255 255 255 / 0.78); }
+.session[data-now="true"] .session-mentor-name,
+.session[data-now="true"] h3 { color: #fff; }
+
+/* ==========================================================================
+   Empty states
+   ========================================================================== */
+
+.empty { display: grid; gap: var(--space-3); justify-items: center; padding: var(--space-7) var(--space-5); text-align: center; }
+
+.empty-mark {
+  display: grid;
+  place-items: center;
+  width: 44px; height: 44px;
+  border: 1px solid var(--glass-border-soft);
+  border-radius: var(--radius);
+  background: rgb(255 255 255 / 0.07);
+  color: var(--chalk-faint);
+}
+
+.empty p { color: var(--chalk-muted); font-size: var(--text-sm); max-width: 42ch; }
+
+/* ==========================================================================
+   Forms — ThesisTrack's frosted pills
+   ========================================================================== */
+
+.field { display: grid; gap: var(--space-2); }
+.field > label { color: var(--chalk-secondary); font-size: var(--text-base); font-weight: 500; }
+
+.input, .select, .textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  background: rgb(255 255 255 / 0.09);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--glass-highlight);
+  color: var(--chalk);
+  font: inherit;
+}
+
+.textarea { min-height: 110px; border-radius: var(--radius-lg); resize: vertical; }
+
+/* Secondary rather than muted: a placeholder is held to the same 4.5:1 as
+   body text, and the muted ink does not reach it on the frosted field. */
+.input::placeholder, .textarea::placeholder { color: var(--chalk-secondary); }
+
+.input:hover, .select:hover, .textarea:hover { background: rgb(255 255 255 / 0.13); }
+
+.field-label { color: var(--chalk-muted); font-size: var(--text-sm); font-weight: 500; }
+.field-hint { color: var(--chalk-muted); font-size: var(--text-sm); }
+.field-error { color: var(--danger-light); font-size: var(--text-sm); }
+
+/* ==========================================================================
+   Notices, modal, toasts
+   ========================================================================== */
+
+.notice {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-4);
+  border: 1px solid var(--glass-border-soft);
+  border-radius: var(--radius);
+  background: rgb(255 255 255 / 0.07);
+  font-size: var(--text-base);
+}
+
+.notice svg { flex: none; width: 18px; height: 18px; margin-top: 1px; }
+.notice-error { border-color: rgb(245 139 130 / 0.34); background: rgb(217 45 32 / 0.16); color: var(--danger-light); }
+.notice-ok { border-color: rgb(95 211 155 / 0.34); background: rgb(7 148 85 / 0.16); color: var(--success-light); }
+
+.modal {
+  width: min(460px, calc(100vw - var(--space-6)));
+  padding: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-charcoal-700);
+  background-image: var(--glass-fill);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-highlight-strong), var(--shadow-lg);
+  color: var(--chalk-secondary);
+}
+
+.modal::backdrop { background: rgb(2 4 14 / 0.72); backdrop-filter: blur(3px); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .modal[open] { animation: rise var(--duration-base) var(--ease-out); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.modal-head { padding: var(--space-5) var(--space-5) var(--space-3); }
+.modal-body { padding: 0 var(--space-5) var(--space-5); }
+.modal-body p { color: var(--chalk-muted); }
+.modal-foot {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--glass-border-soft);
+}
+
+.toasts {
+  position: fixed;
+  right: var(--space-5); bottom: var(--space-5);
+  z-index: var(--z-toast);
+  display: grid;
+  gap: var(--space-3);
+  width: min(360px, calc(100vw - var(--space-6)));
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-4);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  background: var(--color-charcoal-700);
+  background-image: var(--glass-fill);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-highlight), var(--shadow-lg);
+  font-size: var(--text-base);
+  pointer-events: auto;
+}
+
+.toast svg { flex: none; width: 18px; height: 18px; margin-top: 1px; }
+.toast-ok svg { color: var(--success-light); }
+.toast-error svg { color: var(--danger-light); }
+.toast-text { flex: 1; color: var(--chalk); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .toast { animation: rise var(--duration-base) var(--ease-out); }
+}
+
+/* ==========================================================================
+   Centred pages — sign in, register, 404
+   ========================================================================== */
+
+.centred { display: grid; place-items: center; min-height: 100dvh; padding: var(--space-5); }
+.centred-card { width: min(440px, 100%); }
+.centred-brand {
+  display: flex; gap: var(--space-3); align-items: center; justify-content: center;
+  padding-bottom: var(--space-6);
+  color: var(--chalk); font-size: var(--text-lg); font-weight: 700;
+  letter-spacing: var(--tracking-tight); text-decoration: none;
+}
+.centred-foot { padding-top: var(--space-5); color: var(--chalk-muted); font-size: var(--text-base); text-align: center; }
+
+/* ==========================================================================
+   Narrow viewports
+   ========================================================================== */
+
+@media (max-width: 1180px) {
+  .board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card-activity {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  display: grid;
+  grid-template-rows: auto auto auto auto auto minmax(0, 1fr);
+  align-content: start;
+}
+.card-activity > .inset:last-child { display: grid; align-content: center; }
+  .card-progress { grid-column: 2; grid-row: 1; }
+  .card-feature  { grid-column: 2; grid-row: 2; }
+  .card-schedule { grid-column: 1 / span 2; grid-row: 3; }
+}
+
+@media (max-width: 900px) {
+  .shell { padding: var(--space-4) var(--space-4) var(--space-6); }
+
+  .topbar { grid-template-columns: auto minmax(0, 1fr) auto; padding: var(--space-3); }
+  .nav-toggle { display: grid; order: -1; }
+
+  /* The pill nav becomes a sheet under the bar. */
+  .navpill {
+    position: absolute;
+    top: calc(100% + var(--space-2));
+    left: 0; right: 0;
+    z-index: var(--z-drawer);
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    background: var(--color-charcoal-700);
+    background-image: var(--glass-fill);
+    box-shadow: var(--glass-highlight), var(--shadow-lg);
+  }
+
+  .navpill:not([data-open="true"]) { display: none; }
+  .navpill-item { min-height: 46px; justify-content: flex-start; }
+  .topbar { gap: var(--space-2); }
+  .brand { font-size: var(--text-md); gap: var(--space-2); }
+
+  .board { grid-template-columns: minmax(0, 1fr); }
+  .card-activity,
+  .card-progress,
+  .card-feature,
+  .card-schedule { grid-column: 1; grid-row: auto; }
+
+  .card { padding: var(--space-5); }
+  .schedule-grid { grid-template-columns: minmax(0, 1fr); }
+  .session { min-height: 0; }
+  .feature-split { grid-template-columns: minmax(0, 1fr); }
+  .metric-value { font-size: 2.5rem; }
+
+  .btn, .chip, .icon-btn, .stepper-btn { min-height: 44px; }
+}
+
+/* Below this the wordmark gives way to the mark so the controls keep their
+   spacing and their 44px targets. */
+@media (max-width: 460px) {
+  .brand { font-size: 0; }
+  .brand-mark { font-size: var(--text-md); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

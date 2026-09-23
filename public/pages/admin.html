@@ -9,8 +9,58 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/styles.css">
-<script type="module" src="../assets/js/main.js"></script>
+<script type="module" src="../assets/js/pages/admin.js"></script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="shell">
+  <header class="topbar" data-shell></header>
+
+  <main class="stack" id="main">
+
+    <section class="card" aria-labelledby="admin-title">
+      <h1 id="admin-title">Administration</h1>
+      <p class="card-intro">
+        Who has an account, what each role may do, and which accounts are
+        still waiting to be let in.
+      </p>
+    </section>
+
+    <!-- Each card is shown only to an account holding the permission its
+         screen needs. The server checks the same permission again. -->
+    <div class="link-grid">
+      <a class="card link-card" href="users.html" data-needs="user.read" hidden>
+        <h2>Accounts</h2>
+        <p>Approve new sign-ups, suspend an account, change its role, or give one person a permission their role does not carry.</p>
+        <p class="metric">
+          <span class="metric-value placeholder" data-count="users">—</span>
+          <span class="metric-label">accounts</span>
+        </p>
+        <span class="tag tag-warn" data-count="pending" hidden></span>
+      </a>
+
+      <a class="card link-card" href="roles.html" data-needs="role.manage" hidden>
+        <h2>Roles</h2>
+        <p>Decide what each role may do. A change reaches everyone holding that role on their very next click.</p>
+        <p class="metric">
+          <span class="metric-value placeholder" data-count="roles">—</span>
+          <span class="metric-label">roles</span>
+        </p>
+      </a>
+    </div>
+
+    <section class="card" data-no-access hidden>
+      <h2>Nothing here for your account</h2>
+      <p class="card-intro">
+        The administration screens need a permission your role does not
+        hold. If you think it should, ask an administrator.
+      </p>
+    </section>
+
+  </main>
+</div>
+
+<div class="toasts" role="status" aria-live="polite" data-toasts></div>
 </body>
 </html>

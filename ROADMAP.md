@@ -55,7 +55,7 @@ Status is one of: **done**, **partly done**, **to do**.
 | 1 | Plan and set up the project | **partly done** | Repo, Express server, `/api/health`, `.env` and `config.js` exist. No React or Vite: the pages are served as authored. |
 | 2 | Design the database | **done** | `database/schema/` is the single source of truth — one file per domain, numbered in dependency order. 14 tables in one database, covering courses through submissions. `migrations/` stays empty until there is real data. |
 | 3 | Accounts, sign-in and roles | **done** | Sessions are server-side via `express-session`, not a token with a `token_version`. Permissions are read per request. |
-| 4 | Page shell and design system | **partly done** | Design tokens live in the `:root` block of `styles.css`. Pages are HTML files under `public/pages/`, not lazy-loaded routes. The shared bar is drawn by `assets/js/shell.js` rather than copied into each page, so its links can follow the account's permissions. Signing in, registering, the account page, the front page and `404.html` are built; the three administrator screens are not. |
+| 4 | Page shell and design system | **done** | Design tokens live in the `:root` block of `styles.css`. Pages are HTML files under `public/pages/`, not lazy-loaded routes. The shared bar is drawn by `assets/js/shell.js` rather than copied into each page, so its links can follow the account's permissions. Signing in, registering, the account page, the front page, `404.html` and the three administrator screens are built. |
 
 ### Core learning features
 
@@ -95,7 +95,7 @@ inventory, and which step fills each one.
 | `assignments.html` | Assignments and submissions | 7 |
 | `schedule.html` | Weekly meetings | 5 |
 | `files.html` | Uploads the viewer may see | 6 |
-| `users.html`, `roles.html`, `admin.html` | Administrators | 4 — still shells |
+| `users.html`, `roles.html`, `admin.html` | Administrators | 4 — **built** |
 | `404.html` | Everyone | 4 — **built** |
 
 A gradebook page is not in the list above and is added in step 8.

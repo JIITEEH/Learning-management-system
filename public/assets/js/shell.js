@@ -14,7 +14,7 @@
 //   const current = await mountShell();
 //   if (!current) return;          // already sent to the sign-in page
 
-import { mountNav, toast } from "./main.js";
+import { esc, mountNav, toast } from "./main.js";
 import { requireSession, roleLabel, signOut } from "./session.js";
 
 /**
@@ -45,14 +45,6 @@ const ICONS = {
     '<path d="M15 8V6.5A2.5 2.5 0 0 0 12.5 4h-5A2.5 2.5 0 0 0 5 6.5v11A2.5 2.5 0 0 0 7.5 20h5a2.5 2.5 0 0 0 2.5-2.5V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' +
     '<path d="M10 12h10m0 0-3-3m3 3-3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
 };
-
-/** A name is a person's own text, so it is escaped before it meets markup. */
-const esc = (value) =>
-  String(value).replace(
-    /[&<>"']/g,
-    (character) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character],
-  );
 
 /** "Maria Dela Cruz" becomes MC — the first letter of the first and last word. */
 function initials(fullName) {

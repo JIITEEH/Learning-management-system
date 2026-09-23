@@ -45,6 +45,18 @@ export function mountNav() {
   });
 }
 
+/* ----------------------------------------------------------------------- Escaping
+   Names, emails and role descriptions are text people typed. Before any of it
+   is placed inside markup it is escaped, so a name like <b>Ana</b> shows as
+   those characters rather than turning bold, or worse, running as a script. */
+
+export const esc = (value) =>
+  String(value ?? "").replace(
+    /[&<>"']/g,
+    (character) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character],
+  );
+
 /* ----------------------------------------------------------------------- Toasts
    One live region per page. It is created on first use rather than authored
    into every file, so a page that never reports anything carries no markup

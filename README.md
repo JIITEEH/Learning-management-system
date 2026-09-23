@@ -105,7 +105,13 @@ into every file, and a link nobody may follow is never shown. The dashboard
 carries that bar over placeholder cards, which stay as dashes until there is
 something real to count.
 
+The administrator screens are built too. `users.html` lists every account,
+approves or suspends one, changes its role, and sets per-account exceptions
+to what the role allows. `roles.html` creates, edits and deletes roles and
+chooses their permissions. `admin.html` links to both, with counts. Each
+screen switches off the controls the viewer's permissions do not cover; the
+server checks the same permissions again on every request.
+
 Still empty shells with a blank `<body>`: `courses`, `course`, `lesson`,
-`assignments`, `schedule`, `files`, and the three administrator pages
-(`users`, `roles`, `admin`). The administrator screens come next, then
-courses, per [ROADMAP.md](ROADMAP.md).
+`assignments`, `schedule`, and `files`. Courses come next, per
+[ROADMAP.md](ROADMAP.md).

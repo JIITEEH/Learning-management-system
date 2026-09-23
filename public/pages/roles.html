@@ -4,13 +4,95 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#060709">
-<title>Roles and permissions — Learning Management System</title>
+<title>Roles — Learning Management System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/styles.css">
-<script type="module" src="../assets/js/main.js"></script>
+<script type="module" src="../assets/js/pages/roles.js"></script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="shell">
+  <header class="topbar" data-shell></header>
+
+  <main class="stack stack-wide" id="main">
+
+    <section class="card" aria-labelledby="roles-title" data-list hidden>
+      <div class="card-head">
+        <h1 id="roles-title">Roles</h1>
+        <button class="btn btn-primary" type="button" data-new>New role</button>
+      </div>
+      <p class="card-intro">
+        A role is a named bundle of permissions. Every account holds exactly
+        one. Changing a role changes what everyone holding it may do, from
+        their very next click.
+      </p>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Role</th>
+              <th scope="col">Description</th>
+              <th scope="col">Accounts</th>
+              <th scope="col">Permissions</th>
+              <th scope="col"><span class="visually-hidden">Action</span></th>
+            </tr>
+          </thead>
+          <tbody data-rows></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- The editor, used both for a new role and for changing one. -->
+    <section class="card" aria-labelledby="editor-title" data-editor hidden>
+      <h2 id="editor-title" tabindex="-1" data-heading>—</h2>
+
+      <p class="notice notice-error" data-notice hidden></p>
+
+      <form class="form" data-form novalidate>
+        <div class="form-row">
+          <div class="field">
+            <label for="role-label">Name shown on screen</label>
+            <input class="input" id="role-label" name="label" maxlength="80" required>
+          </div>
+          <div class="field">
+            <label for="role-name">Short name</label>
+            <input class="input" id="role-name" name="name" maxlength="40" required
+                   autocapitalize="none" spellcheck="false" aria-describedby="name-hint">
+            <p class="field-hint" id="name-hint">Lower-case letters, digits, _ or -. Used inside the system.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="role-description">Description</label>
+          <textarea class="textarea" id="role-description" name="description" maxlength="255"></textarea>
+        </div>
+
+        <h3 class="subhead">What this role may do</h3>
+        <div data-perm-groups></div>
+
+        <div class="actions">
+          <button class="btn btn-primary" type="submit" data-save>Save role</button>
+          <button class="btn btn-danger" type="button" data-delete>Delete role</button>
+        </div>
+        <p class="field-hint" data-delete-hint hidden></p>
+      </form>
+    </section>
+
+    <section class="card" data-no-access hidden>
+      <h1>No access</h1>
+      <p class="card-intro">
+        Managing roles needs the <span class="tag">role.manage</span>
+        permission, and your account does not hold it.
+      </p>
+    </section>
+
+  </main>
+</div>
+
+<div class="toasts" role="status" aria-live="polite" data-toasts></div>
 </body>
 </html>

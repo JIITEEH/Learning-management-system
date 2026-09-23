@@ -148,6 +148,8 @@
   --shell-max: 1660px;
   --card-gap: 22px;
   --measure: 62ch;
+  --stack-max: 820px;
+  --stack-wide-max: 1120px;
 
   --z-sticky: 20;
   --z-drawer: 40;
@@ -980,7 +982,7 @@ time,
    Forms — ThesisTrack's frosted pills
    ========================================================================== */
 
-.field { display: grid; gap: var(--space-2); }
+.field { display: grid; gap: var(--space-2); align-content: start; }
 .field > label { color: var(--chalk-secondary); font-size: var(--text-base); font-weight: 500; }
 
 .input, .select, .textarea {
@@ -1106,9 +1108,24 @@ time,
 /* The dashboard's .board is a three-column arrangement. A page that is a
    sequence of cards rather than a mosaic uses this instead, and stays narrow
    enough that a line of text is still comfortable to read. */
-.stack { display: grid; gap: var(--card-gap); max-width: 820px; margin-inline: auto; }
+/* minmax(0, 1fr) caps the column at the width available. Without it a wide
+   child, such as a table, stretches its card past the edge of a phone. */
+.stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--card-gap);
+  max-width: var(--stack-max);
+  margin-inline: auto;
+}
+
+/* The administrator screens hold a table of accounts, which needs more room
+   than a column of prose. */
+.stack-wide { max-width: var(--stack-wide-max); }
 
 .card-intro { margin-top: var(--space-2); color: var(--chalk-muted); }
+
+/* A heading that starts a new part partway down a card. */
+.subhead { margin-top: var(--space-7); }
 
 /* ==========================================================================
    Stacked forms
@@ -1134,6 +1151,88 @@ time,
   text-align: right;
   overflow-wrap: anywhere;
 }
+
+/* ==========================================================================
+   Tables — lists of records on the administrator screens
+   ========================================================================== */
+
+/* On a phone the table keeps its columns and scrolls sideways inside its
+   card, rather than pushing the whole page wider than the screen.
+   position: relative matters: the screen-reader-only text on each row's
+   button is positioned absolutely, and without an anchor here it measures
+   itself against the page, escapes the scrolling box, and widens the page. */
+.table-wrap { position: relative; overflow-x: auto; margin-top: var(--space-5); }
+
+.table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: var(--text-base); }
+.table th,
+.table td { padding: var(--space-3); border-bottom: 1px solid var(--glass-border-soft); text-align: left; vertical-align: middle; }
+.table th { color: var(--chalk-muted); font-size: var(--text-sm); font-weight: 500; }
+.table td { color: var(--chalk-secondary); }
+.table tr:last-child td { border-bottom: 0; }
+.table .cell-strong { color: var(--chalk); font-weight: 600; }
+.table .cell-action { text-align: right; }
+.table tr[aria-current="true"] td { background: rgb(255 255 255 / 0.06); }
+
+/* A compact button for a row of a table. */
+.btn-sm { min-height: 36px; padding: 0 var(--space-4); }
+
+.btn-danger { border-color: rgb(245 139 130 / 0.4); color: var(--danger-light); }
+.btn-danger:hover { background: rgb(217 45 32 / 0.2); }
+
+/* Filters above a table: side by side when there is room, stacked when not. */
+.filters { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-5); }
+.filters .field { flex: 1 1 200px; }
+
+/* Two fields on one line in a wide card, one per line on a phone. */
+.form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); }
+
+.actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-5); }
+
+/* ==========================================================================
+   Permission lists — the role editor and per-account overrides
+   ========================================================================== */
+
+.perm-group { margin-top: var(--space-6); }
+.perm-group h3 {
+  color: var(--chalk-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.perm-list { display: grid; margin-top: var(--space-2); }
+
+.perm-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--glass-border-soft);
+}
+.perm-row:last-child { border-bottom: 0; }
+
+.perm-code { display: block; color: var(--chalk); font-family: var(--font-mono); font-size: var(--text-sm); }
+.perm-desc { display: block; color: var(--chalk-muted); font-size: var(--text-sm); }
+
+/* In the role editor the whole row is the checkbox's label, so the target is
+   the full width of the card rather than an 18px square. */
+.perm-row-check { grid-template-columns: auto minmax(0, 1fr); cursor: pointer; }
+.check { width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer; }
+
+.perm-row .select { width: auto; min-height: 40px; padding-block: var(--space-2); }
+
+/* ==========================================================================
+   Link cards — the administration landing page
+   ========================================================================== */
+
+.link-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--card-gap); }
+
+.link-card { display: grid; gap: var(--space-3); color: inherit; text-decoration: none; }
+.link-card:hover { background: var(--glass-hover); text-decoration: none; }
+.link-card h2 { color: var(--chalk); }
+.link-card p { color: var(--chalk-muted); }
 
 /* ==========================================================================
    Centred pages — sign in, register, 404
@@ -1210,6 +1309,7 @@ time,
   .metric-value { font-size: 2.5rem; }
 
   .btn, .chip, .icon-btn, .stepper-btn { min-height: 44px; }
+  .perm-row:not(.perm-row-check) { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* Below this the wordmark gives way to the mark so the controls keep their

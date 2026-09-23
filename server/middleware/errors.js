@@ -37,8 +37,12 @@ export function errorHandler(error, req, res, _next) {
     return res.status(status).json({ error: error.message, code: error.code });
   }
 
-  console.error(error);
   const status = error.status ?? 500;
+
+  // A 4xx is the client being told no, which is routine — only a fault on
+  // our side is worth a stack trace in the log.
+  if (status >= 500) console.error(error);
+
   res.status(status).json({
     error: isProduction && status === 500 ? "Internal server error" : error.message,
   });

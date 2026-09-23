@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev-current]
   pull_request:
-    branches: [main, dev]
+    branches: [main, dev-current]
 
 # The job only reads the checkout; it needs nothing else.
 permissions:

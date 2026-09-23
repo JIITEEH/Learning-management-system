@@ -9,7 +9,9 @@
     "start": "node server/server.js",
     "dev": "node --watch server/server.js",
     "db:schema": "mysql -u $DB_USER -p $DB_NAME < database/schema.sql",
-    "db:seed": "mysql -u $DB_USER -p $DB_NAME < database/seed.sql"
+    "db:seed": "mysql -u $DB_USER -p $DB_NAME < database/seed.sql",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "engines": {
     "node": ">=20"
@@ -21,5 +23,9 @@
     "express-session": "^1.18.1",
     "multer": "^2.4.0",
     "mysql2": "^3.11.5"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.5",
+    "globals": "^17.12.0"
   }
 }

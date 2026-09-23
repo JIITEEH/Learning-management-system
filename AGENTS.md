@@ -3,6 +3,38 @@
 Instructions for AI coding agents working in this repository. Human
 contributors should follow the same rules.
 
+## Explaining your work
+
+**Write for a student who is not studying IT.** That is the audience for every
+explanation here — someone capable and interested, who has simply never been
+taught the vocabulary. This is not a small courtesy; it is how the person who
+owns this project stays able to steer it.
+
+- **Say what something does before you name it.** Describe the thing in
+  ordinary words, then give the technical term as a label for what you just
+  described. "The file that records the exact version of every downloaded
+  package, so a later install gets the same ones — the lockfile" reads better
+  than "the lockfile" on its own.
+- **Gloss jargon the first time it appears.** Endpoint, schema, migration,
+  seed, foreign key, session, middleware, orphan process, least privilege: each
+  needs a handful of plain words the first time it comes up in a conversation.
+  Do not assume an acronym is common knowledge.
+- **Use an everyday comparison when one genuinely fits**, and say where the
+  comparison breaks down, so it does not quietly teach something false.
+- **Explain why it matters in terms of what the reader would notice** — a page
+  that loads, a login that stops working, a push that turns red — not only
+  which lines changed.
+- **Prefer a short worked example to an abstract description.** A single
+  command with its real output teaches more than a paragraph about the command.
+- **Keep the substance whole.** Plain language means clearer, not vaguer and
+  not shorter. Do not drop caveats, round off numbers, or hide an uncertainty
+  to make a sentence flow. A guess must still be labelled a guess, and bad
+  news must still be stated plainly.
+
+The same applies to comments in code and to commit messages: explain the
+reason a reader could not have guessed, in words a newcomer to the project
+can follow.
+
 ## Git and GitHub
 
 ### Always confirm before pushing

@@ -1,14 +1,19 @@
-// Shared entry point for every page. Wires the parts of the shell that need
-// behaviour: the navigation sheet on narrow viewports, and the toast region.
+// Shared browser behaviour, used by every screen.
 //
-// Pages talk to the server through api.js, never through fetch directly.
+// This file holds only the pieces that have no page of their own: the
+// navigation sheet on narrow viewports, the message region, and a wrapper
+// that keeps a button from being pressed twice. The bar itself is drawn by
+// shell.js, and pages talk to the server through api.js, never fetch.
 
 /* ------------------------------------------------------------------ Navigation
    Below 900px the pill nav becomes a sheet under the bar. `data-open` drives
    the CSS, and aria-expanded on the toggle is kept in step with it so the
-   state is announced rather than only drawn. */
+   state is announced rather than only drawn.
 
-function mountNav() {
+   Called by shell.js once the bar exists, because the markup it wires is
+   drawn rather than authored. */
+
+export function mountNav() {
   const toggle = document.querySelector(".nav-toggle");
   const nav = document.getElementById("primary-nav");
   if (!toggle || !nav) return;
@@ -41,8 +46,10 @@ function mountNav() {
 }
 
 /* ----------------------------------------------------------------------- Toasts
-   One live region per page, already in the markup. Messages are appended and
-   removed on their own; the region is polite so it never interrupts. */
+   One live region per page. It is created on first use rather than authored
+   into every file, so a page that never reports anything carries no markup
+   for it. The region is polite, so a screen reader finishes its sentence
+   before reading the message instead of cutting itself off. */
 
 const TOAST_ICONS = {
   ok: '<path d="m5 12.5 4 4 10-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
@@ -51,10 +58,20 @@ const TOAST_ICONS = {
     '<path d="M12 7.5v5.5m0 3.2v.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
 };
 
-export function toast(message, tone = "ok") {
-  const region = document.querySelector("[data-toasts]");
-  if (!region) return;
+function toastRegion() {
+  let region = document.querySelector("[data-toasts]");
+  if (!region) {
+    region = document.createElement("div");
+    region.className = "toasts";
+    region.setAttribute("role", "status");
+    region.setAttribute("aria-live", "polite");
+    region.dataset.toasts = "";
+    document.body.appendChild(region);
+  }
+  return region;
+}
 
+export function toast(message, tone = "ok") {
   const item = document.createElement("div");
   item.className = `toast toast-${tone === "error" ? "error" : "ok"}`;
   item.innerHTML =
@@ -62,7 +79,7 @@ export function toast(message, tone = "ok") {
     `<span class="toast-text"></span>`;
   item.querySelector(".toast-text").textContent = message;
 
-  region.appendChild(item);
+  toastRegion().appendChild(item);
   setTimeout(() => item.remove(), 6000);
 }
 
@@ -81,4 +98,18 @@ export async function whileLoading(button, work) {
   }
 }
 
-mountNav();
+/* ---------------------------------------------------------------------- Notices
+   The inline message above a form. Unlike a toast it stays put, which is what
+   a failed sign-in needs: the reason must still be on screen while the person
+   corrects the field it refers to. */
+
+export function showNotice(element, message, tone = "error") {
+  element.className = `notice notice-${tone === "error" ? "error" : "ok"}`;
+  element.textContent = message;
+  element.hidden = false;
+}
+
+export function clearNotice(element) {
+  element.textContent = "";
+  element.hidden = true;
+}

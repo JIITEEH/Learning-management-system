@@ -9,66 +9,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/styles.css">
-<script type="module" src="../assets/js/main.js"></script>
+<script type="module" src="../assets/js/pages/dashboard.js"></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 
 <div class="shell">
 
-  <!-- ===================================================== Topbar -->
-  <header class="topbar">
-    <a class="brand" href="../index.html">
-      <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M4 5.5 12 12l8-6.5M4 18.5 12 12l8 6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      LearnHub
-    </a>
-
-    <button class="icon-btn nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
-      <span class="visually-hidden">Menu</span>
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      </svg>
-    </button>
-
-    <nav class="navpill" id="primary-nav" aria-label="Primary">
-      <a class="navpill-item" href="courses.html">Courses</a>
-      <a class="navpill-item" href="dashboard.html" aria-current="page">Dashboard</a>
-      <a class="navpill-item" href="schedule.html">Schedule</a>
-      <a class="navpill-item" href="assignments.html">Assignments</a>
-      <a class="navpill-item" href="files.html">Files</a>
-    </nav>
-
-    <div class="topbar-actions">
-      <button class="icon-btn" type="button">
-        <span class="visually-hidden">Search</span>
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/>
-          <path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <button class="icon-btn" type="button" data-dot="true">
-        <span class="visually-hidden">Notifications</span>
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M18 15.5V10a6 6 0 1 0-12 0v5.5L4.5 18h15L18 15.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-          <path d="M9.5 21h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <a class="account-btn" href="account.html">
-        <span class="avatar" data-identity-avatar aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="12" cy="8.5" r="3.6" stroke="currentColor" stroke-width="1.8"/>
-            <path d="M5 20c1.2-3.6 3.8-5.4 7-5.4s5.8 1.8 7 5.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
-        </span>
-        <span class="visually-hidden">Your account</span>
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="m6 9.5 6 5 6-5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </a>
-    </div>
-  </header>
+  <!-- The bar is drawn by shell.js: the links depend on what this
+       account may reach, which is only known once the server answers. -->
+  <header class="topbar" data-shell></header>
 
   <!-- ===================================================== Board -->
   <main class="board" id="main">

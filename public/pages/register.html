@@ -4,13 +4,71 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#060709">
-<title>Create account — Learning Management System</title>
+<title>Create an account — Learning Management System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/styles.css">
-<script type="module" src="../assets/js/main.js"></script>
+<script type="module" src="../assets/js/pages/register.js"></script>
 </head>
 <body>
+<main class="centred">
+  <div class="centred-card">
+
+    <a class="centred-brand" href="/">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 5.5 12 12l8-6.5M4 18.5 12 12l8 6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      LearnHub
+    </a>
+
+    <section class="card">
+      <h1>Create an account</h1>
+      <p class="card-intro">
+        A new account joins as a student and waits for an administrator to
+        approve it before it can sign in.
+      </p>
+
+      <p class="notice notice-error" data-notice hidden></p>
+
+      <form class="form" data-form novalidate>
+        <div class="field">
+          <label for="fullName">Full name</label>
+          <input class="input" id="fullName" name="fullName" type="text"
+                 autocomplete="name" required autofocus>
+        </div>
+
+        <div class="field">
+          <label for="email">Email address</label>
+          <input class="input" id="email" name="email" type="email"
+                 autocomplete="email" required>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input class="input" id="password" name="password" type="password"
+                 autocomplete="new-password" minlength="8" required
+                 aria-describedby="password-hint">
+          <p class="field-hint" id="password-hint">At least 8 characters.</p>
+        </div>
+
+        <div class="field">
+          <label for="confirm">Repeat password</label>
+          <input class="input" id="confirm" name="confirm" type="password"
+                 autocomplete="new-password" required>
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Create account</button>
+      </form>
+
+      <p class="centred-foot">
+        Already have an account? <a href="login.html">Sign in</a>
+      </p>
+    </section>
+
+  </div>
+</main>
 </body>
 </html>

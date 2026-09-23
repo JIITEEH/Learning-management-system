@@ -4,13 +4,98 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#060709">
-<title>Account — Learning Management System</title>
+<title>Your account — Learning Management System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/styles.css">
-<script type="module" src="../assets/js/main.js"></script>
+<script type="module" src="../assets/js/pages/account.js"></script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="shell">
+  <header class="topbar" data-shell></header>
+
+  <main class="stack" id="main">
+
+    <section class="card" aria-labelledby="details-title">
+      <h1 id="details-title">Your account</h1>
+      <p class="card-intro">
+        These details come from the server each time this page is opened, so
+        they are what your account holds right now.
+      </p>
+
+      <dl class="details">
+        <div>
+          <dt>Name</dt>
+          <dd class="placeholder" data-field="fullName">—</dd>
+        </div>
+        <div>
+          <dt>Email address</dt>
+          <dd class="placeholder" data-field="email">—</dd>
+        </div>
+        <div>
+          <dt>Role</dt>
+          <dd class="placeholder" data-field="role">—</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd class="placeholder" data-field="status">—</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="card" aria-labelledby="permissions-title">
+      <div class="card-head">
+        <h2 id="permissions-title">What you may do</h2>
+        <span class="tag" data-permission-count>—</span>
+      </div>
+      <p>
+        Your role grants these permissions. A page or a button you cannot see
+        is missing because one of these is not on the list, and the server
+        checks the same list again on every request.
+      </p>
+      <div class="tag-list" data-permissions></div>
+    </section>
+
+    <section class="card" aria-labelledby="password-title">
+      <h2 id="password-title">Change password</h2>
+      <p class="card-intro">
+        Your current password is asked for so that an unattended, still
+        signed-in browser cannot be used to lock you out of your own account.
+      </p>
+
+      <p class="notice notice-error" data-notice hidden></p>
+
+      <form class="form" data-form novalidate>
+        <div class="field">
+          <label for="currentPassword">Current password</label>
+          <input class="input" id="currentPassword" name="currentPassword" type="password"
+                 autocomplete="current-password" required>
+        </div>
+
+        <div class="field">
+          <label for="newPassword">New password</label>
+          <input class="input" id="newPassword" name="newPassword" type="password"
+                 autocomplete="new-password" minlength="8" required
+                 aria-describedby="new-password-hint">
+          <p class="field-hint" id="new-password-hint">At least 8 characters.</p>
+        </div>
+
+        <div class="field">
+          <label for="confirm">Repeat new password</label>
+          <input class="input" id="confirm" name="confirm" type="password"
+                 autocomplete="new-password" required>
+        </div>
+
+        <button class="btn btn-primary btn-lg" type="submit">Change password</button>
+      </form>
+    </section>
+
+  </main>
+</div>
+
+<div class="toasts" role="status" aria-live="polite" data-toasts></div>
 </body>
 </html>

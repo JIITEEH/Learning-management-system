@@ -97,7 +97,15 @@ administrator moves through. Every SQL statement behind them lives in
 Six route modules are still stubs answering `501 Not Implemented` —
 `courses`, `enrollments`, `lessons`, `assignments`, `files`, and `schedules`.
 
-The shared page shell and the design system exist, and `public/pages/dashboard.html`
-is built. The remaining pages in `public/pages/` are shells that load
-`assets/js/main.js` with an empty `<body>`, so they render the shell and nothing
-inside it yet. Courses come next, per [ROADMAP.md](ROADMAP.md).
+In the browser, the way in is built: the front page, signing in, registering,
+the account page with its change-password form, and a styled 404. The bar
+across the top of a signed-in page is drawn by `public/assets/js/shell.js`
+from the account's own permissions, so it is written once rather than copied
+into every file, and a link nobody may follow is never shown. The dashboard
+carries that bar over placeholder cards, which stay as dashes until there is
+something real to count.
+
+Still empty shells with a blank `<body>`: `courses`, `course`, `lesson`,
+`assignments`, `schedule`, `files`, and the three administrator pages
+(`users`, `roles`, `admin`). The administrator screens come next, then
+courses, per [ROADMAP.md](ROADMAP.md).

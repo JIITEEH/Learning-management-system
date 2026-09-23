@@ -1,0 +1,21 @@
+{
+  "name": "web-portfolio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Repository root. The application lives in lms/; these scripts forward to it so npm run works from either directory.",
+  "scripts": {
+    "dev": "npm --prefix lms run dev",
+    "start": "npm --prefix lms start",
+    "lint": "npm --prefix lms run lint",
+    "lint:fix": "npm --prefix lms run lint:fix",
+    "db:setup": "npm --prefix lms run db:setup",
+    "db:schema": "npm --prefix lms run db:schema",
+    "db:seed": "npm --prefix lms run db:seed",
+    "db:reset": "npm --prefix lms run db:reset",
+    "db:migrate": "npm --prefix lms run db:migrate",
+    "db:status": "npm --prefix lms run db:status"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

@@ -6,14 +6,24 @@ on:
   pull_request:
     branches: [main, dev]
 
+# The job only reads the checkout; it needs nothing else.
+permissions:
+  contents: read
+
+# A new push to the same branch makes the previous run redundant.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     strategy:
       fail-fast: false
       matrix:
-        # The version in development, and the next LTS line.
+        # The declared minimum in package.json, and the next LTS line.
         node: ["22.13", "24"]
 
     # A throwaway database for the run. It is created empty and built by

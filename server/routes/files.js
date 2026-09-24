@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { requireAuth, requirePermission } from "../middleware/auth.js";
-import { upload } from "../middleware/upload.js";
 
 const router = Router();
 
@@ -9,7 +8,13 @@ const todo = (_req, res) =>
 
 // Uploads are attached to something — owner_type and owner_id come in the
 // form body alongside the file itself.
-router.post("/", requirePermission("file.upload"), upload.array("files", 10), todo);
+//
+// The upload middleware (upload.array("files", 10) from middleware/upload.js)
+// is added together with the handler, not before it. It writes every file to
+// disk the moment the request arrives, so on a placeholder that answers "not
+// implemented" the files would stay on disk with no record of them, and
+// anyone signed in could fill the disk 250 MB at a time.
+router.post("/", requirePermission("file.upload"), todo);
 
 router.get("/", requireAuth, todo);
 router.get("/:id", requirePermission("file.read"), todo);

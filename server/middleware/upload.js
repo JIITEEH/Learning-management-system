@@ -6,6 +6,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import multer from "multer";
+import { httpError } from "./errors.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -37,8 +38,11 @@ const storage = multer.diskStorage({
   destination: (_req, _file, done) => done(null, uploadDir),
   filename: (_req, file, done) => {
     // Never reuse the client's name on disk — it is attacker-controlled.
-    const ext = path.extname(file.originalname).slice(0, 16);
-    done(null, `${Date.now()}-${crypto.randomUUID()}${ext}`);
+    // Even the extension is kept only when it is plain letters and digits,
+    // so a name such as "notes.pdf%00.html" cannot smuggle anything through.
+    const ext = path.extname(file.originalname);
+    const safeExt = /^\.[a-z0-9]{1,10}$/i.test(ext) ? ext.toLowerCase() : "";
+    done(null, `${Date.now()}-${crypto.randomUUID()}${safeExt}`);
   },
 });
 
@@ -47,7 +51,9 @@ export const upload = multer({
   limits: { fileSize: MAX_UPLOAD_BYTES, files: 10 },
   fileFilter: (_req, file, done) => {
     if (!ALLOWED_MIME.has(file.mimetype)) {
-      return done(new Error(`Unsupported file type: ${file.mimetype}`));
+      // 415 "unsupported media type": the sender's mistake, not a server
+      // fault, so it must not be reported as a 500.
+      return done(httpError(415, `Unsupported file type: ${file.mimetype}`));
     }
     done(null, true);
   },

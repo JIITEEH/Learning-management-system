@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { requireAuth, requirePermission } from "../middleware/auth.js";
-import { upload } from "../middleware/upload.js";
 
 const router = Router();
 
@@ -13,12 +12,9 @@ router.delete("/:id", requirePermission("assignment.manage"), todo);
 
 // Submitting and grading
 router.get("/:id/submissions", requirePermission("submission.read"), todo);
-router.post(
-  "/:id/submissions",
-  requirePermission("submission.create"),
-  upload.array("files", 10),
-  todo,
-);
+// Gets upload.array("files", 10) when its handler is written, and not
+// before: see the note on POST /api/files.
+router.post("/:id/submissions", requirePermission("submission.create"), todo);
 router.get("/:id/submissions/me", requireAuth, todo);
 router.patch("/:id/submissions/:submissionId", requirePermission("submission.grade"), todo);
 

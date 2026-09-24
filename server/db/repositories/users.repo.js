@@ -35,6 +35,16 @@ export function findById(id) {
   return queryOne(`${SELECT_ACCOUNT} WHERE u.id = :id`, { id });
 }
 
+/**
+ * An account's status as it stands now ('pending', 'active' or 'suspended'),
+ * or null when the account no longer exists. The sign-in gate asks this on
+ * every protected request, so it reads one column and nothing else.
+ */
+export async function statusOf(id) {
+  const row = await queryOne("SELECT status FROM users WHERE id = :id", { id });
+  return row?.status ?? null;
+}
+
 /** One account by email address, or null. No password hash. */
 export function findByEmail(email) {
   return queryOne(`${SELECT_ACCOUNT} WHERE u.email = :email`, { email });

@@ -14,6 +14,7 @@ const publicDir = path.join(__dirname, "..", "public");
 const app = express();
 
 app.disable("x-powered-by");
+app.set("trust proxy", config.trustProxy);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

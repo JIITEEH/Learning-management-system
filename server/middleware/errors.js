@@ -37,6 +37,14 @@ export function errorHandler(error, req, res, _next) {
     return res.status(status).json({ error: error.message, code: error.code });
   }
 
+  // A value longer than its database column. Every form field should be
+  // checked before it gets this far; this is the net for one that was
+  // missed, so it answers "too long" rather than "the server broke".
+  if (error.code === "ER_DATA_TOO_LONG") {
+    const column = /column '([^']+)'/.exec(error.message)?.[1] ?? "A value";
+    return res.status(400).json({ error: `${column.replace(/_/g, " ")} is too long` });
+  }
+
   const status = error.status ?? 500;
 
   // A 4xx is the client being told no, which is routine — only a fault on

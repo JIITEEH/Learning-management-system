@@ -10,12 +10,12 @@ import { minutesBlocked, recordFailure, recordSuccess } from "../middleware/logi
 import { limitPerAddress } from "../middleware/rateLimit.js";
 import { httpError, asyncRoute } from "../middleware/errors.js";
 import { config } from "../config.js";
+import { assertPasswordStrength, readEmail, readFullName } from "../validate.js";
 import { passwordResetMessage, sendInBackground } from "../mail.js";
 
 const router = Router();
 
 const HASH_ROUNDS = 12;
-const MIN_PASSWORD = 8;
 
 // How long a reset link works, and how soon one account may be sent another.
 const RESET_MINUTES = 30;
@@ -59,12 +59,6 @@ function readCredentials(body) {
   return { email, password };
 }
 
-function assertPasswordStrength(password) {
-  if (password.length < MIN_PASSWORD) {
-    throw httpError(400, `Password must be at least ${MIN_PASSWORD} characters`);
-  }
-}
-
 /**
  * Self-registration. The role is never taken from the request — an account
  * created this way is always a student awaiting approval. The one exception
@@ -76,11 +70,9 @@ router.post(
   "/register",
   registerLimit,
   asyncRoute(async (req, res) => {
-    const { email, password } = readCredentials(req.body);
-    const fullName = String(req.body?.fullName ?? "").trim();
-
-    if (!fullName) throw httpError(400, "Full name is required");
-    if (!email.includes("@")) throw httpError(400, "Email address is not valid");
+    const { password } = readCredentials(req.body);
+    const email = readEmail(req.body.email);
+    const fullName = readFullName(req.body.fullName);
     assertPasswordStrength(password);
 
     if (await users.emailTaken(email)) {
@@ -228,8 +220,7 @@ router.post(
   "/forgot",
   forgotLimit,
   asyncRoute(async (req, res) => {
-    const email = String(req.body?.email ?? "").trim().toLowerCase();
-    if (!email.includes("@")) throw httpError(400, "Email address is not valid");
+    const email = readEmail(req.body?.email);
 
     const account = await users.findByEmail(email);
     const eligible =

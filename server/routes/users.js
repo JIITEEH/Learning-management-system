@@ -6,11 +6,11 @@ import * as roles from "../db/repositories/roles.repo.js";
 import * as permissions from "../db/repositories/permissions.repo.js";
 import { requireAuth, requirePermission } from "../middleware/auth.js";
 import { httpError, asyncRoute } from "../middleware/errors.js";
+import { assertPasswordStrength, readEmail, readFullName } from "../validate.js";
 
 const router = Router();
 
 const HASH_ROUNDS = 12;
-const MIN_PASSWORD = 8;
 const STATUSES = ["pending", "active", "suspended"];
 
 /**
@@ -45,12 +45,6 @@ async function holds(req, ...codes) {
   return codes.every((code) => held.has(code));
 }
 
-function readEmail(value) {
-  const email = String(value ?? "").trim().toLowerCase();
-  if (!email.includes("@")) throw httpError(400, "Email address is not valid");
-  return email;
-}
-
 function assertStatus(status) {
   if (!STATUSES.includes(status)) {
     throw httpError(400, `Status must be one of: ${STATUSES.join(", ")}`);
@@ -79,13 +73,9 @@ router.post(
   requirePermission("user.create"),
   asyncRoute(async (req, res) => {
     const email = readEmail(req.body?.email);
-    const fullName = String(req.body?.fullName ?? "").trim();
+    const fullName = readFullName(req.body?.fullName);
     const password = String(req.body?.password ?? "");
-
-    if (!fullName) throw httpError(400, "Full name is required");
-    if (password.length < MIN_PASSWORD) {
-      throw httpError(400, `Password must be at least ${MIN_PASSWORD} characters`);
-    }
+    assertPasswordStrength(password);
 
     const status = assertStatus(req.body?.status ?? "active");
 
@@ -144,8 +134,7 @@ router.patch(
     }
 
     const fullName =
-      req.body?.fullName === undefined ? user.full_name : String(req.body.fullName).trim();
-    if (!fullName) throw httpError(400, "Full name is required");
+      req.body?.fullName === undefined ? user.full_name : readFullName(req.body.fullName);
 
     let email = user.email;
     if (req.body?.email !== undefined) {

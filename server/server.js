@@ -7,6 +7,7 @@ import { config, isProduction } from "./config.js";
 import apiRoutes from "./routes/index.js";
 import { currentUser } from "./middleware/auth.js";
 import { notFound, errorHandler } from "./middleware/errors.js";
+import { securityHeaders, sameOriginOnly } from "./middleware/security.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, "..", "public");
@@ -15,8 +16,12 @@ const app = express();
 
 app.disable("x-powered-by");
 app.set("trust proxy", config.trustProxy);
+app.use(securityHeaders);
+
+// Only JSON bodies are read: every page sends JSON through api.js. A plain
+// HTML form, the kind another website can submit on a visitor's behalf,
+// therefore arrives with nothing the API will read.
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 app.use(
   session({
@@ -36,7 +41,7 @@ app.use(
 app.use(currentUser);
 
 // JSON API first, then the static pages it serves data to.
-app.use("/api", apiRoutes);
+app.use("/api", sameOriginOnly, apiRoutes);
 app.use(express.static(publicDir));
 
 app.use(notFound);

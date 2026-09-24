@@ -751,6 +751,7 @@ time,
 }
 
 .chart-note { padding-top: var(--space-4); color: var(--chalk-faint); font-size: var(--text-sm); text-align: center; }
+.chart-note + .inset { margin-top: var(--space-6); }
 
 /* ==========================================================================
    Platform / course list

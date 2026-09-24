@@ -68,12 +68,13 @@ fell back to a public placeholder, a password change that left other
 devices signed in, forgot and reset password, text contrast, and layout on
 phones and tablets.
 
-Two findings are still open, and are to be settled before step 6 starts:
+Two more were fixed at the end of the pass:
 
-- [ ] Instructors hold `user.read`, so they can list every account in the
-      system, not only their own students.
-- [ ] The top bar links to Schedule, Assignments and Files, whose pages are
-      still blank until steps 5 to 7 fill them.
+- [x] Instructors no longer hold `user.read`, which let them list every
+      account in the system. They see their own students on each course's
+      People tab.
+- [x] The top bar no longer links to Schedule, Assignments and Files. Each
+      link comes back when its page is built.
 
 ### Core learning features
 

@@ -11,12 +11,14 @@ INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id FROM roles r CROSS JOIN permissions p WHERE r.name = 'admin';
 
 -- Instructor: owns course content and assessment, but not account admin.
+-- No user.read either: that lists every account in the system, and an
+-- instructor needs only their own students, whom the course's People tab
+-- already shows through enrollment.read.
 -- course.manage_any is left out on purpose: an instructor manages the
 -- courses they teach, and only an administrator sees every course.
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id FROM roles r JOIN permissions p
 WHERE r.name = 'instructor' AND p.code IN (
-  'user.read',
   'course.read', 'course.create', 'course.update', 'course.publish',
   'lesson.read', 'lesson.manage',
   'enrollment.read', 'enrollment.manage',

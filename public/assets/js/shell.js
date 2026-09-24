@@ -29,9 +29,9 @@ import { requireSession, roleLabel, signOut } from "./session.js";
 const NAV = [
   { href: "/pages/dashboard.html", label: "Dashboard" },
   { href: "/pages/courses.html", label: "Courses", needs: "course.read" },
-  { href: "/pages/schedule.html", label: "Schedule", needs: "schedule.read" },
-  { href: "/pages/assignments.html", label: "Assignments", needs: "assignment.read" },
-  { href: "/pages/files.html", label: "Files", needs: "file.read" },
+  // Schedule, Assignments and Files join the bar when their pages are built
+  // (roadmap steps 6 and 7, and the schedule piece). A link to a blank page
+  // reads as a broken one.
   { href: "/pages/admin.html", label: "Administration", needs: "role.manage" },
 ];
 

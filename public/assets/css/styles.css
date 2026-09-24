@@ -1481,8 +1481,9 @@ time,
 }
 
 /* The row of links is centred, so the logo and the account controls each
-   get half of what the links leave over. An administrator's six links take
-   about 725px, which leaves each side too little for a name below 1400px.
+   get half of what the links leave over. An administrator's full row of six
+   links (three are held back until their pages exist) takes about 725px,
+   which leaves each side too little for a name below 1400px.
    There the name gives way to the initials beside it; the account page
    shows it in full. Adding a link to the row means measuring this again. */
 @media (max-width: 1399px) {
@@ -1490,7 +1491,7 @@ time,
 }
 
 /* Below 1200px the row of links folds away behind a menu button. The row
-   needs about 1,150px for an administrator's six links beside the brand and
+   needs about 1,150px for an administrator's full six links beside the brand and
    the account controls, so an iPad held sideways (1024px to 1180px) cannot
    fit it: before, the account and sign-out buttons were pushed out of the
    bar. A 12.9-inch iPad Pro held sideways (1366px) keeps the full row. */

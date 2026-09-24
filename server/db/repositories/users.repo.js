@@ -211,6 +211,25 @@ export async function resetRequestedWithin(userId, seconds) {
 }
 
 /**
+ * Whether a reset link can still be used: it exists, has not expired, and
+ * belongs to an active account. A quick look before the slow work of
+ * scrambling the new password; consumePasswordReset below is what actually
+ * uses the link.
+ */
+export async function resetLinkIsLive(tokenHash) {
+  const row = await queryOne(
+    `SELECT 1
+       FROM password_resets r
+       JOIN users u ON u.id = r.user_id
+      WHERE r.token_hash = :tokenHash
+        AND r.expires_at > NOW()
+        AND u.status = 'active'`,
+    { tokenHash },
+  );
+  return row !== null;
+}
+
+/**
  * Use a reset link: if it is live and its account is active, set the new
  * password, sign out every device, and delete the link so it cannot be used
  * twice. Returns the account id, or null when the link is unknown, expired or

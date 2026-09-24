@@ -7,6 +7,7 @@ import * as roles from "../db/repositories/roles.repo.js";
 import { effectiveCodesFor } from "../db/repositories/permissions.repo.js";
 import { requireAuth } from "../middleware/auth.js";
 import { minutesBlocked, recordFailure, recordSuccess } from "../middleware/loginLimit.js";
+import { limitPerAddress } from "../middleware/rateLimit.js";
 import { httpError, asyncRoute } from "../middleware/errors.js";
 import { config } from "../config.js";
 import { passwordResetMessage, sendInBackground } from "../mail.js";
@@ -19,6 +20,21 @@ const MIN_PASSWORD = 8;
 // How long a reset link works, and how soon one account may be sent another.
 const RESET_MINUTES = 30;
 const RESET_COOLDOWN_SECONDS = 60;
+
+/**
+ * Checked against when nobody has the email address being signed in with.
+ * Checking a password takes about a fifth of a second; skipping the check
+ * for an unknown address answered almost at once, so the delay alone told a
+ * stranger which addresses are registered. Now both take the same time.
+ */
+const NO_ACCOUNT_HASH = bcrypt.hashSync("no account has this address", HASH_ROUNDS);
+
+// Caps per network address on the routes open to anyone. A whole class may
+// register at once from one school network, which shares one address, so
+// that cap is the loosest.
+const registerLimit = limitPerAddress({ max: 30, minutes: 15 });
+const forgotLimit = limitPerAddress({ max: 10, minutes: 15 });
+const resetLimit = limitPerAddress({ max: 10, minutes: 15 });
 
 /** Only this hash of a reset link's secret is stored. */
 const hashToken = (token) => createHash("sha256").update(token).digest("hex");
@@ -58,6 +74,7 @@ function assertPasswordStrength(password) {
  */
 router.post(
   "/register",
+  registerLimit,
   asyncRoute(async (req, res) => {
     const { email, password } = readCredentials(req.body);
     const fullName = String(req.body?.fullName ?? "").trim();
@@ -110,10 +127,11 @@ router.post(
 
     const account = await users.findCredentialsByEmail(email);
 
-    // One message for both a missing account and a wrong password, so the
-    // response cannot be used to find out which addresses are registered.
-    const matches = account && (await bcrypt.compare(password, account.password_hash));
-    if (!matches) {
+    // One message, and one delay, for both a missing account and a wrong
+    // password, so the response cannot be used to find out which addresses
+    // are registered.
+    const matches = await bcrypt.compare(password, account?.password_hash ?? NO_ACCOUNT_HASH);
+    if (!account || !matches) {
       recordFailure(req.ip, email);
       throw httpError(401, "Email or password is incorrect");
     }
@@ -208,6 +226,7 @@ router.patch(
  */
 router.post(
   "/forgot",
+  forgotLimit,
   asyncRoute(async (req, res) => {
     const email = String(req.body?.email ?? "").trim().toLowerCase();
     if (!email.includes("@")) throw httpError(400, "Email address is not valid");
@@ -245,20 +264,27 @@ router.post(
  */
 router.post(
   "/reset",
+  resetLimit,
   asyncRoute(async (req, res) => {
     const token = String(req.body?.token ?? "");
     const newPassword = String(req.body?.newPassword ?? "");
     assertPasswordStrength(newPassword);
 
-    const userId = token
-      ? await users.consumePasswordReset({
-          tokenHash: hashToken(token),
-          passwordHash: await bcrypt.hash(newPassword, HASH_ROUNDS),
-        })
-      : null;
-    if (!userId) {
-      throw httpError(400, "This reset link has expired or has already been used. Ask for a new one.");
-    }
+    const deadLink = () =>
+      httpError(400, "This reset link has expired or has already been used. Ask for a new one.");
+
+    // The link is looked up before the new password is scrambled, so a
+    // made-up link costs the server one quick query rather than a fifth of a
+    // second of work. consumePasswordReset checks it again, under a lock, in
+    // case the same link is being used twice at once.
+    const tokenHash = hashToken(token);
+    if (!token || !(await users.resetLinkIsLive(tokenHash))) throw deadLink();
+
+    const userId = await users.consumePasswordReset({
+      tokenHash,
+      passwordHash: await bcrypt.hash(newPassword, HASH_ROUNDS),
+    });
+    if (!userId) throw deadLink();
 
     res.status(204).end();
   }),

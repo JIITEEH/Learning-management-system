@@ -1110,6 +1110,11 @@ time,
 
 .notice svg { flex: none; width: 18px; height: 18px; margin-top: 1px; }
 
+/* A message in a card sits clear of the text above it, and of a button that
+   follows it, such as "Sign in" once a password reset is done. */
+.card > .notice { margin-top: var(--space-5); }
+.notice + .btn { margin-top: var(--space-4); }
+
 .notice-error { border-color: rgb(245 139 130 / 0.34); background: rgb(217 45 32 / 0.16); color: var(--danger-light); }
 .notice-ok { border-color: rgb(95 211 155 / 0.34); background: rgb(7 148 85 / 0.16); color: var(--success-light); }
 

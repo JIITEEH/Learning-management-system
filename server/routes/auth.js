@@ -1,5 +1,6 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
+import { createHash, randomBytes } from "node:crypto";
 
 import * as users from "../db/repositories/users.repo.js";
 import * as roles from "../db/repositories/roles.repo.js";
@@ -7,11 +8,20 @@ import { effectiveCodesFor } from "../db/repositories/permissions.repo.js";
 import { requireAuth } from "../middleware/auth.js";
 import { minutesBlocked, recordFailure, recordSuccess } from "../middleware/loginLimit.js";
 import { httpError, asyncRoute } from "../middleware/errors.js";
+import { config } from "../config.js";
+import { passwordResetMessage, sendInBackground } from "../mail.js";
 
 const router = Router();
 
 const HASH_ROUNDS = 12;
 const MIN_PASSWORD = 8;
+
+// How long a reset link works, and how soon one account may be sent another.
+const RESET_MINUTES = 30;
+const RESET_COOLDOWN_SECONDS = 60;
+
+/** Only this hash of a reset link's secret is stored. */
+const hashToken = (token) => createHash("sha256").update(token).digest("hex");
 
 /** What goes on the session, and what the front end gets back. */
 function publicUser(row) {
@@ -117,6 +127,7 @@ router.post(
     });
 
     req.session.user = publicUser(account);
+    req.session.version = account.session_version;
     await users.touchLastLogin(account.id);
 
     res.json({
@@ -176,7 +187,78 @@ router.patch(
     const matches = await bcrypt.compare(currentPassword, account.password_hash);
     if (!matches) throw httpError(403, "Current password is incorrect");
 
-    await users.updatePasswordHash(account.id, await bcrypt.hash(newPassword, HASH_ROUNDS));
+    // Moving the version on signs out every other device. This one is kept
+    // signed in by taking the new version into its own session.
+    req.session.version = await users.updatePasswordHash(
+      account.id,
+      await bcrypt.hash(newPassword, HASH_ROUNDS),
+    );
+
+    res.status(204).end();
+  }),
+);
+
+/**
+ * Ask for a reset link by email. The answer is the same whether or not the
+ * address has an account, and the email goes out in the background, so
+ * neither the reply nor its timing tells a visitor who is registered.
+ *
+ * Only an active account is sent a link: one awaiting approval or suspended
+ * could not sign in with a new password anyway.
+ */
+router.post(
+  "/forgot",
+  asyncRoute(async (req, res) => {
+    const email = String(req.body?.email ?? "").trim().toLowerCase();
+    if (!email.includes("@")) throw httpError(400, "Email address is not valid");
+
+    const account = await users.findByEmail(email);
+    const eligible =
+      account?.status === "active" &&
+      !(await users.resetRequestedWithin(account.id, RESET_COOLDOWN_SECONDS));
+
+    if (eligible) {
+      const token = randomBytes(32).toString("base64url");
+      await users.createPasswordReset({
+        userId: account.id,
+        tokenHash: hashToken(token),
+        minutes: RESET_MINUTES,
+      });
+      sendInBackground(
+        passwordResetMessage({
+          to: account.email,
+          fullName: account.full_name,
+          url: `${config.appUrl}/pages/reset.html#token=${token}`,
+          minutes: RESET_MINUTES,
+        }),
+      );
+    }
+
+    res.status(202).json({ ok: true });
+  }),
+);
+
+/**
+ * Choose a new password with a reset link. The link works once; using it
+ * also signs out every device, in case whoever made the reset necessary is
+ * still signed in somewhere.
+ */
+router.post(
+  "/reset",
+  asyncRoute(async (req, res) => {
+    const token = String(req.body?.token ?? "");
+    const newPassword = String(req.body?.newPassword ?? "");
+    assertPasswordStrength(newPassword);
+
+    const userId = token
+      ? await users.consumePasswordReset({
+          tokenHash: hashToken(token),
+          passwordHash: await bcrypt.hash(newPassword, HASH_ROUNDS),
+        })
+      : null;
+    if (!userId) {
+      throw httpError(400, "This reset link has expired or has already been used. Ask for a new one.");
+    }
 
     res.status(204).end();
   }),

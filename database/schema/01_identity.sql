@@ -8,7 +8,8 @@
 -- a per-account grant or revoke on top, so one person can be denied something
 -- their role would otherwise allow.
 --
--- Tables: roles, permissions, role_permissions, users, user_permissions
+-- Tables: roles, permissions, role_permissions, users, user_permissions,
+--         password_resets
 -- Depends on: nothing. This file is always applied first.
 
 CREATE TABLE roles (
@@ -50,6 +51,10 @@ CREATE TABLE users (
   full_name      VARCHAR(160) NOT NULL,
   role_id        SMALLINT UNSIGNED NOT NULL,
   status         ENUM('pending', 'active', 'suspended') NOT NULL DEFAULT 'pending',
+  -- Copied into the session at sign-in and compared on every request. A
+  -- password change or reset adds one, so every other device still signed in
+  -- with the old password is signed out on its next click.
+  session_version INT UNSIGNED NOT NULL DEFAULT 0,
   last_login_at  TIMESTAMP NULL DEFAULT NULL,
   created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -77,4 +82,21 @@ CREATE TABLE user_permissions (
     FOREIGN KEY (permission_id) REFERENCES permissions (id) ON DELETE CASCADE,
   CONSTRAINT fk_user_permissions_granter
     FOREIGN KEY (granted_by) REFERENCES users (id) ON DELETE SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- A "forgot password" link. Only a SHA-256 hash of the link's secret is kept,
+-- so a copy of this table cannot be used to reset anyone's password. An
+-- account holds at most one live link: asking again replaces it, and using it
+-- deletes it.
+CREATE TABLE password_resets (
+  id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id      INT UNSIGNED NOT NULL,
+  token_hash   CHAR(64) NOT NULL,
+  expires_at   TIMESTAMP NOT NULL,
+  created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_password_resets_token (token_hash),
+  KEY idx_password_resets_user (user_id),
+  CONSTRAINT fk_password_resets_user
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

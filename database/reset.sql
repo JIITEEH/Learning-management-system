@@ -33,6 +33,7 @@ DROP TABLE IF EXISTS courses;
 DROP TABLE IF EXISTS schema_migrations;
 
 -- 01 · identity
+DROP TABLE IF EXISTS password_resets;
 DROP TABLE IF EXISTS user_permissions;
 DROP TABLE IF EXISTS role_permissions;
 DROP TABLE IF EXISTS permissions;

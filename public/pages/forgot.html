@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#060709">
-<title>Sign in — Learning Management System</title>
+<title>Forgot password — Learning Management System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/styles.css">
-<script type="module" src="../assets/js/pages/login.js"></script>
+<script type="module" src="../assets/js/pages/forgot.js"></script>
 </head>
 <body>
 <main class="centred">
@@ -25,8 +25,11 @@
     </a>
 
     <section class="card">
-      <h1>Sign in</h1>
-      <p class="card-intro">Use the email address your account was created with.</p>
+      <h1>Forgot your password?</h1>
+      <p class="card-intro">
+        Type the email address your account uses. If it has an account, a link
+        to choose a new password is sent there. The link works for 30 minutes.
+      </p>
 
       <p class="notice notice-error" data-notice hidden></p>
 
@@ -37,18 +40,11 @@
                  autocomplete="email" required autofocus>
         </div>
 
-        <div class="field">
-          <label for="password">Password</label>
-          <input class="input" id="password" name="password" type="password"
-                 autocomplete="current-password" required>
-          <p class="field-hint"><a href="forgot.html">Forgot your password?</a></p>
-        </div>
-
-        <button class="btn btn-primary btn-lg btn-block" type="submit">Sign in</button>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Send the link</button>
       </form>
 
       <p class="centred-foot">
-        No account yet? <a href="register.html">Create one</a>
+        Remembered it? <a href="login.html">Sign in</a>
       </p>
     </section>
 

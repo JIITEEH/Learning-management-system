@@ -55,10 +55,25 @@ Status is one of: **done**, **partly done**, **to do**.
 
 | # | Step | Status | Notes for this stack |
 |---|------|--------|----------------------|
-| 1 | Plan and set up the project | **partly done** | Repo, Express server, `/api/health`, `.env` and `config.js` exist. No React or Vite: the pages are served as authored. |
-| 2 | Design the database | **done** | `database/schema/` is the single source of truth — one file per domain, numbered in dependency order. 14 tables in one database, covering courses through submissions. `migrations/` stays empty until there is real data. |
-| 3 | Accounts, sign-in and roles | **done** | Sessions are server-side via `express-session`, not a token with a `token_version`. Permissions are read per request. |
+| 1 | Plan and set up the project | **done** | Repo, Express server, `/api/health`, `.env` and `config.js`, with a `TRUST_PROXY` setting for running behind nginx. ESLint 9, and a GitHub Actions workflow on Node 22.13 and 24 that lints, builds the database and boots the server on every push. No React or Vite: the pages are served as authored. |
+| 2 | Design the database | **done** | `database/schema/` is the single source of truth — one file per domain, numbered in dependency order. 15 tables in one database, covering accounts and password resets through submissions. The quiz, announcement and notification tables the roadmap lists are not created yet: announcements arrive with step 9, and quizzes and notifications are on the Later list. `migrations/` stays empty until there is real data. |
+| 3 | Accounts, sign-in and roles | **done** | Sessions are server-side via `express-session` in an HttpOnly, SameSite cookie, not a token. `users.session_version` does the job of the roadmap's `token_version`: changing or resetting a password moves it on, which signs out every other device. Status and permissions are read per request, so a suspension or a revoked permission applies on the next click. Wrong passwords are limited per account and per network address. Forgot and reset password by email over SMTP (Gmail, as in ThesisTrack); with no mail server set, the link is printed in the terminal. Email verification on sign-up is replaced by administrator approval: a new account cannot sign in until an administrator makes it active. In production the server refuses to start without a real `SESSION_SECRET`. |
 | 4 | Page shell and design system | **done** | Design tokens live in the `:root` block of `styles.css`. Pages are HTML files under `public/pages/`, not lazy-loaded routes. The shared bar is drawn by `assets/js/shell.js` rather than copied into each page, so its links can follow the account's permissions. Signing in, registering, the account page, the front page, `404.html` and the three administrator screens are built. |
+
+### Checked before step 6
+
+Steps 1 to 5 were reviewed against the roadmap's task lists before moving
+on. Fixed in that pass: the wrong-password limit, the session secret that
+fell back to a public placeholder, a password change that left other
+devices signed in, forgot and reset password, text contrast, and layout on
+phones and tablets.
+
+Two findings are still open, and are to be settled before step 6 starts:
+
+- [ ] Instructors hold `user.read`, so they can list every account in the
+      system, not only their own students.
+- [ ] The top bar links to Schedule, Assignments and Files, whose pages are
+      still blank until steps 5 to 7 fill them.
 
 ### Core learning features
 

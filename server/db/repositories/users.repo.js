@@ -13,7 +13,7 @@ import { query, queryOne, transaction } from "../pool.js";
 // it is selected only by the two functions below that say so in their names,
 // so an accidental `res.json(row)` cannot leak a hash.
 const ACCOUNT_COLUMNS = `
-  u.id, u.email, u.full_name, u.status, u.role_id, u.last_login_at,
+  u.id, u.email, u.full_name, u.status, u.role_id, u.session_version, u.last_login_at,
   u.created_at, r.name AS role, r.label AS role_label
 `;
 
@@ -36,13 +36,13 @@ export function findById(id) {
 }
 
 /**
- * An account's status as it stands now ('pending', 'active' or 'suspended'),
- * or null when the account no longer exists. The sign-in gate asks this on
- * every protected request, so it reads one column and nothing else.
+ * What the sign-in gate compares on every request: the account's status and
+ * its session version, or null when the account no longer exists. A session
+ * signed in under an older version than this is from before a password
+ * change, and is no longer honoured.
  */
-export async function statusOf(id) {
-  const row = await queryOne("SELECT status FROM users WHERE id = :id", { id });
-  return row?.status ?? null;
+export function sessionStateOf(id) {
+  return queryOne("SELECT status, session_version FROM users WHERE id = :id", { id });
 }
 
 /** One account by email address, or null. No password hash. */
@@ -116,11 +116,22 @@ export function updateStatus(id, status) {
   return query("UPDATE users SET status = :status WHERE id = :id", { status, id });
 }
 
-export function updatePasswordHash(id, passwordHash) {
-  return query("UPDATE users SET password_hash = :passwordHash WHERE id = :id", {
-    passwordHash,
-    id,
-  });
+/**
+ * Set a new password and move the session version on, which signs out every
+ * other device still using the old password. Returns the new version, so the
+ * caller can keep its own session valid.
+ */
+export async function updatePasswordHash(id, passwordHash) {
+  await query(
+    `UPDATE users SET password_hash = :passwordHash, session_version = session_version + 1
+      WHERE id = :id`,
+    { passwordHash, id },
+  );
+  const { session_version: version } = await queryOne(
+    "SELECT session_version FROM users WHERE id = :id",
+    { id },
+  );
+  return version;
 }
 
 export function touchLastLogin(id) {
@@ -166,5 +177,69 @@ export function replaceOverrides(userId, rows, grantedBy) {
         { userId, permissionId: row.permissionId, effect: row.effect, grantedBy },
       );
     }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Password reset links
+// ---------------------------------------------------------------------------
+
+/**
+ * Store a new reset link for an account, replacing any earlier one so only
+ * the newest link works. `tokenHash` is the SHA-256 of the secret in the
+ * link; the secret itself is never stored.
+ */
+export function createPasswordReset({ userId, tokenHash, minutes }) {
+  return transaction(async (connection) => {
+    await connection.execute("DELETE FROM password_resets WHERE user_id = :userId", { userId });
+    await connection.execute(
+      `INSERT INTO password_resets (user_id, token_hash, expires_at)
+       VALUES (:userId, :tokenHash, NOW() + INTERVAL :minutes MINUTE)`,
+      { userId, tokenHash, minutes },
+    );
+  });
+}
+
+/** Whether this account was sent a reset link in the last `seconds`. */
+export async function resetRequestedWithin(userId, seconds) {
+  const row = await queryOne(
+    `SELECT 1 FROM password_resets
+      WHERE user_id = :userId AND created_at > NOW() - INTERVAL :seconds SECOND`,
+    { userId, seconds },
+  );
+  return row !== null;
+}
+
+/**
+ * Use a reset link: if it is live and its account is active, set the new
+ * password, sign out every device, and delete the link so it cannot be used
+ * twice. Returns the account id, or null when the link is unknown, expired or
+ * belongs to an account that may not sign in.
+ *
+ * The row is locked while this runs, so two requests racing with the same
+ * link cannot both succeed.
+ */
+export function consumePasswordReset({ tokenHash, passwordHash }) {
+  return transaction(async (connection) => {
+    const [rows] = await connection.execute(
+      `SELECT r.user_id
+         FROM password_resets r
+         JOIN users u ON u.id = r.user_id
+        WHERE r.token_hash = :tokenHash
+          AND r.expires_at > NOW()
+          AND u.status = 'active'
+        FOR UPDATE`,
+      { tokenHash },
+    );
+    const userId = rows[0]?.user_id;
+    if (!userId) return null;
+
+    await connection.execute(
+      `UPDATE users SET password_hash = :passwordHash, session_version = session_version + 1
+        WHERE id = :userId`,
+      { passwordHash, userId },
+    );
+    await connection.execute("DELETE FROM password_resets WHERE user_id = :userId", { userId });
+    return userId;
   });
 }

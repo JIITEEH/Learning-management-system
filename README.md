@@ -87,10 +87,15 @@ no hot reload either — reload the browser yourself. The server boots without a
 database, but any route that touches one will fail until MySQL is up and
 `db:setup` has run. `npm run db:status` says what the database currently holds.
 
+"Forgot password" sends its link by email. Without a mail server in `.env`,
+the link is printed in the terminal running `npm run dev` instead, which is
+enough on your own computer. To send real email, fill in the `SMTP_` lines;
+`.env.example` explains how to use a Gmail app password.
+
 ## Status
 
 Accounts work end to end: registering, signing in and out, changing a
-password, the role and permission routes, and the account lifecycle an
+password, resetting a forgotten one by email, the role and permission routes, and the account lifecycle an
 administrator moves through. Every SQL statement behind them lives in
 `server/db/repositories/`.
 

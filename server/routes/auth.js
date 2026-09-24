@@ -5,6 +5,7 @@ import * as users from "../db/repositories/users.repo.js";
 import * as roles from "../db/repositories/roles.repo.js";
 import { effectiveCodesFor } from "../db/repositories/permissions.repo.js";
 import { requireAuth } from "../middleware/auth.js";
+import { minutesBlocked, recordFailure, recordSuccess } from "../middleware/loginLimit.js";
 import { httpError, asyncRoute } from "../middleware/errors.js";
 
 const router = Router();
@@ -87,12 +88,26 @@ router.post(
   "/login",
   asyncRoute(async (req, res) => {
     const { email, password } = readCredentials(req.body);
+
+    const waitMinutes = minutesBlocked(req.ip, email);
+    if (waitMinutes > 0) {
+      res.set("Retry-After", String(waitMinutes * 60));
+      throw httpError(
+        429,
+        `Too many sign-in attempts. Try again in ${waitMinutes} minute${waitMinutes === 1 ? "" : "s"}.`,
+      );
+    }
+
     const account = await users.findCredentialsByEmail(email);
 
     // One message for both a missing account and a wrong password, so the
     // response cannot be used to find out which addresses are registered.
     const matches = account && (await bcrypt.compare(password, account.password_hash));
-    if (!matches) throw httpError(401, "Email or password is incorrect");
+    if (!matches) {
+      recordFailure(req.ip, email);
+      throw httpError(401, "Email or password is incorrect");
+    }
+    recordSuccess(req.ip, email);
 
     if (account.status === "suspended") throw httpError(403, "This account is suspended");
     if (account.status === "pending") throw httpError(403, "This account is awaiting approval");

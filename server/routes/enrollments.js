@@ -62,10 +62,14 @@ router.post(
       throw httpError(409, "You teach this course");
     }
 
+    // Only an instructor or administrator sets an enrollment to dropped, so a
+    // dropped student was taken out on purpose. The join code alone must not
+    // walk them back in; the instructor can re-add them from the People tab.
     const existing = await enrollments.findFor(course.id, req.user.id);
-    if (existing && existing.status !== "dropped") {
-      throw httpError(409, "You are already enrolled in this course");
+    if (existing?.status === "dropped") {
+      throw httpError(403, "You were removed from this course. Ask your instructor to add you back.");
     }
+    if (existing) throw httpError(409, "You are already enrolled in this course");
 
     await enrollments.enroll(course.id, req.user.id);
     res.status(201).json({ course: { id: course.id, code: course.code, title: course.title } });

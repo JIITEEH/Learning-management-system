@@ -251,7 +251,7 @@ function wireRoster() {
   roster.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-remove]");
     if (!button) return;
-    if (!confirm(`Remove ${button.dataset.name} from this course? To keep a record that they took part, set them to Dropped instead.`)) {
+    if (!confirm(`Remove ${button.dataset.name} from this course? They could rejoin with the join code. To keep them out, and keep a record that they took part, set them to Dropped instead.`)) {
       return;
     }
     try {

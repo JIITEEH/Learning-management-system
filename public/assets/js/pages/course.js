@@ -302,9 +302,9 @@ function rosterRow(row, canManage) {
   return `
     <tr>
       <td class="cell-strong">${esc(row.fullName)}</td>
-      <td>${esc(row.email)}</td>
-      <td>${esc(new Date(row.enrolledAt).toLocaleDateString())}</td>
-      <td>${status}</td>
+      <td data-label="Email address">${esc(row.email)}</td>
+      <td data-label="Enrolled">${esc(new Date(row.enrolledAt).toLocaleDateString())}</td>
+      <td data-label="Status">${status}</td>
       <td class="cell-action">${action}</td>
     </tr>`;
 }

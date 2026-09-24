@@ -67,9 +67,9 @@ async function loadRoles() {
           <span class="perm-code">${esc(role.name)}</span>
           ${role.isSystem ? '<span class="tag">Built in</span>' : ""}
         </td>
-        <td>${esc(role.description ?? "")}</td>
-        <td>${role.userCount}</td>
-        <td>${role.permissionCount}</td>
+        <td data-label="Description">${esc(role.description ?? "")}</td>
+        <td data-label="Accounts">${role.userCount}</td>
+        <td data-label="Permissions">${role.permissionCount}</td>
         <td class="cell-action">
           <button class="btn btn-sm" type="button" data-open="${role.id}">
             Edit<span class="visually-hidden"> ${esc(role.label)}</span>

@@ -82,7 +82,10 @@
   --chalk: #f3f6ff;
   --chalk-secondary: #c6d1ee;
   --chalk-muted: #98a4c4;
-  --chalk-faint: #6f7b99;
+  /* The dimmest ink, for placeholders standing in for data not there yet.
+     Still held to WCAG AA's 4.5:1 for small text on the cards: the earlier
+     #6f7b99 measured 3.4–4.0:1 there and was hard to read. */
+  --chalk-faint: #909cba;
   --ink-inverse: #0a0c0f;
 
   /* ------------------------------------------- Glass — ThesisTrack's recipe */
@@ -117,7 +120,7 @@
   --warning: #dc6803;
   --warning-light: #f5b167;
   --danger: #d92d20;
-  --danger-light: #f58b82;
+  --danger-light: #f7968e;
   --info: #1570ef;
   --info-light: #7db4fb;
 
@@ -877,7 +880,10 @@ time,
   font-weight: 700;
   transition: width var(--duration-slow) var(--ease-out);
 }
-.meter-fill.placeholder { background-image: none; background: rgb(255 255 255 / 0.08); color: var(--chalk-faint); }
+/* No fill of its own: a second lighter layer on top of the track left the
+   placeholder dash too faint to read against it. The track is lighter than
+   a card, so the dash takes the muted ink rather than the faint one. */
+.meter-fill.placeholder { background: none; color: var(--chalk-muted); }
 
 /* ==========================================================================
    Buttons — ThesisTrack's pills
@@ -1253,6 +1259,46 @@ time,
 .table .cell-action { text-align: right; }
 .table tr[aria-current="true"] td { background: rgb(255 255 255 / 0.06); }
 
+/* On a phone, each row becomes a small card instead of a line of a table
+   that scrolls sideways. Scrolling hid every column past the second, the
+   row's button among them, with nothing on screen to say more was there.
+
+   The name stays on top with the row's button beside it, and each other cell
+   takes its own line, labelled by its data-label attribute because the column
+   headings are no longer on screen. The label sits above its value rather
+   than beside it, so an email address gets the card's full width instead of
+   breaking in the middle. */
+@media (max-width: 640px) {
+  .table { min-width: 0; }
+  .table thead { display: none; }
+  .table tbody, .table td { display: block; }
+
+  .table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-2) var(--space-3);
+    padding: var(--space-4) var(--space-3);
+    border-bottom: 1px solid var(--glass-border-soft);
+  }
+  .table tr:last-child { border-bottom: 0; }
+  .table tr[aria-current="true"] { border-radius: var(--radius); background: rgb(255 255 255 / 0.06); }
+  .table tr[aria-current="true"] td { background: none; }
+
+  .table td { padding: 0; border: 0; overflow-wrap: anywhere; }
+  .table td:first-child { grid-column: 1; }
+  .table .cell-action { grid-column: 2; grid-row: 1; align-self: start; }
+
+  .table td[data-label] {
+    display: grid;
+    grid-column: 1 / -1;
+    gap: 2px;
+    justify-items: start;
+  }
+  .table td[data-label]::before { content: attr(data-label); color: var(--chalk-muted); font-size: var(--text-sm); }
+  .table td[data-label] .select-sm { min-width: 10rem; }
+  .table td[data-label]:empty { display: none; }
+}
+
 /* A compact button for a row of a table. */
 .btn-sm { min-height: 36px; padding: 0 var(--space-4); }
 
@@ -1379,6 +1425,20 @@ time,
 }
 @media (hover: hover) { .tab:hover { background: rgb(255 255 255 / 0.08); color: var(--chalk); } }
 .tab[aria-selected="true"] { background-image: var(--primary-face); color: var(--primary-ink); }
+
+/* On a phone the row cannot hold five tabs, and scrolling it sideways left
+   the last two off the edge with no sign they were there. The tabs become an
+   even grid instead, as many to a line as fit, and the pill loosens to a
+   rounded box so several lines of it still look deliberate. */
+@media (max-width: 640px) {
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+    overflow-x: visible;
+    border-radius: var(--radius-lg);
+  }
+  .tab { padding-inline: var(--space-3); }
+}
 
 .select-sm { width: auto; min-height: 36px; padding-block: var(--space-1); }
 

@@ -109,10 +109,10 @@ function rowMarkup(user) {
   return `
     <tr${isPicked ? ' aria-current="true"' : ""}>
       <td class="cell-strong">${esc(user.fullName)}</td>
-      <td>${esc(user.email)}</td>
-      <td>${esc(user.roleLabel)}</td>
-      <td><span class="tag ${STATUS_TAGS[user.status] ?? ""}">${esc(statusLabel(user.status))}</span></td>
-      <td>${esc(lastSeen)}</td>
+      <td data-label="Email address">${esc(user.email)}</td>
+      <td data-label="Role">${esc(user.roleLabel)}</td>
+      <td data-label="Status"><span class="tag ${STATUS_TAGS[user.status] ?? ""}">${esc(statusLabel(user.status))}</span></td>
+      <td data-label="Last signed in">${esc(lastSeen)}</td>
       <td class="cell-action">
         <button class="btn btn-sm" type="button" data-open="${user.id}">
           Manage<span class="visually-hidden"> ${esc(user.fullName)}</span>

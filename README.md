@@ -75,7 +75,9 @@ not an enum — adding a fourth needs no schema change.
 
 ## Running it
 
-Requires Node 22.13+ and a MySQL 8 server.
+Requires Node 22.13+ and MySQL 8.4, the long-term-support release, which the
+automated GitHub check tests against. Newer MySQL releases also work, but see
+the note on cascades in `server/src/database/README.md`.
 
 ```sh
 npm install

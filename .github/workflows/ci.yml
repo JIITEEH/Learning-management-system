@@ -31,7 +31,9 @@ jobs:
     # on every push rather than only when somebody remembers to run them.
     services:
       mysql:
-        image: mysql:8
+        # 8.4 is MySQL's long-term-support release, the one to run in production.
+        # "mysql:8" would follow whatever MySQL publishes next, untested.
+        image: mysql:8.4
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
           MYSQL_DATABASE: lms

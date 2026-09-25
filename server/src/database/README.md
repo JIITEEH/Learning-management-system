@@ -1,6 +1,6 @@
 # Database
 
-MySQL 8, one database, organised by domain. Everything about the structure of
+MySQL 8.4 (the long-term-support release), one database, organised by domain. Everything about the structure of
 the data is in this folder — nothing is defined anywhere else. The SQL that
 the running app sends lives next door, in `../database-queries/`.
 

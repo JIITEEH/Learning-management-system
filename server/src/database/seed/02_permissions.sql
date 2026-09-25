@@ -38,4 +38,7 @@ INSERT INTO permissions (code, category, description) VALUES
   ('file.delete',       'files',     'Delete uploaded files.'),
 
   ('schedule.read',     'schedules', 'View schedules.'),
-  ('schedule.manage',   'schedules', 'Create and edit course schedules.');
+  ('schedule.manage',   'schedules', 'Create and edit course schedules.'),
+
+  ('announcement.read',   'communication', 'Read announcements in courses they can see.'),
+  ('announcement.manage', 'communication', 'Post, edit, and remove announcements in courses they manage.');

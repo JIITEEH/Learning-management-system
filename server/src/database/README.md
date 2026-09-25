@@ -97,17 +97,21 @@ next `db:schema` fails on a table that already exists.
 
 ## Migrations
 
-`migrations/` is empty, and stays empty until the database holds data worth
-keeping. Before that point, changing a table means editing its `schema/` file
-and running `npm run db:setup` again.
-
-Once there is real data, a change needs both: the edit to `schema/` so the
-structure stays described in one place, and a migration so existing databases
-can be brought forward. Name them so they sort chronologically:
+Databases now hold data worth keeping (at the least, the administrator
+account), so `db:setup`, which wipes everything, is no longer the way to
+change a structure. A change needs both: the edit to `schema/` (and `seed/`,
+for new permission codes) so a fresh database is built right, and a migration
+so existing databases can be brought forward with `npm run db:migrate`. Name
+them so they sort chronologically:
 
 ```
-migrations/2026-09-23_add_course_visibility.sql
+migrations/2026-09-25_add_announcements.sql
 ```
+
+That one is the first, and a model for the rest: `CREATE TABLE IF NOT EXISTS`
+and `INSERT IGNORE`, so it does no harm on a database that already has part of
+it. A fresh database built by `db:setup` marks every migration as already
+applied, since the schema files already describe where things ended up.
 
 They are applied once, in filename order, and recorded in a
 `schema_migrations` table that `npm run db:migrate` maintains. An applied

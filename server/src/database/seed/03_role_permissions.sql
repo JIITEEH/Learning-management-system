@@ -25,7 +25,8 @@ WHERE r.name = 'instructor' AND p.code IN (
   'assignment.read', 'assignment.manage',
   'submission.read', 'submission.grade',
   'file.upload', 'file.read', 'file.delete',
-  'schedule.read', 'schedule.manage'
+  'schedule.read', 'schedule.manage',
+  'announcement.read', 'announcement.manage'
 );
 
 -- Student: consumes content and submits work.
@@ -38,5 +39,6 @@ WHERE r.name = 'student' AND p.code IN (
   'assignment.read',
   'submission.create',
   'file.upload', 'file.read',
-  'schedule.read'
+  'schedule.read',
+  'announcement.read'
 );

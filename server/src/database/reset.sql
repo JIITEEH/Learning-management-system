@@ -10,6 +10,9 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+-- 07 · communication
+DROP TABLE IF EXISTS announcements;
+
 -- 06 · scheduling
 DROP TABLE IF EXISTS schedules;
 

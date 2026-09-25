@@ -99,7 +99,25 @@ export const api = {
   deleteLesson: (id) => request(`/lessons/${id}`, { method: 'DELETE' }),
   setLessonDone: (id, completed) => request(`/lessons/${id}/progress`, { method: 'PUT', body: { completed } }),
 
+  // Assignments and submissions
+  listAssignments: (courseId) => request(`/courses/${courseId}/assignments`),
+  createAssignment: (courseId, data) => request(`/courses/${courseId}/assignments`, { method: 'POST', body: data }),
+  getAssignment: (id) => request(`/assignments/${id}`),
+  updateAssignment: (id, data) => request(`/assignments/${id}`, { method: 'PATCH', body: data }),
+  deleteAssignment: (id) => request(`/assignments/${id}`, { method: 'DELETE' }),
+  listSubmissions: (assignmentId) => request(`/assignments/${assignmentId}/submissions`),
+  getSubmission: (id) => request(`/submissions/${id}`),
+  // A written answer and any new files, sent together in one request
+  handIn: (assignmentId, body, fileList) => {
+    const form = new FormData();
+    form.append('body', body);
+    for (const file of fileList) form.append('files', file);
+    return request(`/assignments/${assignmentId}/submission`, { method: 'POST', body: form });
+  },
+  removeSubmissionFile: (submissionId, fileId) => request(`/submissions/${submissionId}/files/${fileId}`, { method: 'DELETE' }),
+
   // Files. Downloads are plain links to fileDownloadUrl(id), so the browser saves them itself.
+  listFiles: () => request('/files'),
   uploadLessonFiles: (lessonId, fileList) => {
     const form = new FormData();
     for (const file of fileList) form.append('files', file);

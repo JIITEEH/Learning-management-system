@@ -30,7 +30,9 @@ One model per table or closely related group of tables:
 | `moduleModel.js` | `modules` (`02_catalog.sql`) | module controller, `permission-rules/access.js` |
 | `lessonModel.js` | `lessons` (`02_catalog.sql`) | module, lesson and course controllers, `permission-rules/access.js` |
 | `progressModel.js` | `lesson_progress` (`03_enrollment.sql`) | module and lesson controllers |
-| `fileModel.js` | `files` (`05_files.sql`) | file, lesson, module and course controllers, `helpers/files.js` |
+| `fileModel.js` | `files` (`05_files.sql`) | file, lesson, module, assignment, submission and course controllers, `helpers/files.js` |
+| `assignmentModel.js` | `assignments` (`04_assessment.sql`) | assignment and course controllers, `permission-rules/access.js` |
+| `submissionModel.js` | `submissions` (`04_assessment.sql`) | submission, assignment, file and course controllers |
 
 Controllers import a model under a capitalised name, so a call says which
 table it touches:

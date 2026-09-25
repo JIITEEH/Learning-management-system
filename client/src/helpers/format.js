@@ -54,3 +54,26 @@ export function formatDate(value) {
 export function formatDateTime(value) {
   return parseTimestamp(value)?.toLocaleString() ?? '—';
 }
+
+// A due date for display: "Thu, 1 Jan 2030, 9:00 AM" in the viewer's own time zone
+export function formatDue(value) {
+  const date = value ? parseTimestamp(value) : null;
+  if (!date) return 'No due date';
+  return date.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+// Whether a due date has passed, by the viewer's clock. For display only: the server decides
+// lateness by its own clock when work is handed in.
+export const isPastDue = (value) => Boolean(value) && parseTimestamp(value) < new Date();
+
+// An <input type="datetime-local"> works in the viewer's local time with no zone ('2030-01-01T09:00').
+// These convert between that and the server's UTC.
+export function toLocalInput(value) {
+  const date = value ? parseTimestamp(value) : null;
+  if (!date) return '';
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
+// '2030-01-01T09:00' typed in Manila becomes '2030-01-01T01:00:00.000Z'; empty stays empty
+export const fromLocalInput = (value) => (value ? new Date(value).toISOString() : null);

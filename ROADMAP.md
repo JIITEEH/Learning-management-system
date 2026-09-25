@@ -46,6 +46,8 @@ build.
 - Live chat or video class
 - Mobile app
 - Certificates on completion
+- Downloading every submission for an assignment as one zip (considered in
+  step 7 and left out: it needs an extra library)
 
 ## The steps
 
@@ -82,7 +84,7 @@ Two more were fixed at the end of the pass:
 |---|------|--------|
 | 5 | Courses and enrollment | **done** |
 | 6 | Modules and lessons | **done** |
-| 7 | Assignments and submissions | **to do** |
+| 7 | Assignments and submissions | **done** |
 | 8 | Grading and gradebook | **to do** |
 | 9 | Announcements and dashboards | **to do** |
 
@@ -99,6 +101,17 @@ nothing behind, and deleting a lesson, module or course deletes its files.
 While building it, MySQL 26.7.0 was found to skip part of a two-level
 cascade when a course is deleted; deletes now remove each level themselves
 (see `server/src/database/README.md`).
+
+### Step 7 as built
+
+Instructors create assignments with instructions, a due date (entered in
+their local time, stored in UTC) and a maximum score, and see every student
+in the course with what they handed in. Students hand in a written answer
+and/or files. Late work is accepted and marked Late; work can be changed
+until it is graded, and each change moves the hand-in time, which is always
+the server's clock. A classmate can never see another student's work or
+files. The Files page lists every lesson and submission file the account may
+see. Downloading every submission as one zip was left for later.
 
 ### Launch
 
@@ -123,11 +136,11 @@ Each screen is a file under `client/src/screens/`, shown at the address in
 | `/account` | `Account.jsx` | Every signed-in account | 4 — **built** |
 | `/dashboard` | `Dashboard.jsx` | Every role, different content | 9 (placeholders until then) |
 | `/courses` | `Courses.jsx` | Students and instructors | 5 — **built** |
-| `/courses/:id` | `Course.jsx` | One course, tabbed | 5 — **built** (Overview, People, and Lessons from step 6; Assignments and Schedule wait for later steps) |
+| `/courses/:id` | `Course.jsx` | One course, tabbed | 5 — **built** (Overview, People, Lessons from step 6, Assignments from step 7; Schedule waits) |
 | `/courses/:courseId/lessons/:lessonId` | `Lesson.jsx` | A lesson, its files, previous / next | 6 — **built** |
-| — | an assignments screen | Assignments and submissions | 7 |
+| `/courses/:courseId/assignments/:assignmentId` | `Assignment.jsx` | An assignment, handing in, and the instructor's list of submissions | 7 — **built** |
 | — | a schedule screen | Weekly meetings | Not in the roadmap's step 5, so it follows as its own piece |
-| — | a files screen | Uploads the viewer may see | 7 (moved from 6: step 7 adds submitted files, so it is built once, when both kinds exist) |
+| `/files` | `Files.jsx` | Every lesson and submission file the viewer may see | 7 — **built** (moved from step 6, so it was built once, when both kinds of file existed) |
 | `/admin`, `/admin/users`, `/admin/roles` | `admin/Admin.jsx`, `admin/Users.jsx`, `admin/Roles.jsx` | Administrators | 4 — **built** |
 | anything else | `NotFound.jsx` | Everyone | 4 — **built** |
 

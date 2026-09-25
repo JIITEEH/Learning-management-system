@@ -13,6 +13,7 @@ import BrandMark from '../basics/BrandMark.jsx';
 const NAV = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/courses', label: 'Courses', needs: 'course.read' },
+  { to: '/files', label: 'Files', needs: 'file.read' },
   { to: '/admin', label: 'Administration', needs: 'role.manage' },
 ];
 

@@ -121,9 +121,13 @@ enrolled.
 
 Modules and lessons work (roadmap step 6): instructors build a course's
 outline, write lessons and attach files; students read, download, mark
-lessons done and see their progress. Assignments, the files page and
-schedules have their tables but no endpoints or screens yet. Assignments and
-submissions come next, per [ROADMAP.md](ROADMAP.md).
+lessons done and see their progress.
+
+Assignments work (roadmap step 7): instructors set them with due dates;
+students hand in text and files, late work is marked late, and work can be
+changed until it is graded. The Files page lists every file an account may
+see. Grading and the gradebook come next, per [ROADMAP.md](ROADMAP.md);
+schedules have their table but no screens yet.
 
 The dashboard shows placeholder cards, which stay as dashes until roadmap
 step 9 gives them something real to count.

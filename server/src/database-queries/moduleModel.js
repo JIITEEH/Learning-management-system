@@ -46,8 +46,16 @@ export function move(id, direction) {
   });
 }
 
-// Also deletes its lessons and their progress (ON DELETE CASCADE in the schema). Their uploaded
-// files are not linked by the schema, so the controller removes those first.
+// Deletes the module, its lessons and their progress, from the bottom up in one transaction,
+// rather than trusting a two-level cascade (see courseModel.remove for why). Uploaded files are
+// not linked by the schema at all, so the controller removes those.
 export function remove(id) {
-  return query('DELETE FROM modules WHERE id = :id', { id });
+  return transaction(async (connection) => {
+    await connection.execute(
+      'DELETE p FROM lesson_progress p JOIN lessons l ON l.id = p.lesson_id WHERE l.module_id = :id',
+      { id },
+    );
+    await connection.execute('DELETE FROM lessons WHERE module_id = :id', { id });
+    await connection.execute('DELETE FROM modules WHERE id = :id', { id });
+  });
 }

@@ -1,5 +1,5 @@
 // SQL for courses (the courses table, schema/02_catalog.sql).
-import { query, queryOne } from '../database/index.js';
+import { query, queryOne, transaction } from '../database/index.js';
 
 // The columns every course listing uses, plus the instructor's name and the number of active
 // students, so a course card can be drawn from one row without further queries.
@@ -89,7 +89,20 @@ export function updateJoinCode(id, joinCode) {
   return query('UPDATE courses SET join_code = :joinCode WHERE id = :id', { id, joinCode });
 }
 
-// Also deletes its modules, lessons and enrollments (ON DELETE CASCADE in the schema)
+// Deletes the course and everything in it, from the bottom up: progress, lessons, modules, then the
+// course (which takes its enrollments with it). One transaction, so it happens completely or not
+// at all.
+//
+// The schema's ON DELETE CASCADE should do this alone, but MySQL 26.7.0 does not follow a cascade
+// two levels down reliably: deleting a course removed the lessons of its first module and left
+// the lessons of every later module behind. So nothing here relies on a cascade deeper than one
+// level. See database/README.md.
 export function remove(id) {
-  return query('DELETE FROM courses WHERE id = :id', { id });
+  return transaction(async (connection) => {
+    const inCourse = 'JOIN modules m ON m.id = l.module_id WHERE m.course_id = :id';
+    await connection.execute(`DELETE p FROM lesson_progress p JOIN lessons l ON l.id = p.lesson_id ${inCourse}`, { id });
+    await connection.execute(`DELETE l FROM lessons l ${inCourse}`, { id });
+    await connection.execute('DELETE FROM modules WHERE course_id = :id', { id });
+    await connection.execute('DELETE FROM courses WHERE id = :id', { id });
+  });
 }

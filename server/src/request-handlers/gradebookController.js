@@ -5,7 +5,7 @@ import * as Assignment from '../database-queries/assignmentModel.js';
 import * as Enrollment from '../database-queries/enrollmentModel.js';
 import * as Submission from '../database-queries/submissionModel.js';
 import { sendCsv, toCsv } from '../helpers/csv.js';
-import { totalFor } from '../helpers/grades.js';
+import { nowUtc, totalFor } from '../helpers/grades.js';
 import { manageCourse } from '../permission-rules/access.js';
 import { assignmentToJson, isLate } from './assignmentController.js';
 
@@ -56,9 +56,11 @@ export async function getGradebook(req, res) {
 }
 
 // One row per student: name, email, a column per assignment, then the totals. A cell is the
-// score, "handed in" when not yet graded, or empty when nothing was handed in.
+// score; "handed in" when not graded yet; "missing" when nothing was handed in and the due date
+// has passed (it counts as 0, as on screen); empty when not due yet.
 export async function exportGradebook(req, res) {
   const { course, assignments, students } = await buildGradebook(req);
+  const now = nowUtc();
   const columns = [
     { header: 'Student', value: (student) => student.fullName },
     { header: 'Email', value: (student) => student.email },
@@ -67,7 +69,8 @@ export async function exportGradebook(req, res) {
       value: (student) => {
         const cell = student.cells[index];
         if (cell.score !== null) return cell.score;
-        return cell.status ? 'handed in' : '';
+        if (cell.status) return 'handed in';
+        return assignment.due_at !== null && assignment.due_at < now ? 'missing' : '';
       },
     })),
     { header: 'Points earned', value: (student) => student.total.earned },

@@ -40,10 +40,11 @@ export default function HandInForm({ assignment, submission, courseOpen, onChang
       </div>
       {submission?.status === 'returned' && (
         <div className="inset" aria-label="Your result">
-          <p className="metric">
+          <p className="result-score">
             <span className="metric-value">{submission.score}</span>
-            <span className="metric-label">out of {assignment.maxScore}, returned {formatDateTime(submission.gradedAt)}</span>
+            <span className="metric-label">out of {assignment.maxScore}</span>
           </p>
+          <p className="field-hint">Returned {formatDateTime(submission.gradedAt)}</p>
           {submission.feedback ? <p className="prose">{submission.feedback}</p> : <p className="field-hint">No written feedback.</p>}
         </div>
       )}

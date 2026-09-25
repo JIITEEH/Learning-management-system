@@ -109,8 +109,11 @@ export default function Lesson() {
       <title>{`${lesson.title} — ${course.title}`}</title>
 
       <section className="card" aria-labelledby="lesson-title-heading">
+        <Link className="back-link" to={`/courses/${course.id}`}>
+          <ArrowLeft aria-hidden="true" />
+          {course.code} · {course.title}
+        </Link>
         <span className="tag-row">
-          <Link className="tag" to={`/courses/${course.id}`}>{course.code} · {course.title}</Link>
           <span className="tag">{lesson.moduleTitle}</span>
         </span>
         <h1 id="lesson-title-heading" className="course-title">{lesson.title}</h1>

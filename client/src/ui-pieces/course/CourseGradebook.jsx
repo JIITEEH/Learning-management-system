@@ -2,12 +2,16 @@
 // assignment, with a total. Totals follow the rule in server/src/helpers/grades.js.
 import { api, gradebookCsvUrl } from '../../api-client/api.js';
 import useApi from '../../reusable-logic/useApi.js';
+import { isPastDue } from '../../helpers/format.js';
 import { Notice } from '../basics/Feedback.jsx';
 
-// What one cell shows: the score, "in" when handed in but not graded, "–" when nothing
-function cellText(cell) {
+// What one cell shows: the score; "Handed in" when not graded yet; "Missing" when nothing was
+// handed in and the due date has passed (it counts as 0 in the total); "–" when not due yet
+function Cell({ cell, dueAt }) {
   if (cell.score !== null) return String(cell.score);
-  return cell.status ? 'in' : '–';
+  if (cell.status) return <span className="field-hint">Handed in</span>;
+  if (isPastDue(dueAt)) return <span className="tag tag-warn">Missing</span>;
+  return '–';
 }
 
 export default function CourseGradebook({ course }) {
@@ -23,8 +27,8 @@ export default function CourseGradebook({ course }) {
         <a className="btn" href={gradebookCsvUrl(course.id)} download>Download CSV</a>
       </div>
       <p className="field-hint">
-        Scores count as soon as they are saved, returned or not. Missing work counts as 0 once past its due date;
-        "in" means handed in but not graded yet.
+        Scores count as soon as they are saved, returned or not. Missing work counts as 0 once its due date has
+        passed; work handed in but not graded yet is left out until it is.
       </p>
       {students.length === 0 || assignments.length === 0 ? (
         <p className="empty">{students.length === 0 ? 'Nobody is enrolled yet.' : 'No assignments yet.'}</p>
@@ -46,7 +50,8 @@ export default function CourseGradebook({ course }) {
                   <td className="cell-strong">{student.fullName}</td>
                   {student.cells.map((cell, index) => (
                     <td key={cell.assignmentId} data-label={assignments[index].title} data-numeric>
-                      {cellText(cell)}{cell.late && <span className="visually-hidden"> (late)</span>}
+                      <Cell cell={cell} dueAt={assignments[index].dueAt} />
+                      {cell.late && <span className="visually-hidden"> (late)</span>}
                     </td>
                   ))}
                   <td data-label="Total" data-numeric>

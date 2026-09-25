@@ -320,6 +320,9 @@ time,
   text-decoration: none;
   transform: translateY(-180%);
   transition: transform var(--duration-base) var(--ease-out);
+  min-height: var(--tap-min);
+  display: inline-flex;
+  align-items: center;
 }
 .skip-link:focus-visible { transform: translateY(0); }
 
@@ -379,6 +382,8 @@ time,
   display: inline-flex;
   gap: var(--space-3);
   align-items: center;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
   justify-self: start;
   color: var(--chalk);
   font-size: var(--text-lg);
@@ -647,7 +652,6 @@ time,
   background-image: var(--primary-face);
   color: var(--primary-ink);
   font-weight: 700;
-  transition: width var(--duration-slow) var(--ease-out);
 }
 /* No fill of its own: a second lighter layer on top of the track left the
    placeholder dash too faint to read against it. The track is lighter than
@@ -1042,6 +1046,26 @@ time,
 .course-card h3 { color: var(--chalk); font-size: var(--text-lg); }
 
 .tag-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+/* "← Course" above a lesson or assignment: wraps like text, and is tall enough to tap */
+.back-link {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: var(--tap-min);
+  margin-bottom: var(--space-2);
+  color: var(--chalk-secondary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.back-link svg { flex: none; width: 16px; height: 16px; }
+@media (hover: hover) { .back-link:hover { color: var(--chalk); text-decoration: underline; } }
+
+/* A returned grade: the score large, "out of" beside it, the date under */
+.result-score { display: flex; gap: var(--space-2); align-items: baseline; }
+.result-score .metric-value { font-size: var(--text-display); }
 .course-title { margin-top: var(--space-4); }
 
 /* A description keeps the line breaks its author typed. */
@@ -1052,11 +1076,16 @@ time,
    ========================================================================== */
 
 .outline-module { margin-top: var(--space-5); }
-.outline-module h3 { flex: 1; }
+/* At least ~14 characters wide, so on a phone the buttons move under a long name instead of
+   squeezing it into a column one word wide */
+.outline-module h3 { flex: 1 1 14ch; }
 /* One line of the outline: a title, then its buttons pushed to the right */
 .outline-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; min-height: var(--tap-min); }
 .outline-row > a { flex: 1; min-width: 12ch; }
-.outline-tools { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.outline-tools { display: flex; flex-wrap: wrap; gap: var(--space-1); align-items: center; }
+.outline-add { justify-self: start; margin-top: var(--space-3); }
+.outline-add svg, .btn-sm svg { width: 16px; height: 16px; }
+.icon-btn-danger { color: var(--danger-light); }
 .outline-lessons { display: grid; gap: var(--space-2); margin: var(--space-3) 0 0; padding-left: var(--space-5); }
 .outline-done { display: inline-flex; color: var(--success-light); }
 .outline-done svg, .file-list svg { width: 18px; height: 18px; flex: none; }

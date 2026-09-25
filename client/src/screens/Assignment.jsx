@@ -2,6 +2,7 @@
 // work; its instructor and administrators edit or delete it and see every student's submission.
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
+import { ArrowLeft } from 'lucide-react';
 import { api } from '../api-client/api.js';
 import { useAuth } from '../shared-state/AuthContext.jsx';
 import { useToast } from '../shared-state/ToastContext.jsx';
@@ -61,8 +62,11 @@ export default function Assignment() {
       <title>{`${assignment.title} — ${course.title}`}</title>
 
       <section className="card" aria-labelledby="assignment-title">
+        <Link className="back-link" to={`/courses/${course.id}`}>
+          <ArrowLeft aria-hidden="true" />
+          {course.code} · {course.title}
+        </Link>
         <span className="tag-row">
-          <Link className="tag" to={`/courses/${course.id}`}>{course.code} · {course.title}</Link>
           <span className="tag">Out of {assignment.maxScore}</span>
         </span>
         <h1 id="assignment-title" className="course-title">{assignment.title}</h1>

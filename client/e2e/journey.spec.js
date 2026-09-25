@@ -29,6 +29,7 @@ test('a course from setup to returned grade', async ({ browser }) => {
   await tab(instructor, 'Lessons');
   await instructor.getByLabel('New module title').fill('Week 1');
   await instructor.getByRole('button', { name: 'Add module' }).click();
+  await instructor.getByRole('button', { name: 'New lesson' }).click();
   await instructor.getByLabel('New lesson title').fill('Getting started');
   await instructor.getByRole('button', { name: 'Add lesson' }).click();
   await instructor.getByRole('button', { name: 'Edit lesson' }).click();

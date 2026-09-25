@@ -3,7 +3,7 @@
 // rename, reorder and delete. The server checks every change again.
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { ArrowDown, ArrowUp, CircleCheck } from 'lucide-react';
+import { ArrowDown, ArrowUp, CircleCheck, Pencil, Plus, Trash2 } from 'lucide-react';
 import { api } from '../../api-client/api.js';
 import { useAuth } from '../../shared-state/AuthContext.jsx';
 import { useToast } from '../../shared-state/ToastContext.jsx';
@@ -13,20 +13,34 @@ import { Notice } from '../basics/Feedback.jsx';
 
 // A one-field form for adding a module or a lesson. `thing` is 'module' or 'lesson'.
 // If `onAdd` fails, its message shows above the form and the typed title is kept.
-function AddForm({ id, thing, onAdd }) {
+// `folded`: start as a small "New lesson" button, so a long outline is not a wall of empty boxes.
+function AddForm({ id, thing, onAdd, folded = false }) {
   const [title, setTitle] = useState('');
+  const [open, setOpen] = useState(!folded);
   const add = useSubmit(async () => {
     if (!title.trim()) throw new Error(`Type a title for the ${thing} first.`);
     await onAdd(title.trim());
     setTitle('');
   });
+
+  if (!open) {
+    return (
+      <button className="btn btn-sm outline-add" type="button" aria-expanded="false" aria-controls={id}
+        onClick={() => setOpen(true)}>
+        <Plus aria-hidden="true" /> New {thing}
+      </button>
+    );
+  }
   return (
     <>
       <Notice>{add.error}</Notice>
       <form className="form join-form" noValidate onSubmit={(event) => { event.preventDefault(); add.run(); }}>
         <div className="field">
           <label htmlFor={id}>New {thing} title</label>
-          <input className="input" id={id} maxLength={200} value={title} onChange={(event) => setTitle(event.target.value)} />
+          {/* Opened on purpose, so the cursor goes straight into the box */}
+          <input className="input" id={id} maxLength={200} value={title} autoFocus={folded}
+            onChange={(event) => setTitle(event.target.value)}
+            onKeyDown={(event) => { if (event.key === 'Escape' && folded) setOpen(false); }} />
         </div>
         <button className="btn" type="submit" disabled={add.busy} data-loading={add.busy}>Add {thing}</button>
       </form>
@@ -132,11 +146,13 @@ export default function CourseOutline({ course }) {
                   isLast={moduleIndex === modules.length - 1}
                   onMove={(direction) => change(() => api.moveModule(courseModule.id, direction))}
                 />
-                <button className="btn btn-sm" type="button" onClick={() => renameModule(courseModule)}>
-                  Rename<span className="visually-hidden"> {courseModule.title}</span>
+                <button className="icon-btn" type="button" title="Rename" onClick={() => renameModule(courseModule)}>
+                  <span className="visually-hidden">Rename {courseModule.title}</span>
+                  <Pencil aria-hidden="true" />
                 </button>
-                <button className="btn btn-sm btn-danger" type="button" onClick={() => deleteModule(courseModule)}>
-                  Delete<span className="visually-hidden"> {courseModule.title}</span>
+                <button className="icon-btn icon-btn-danger" type="button" title="Delete" onClick={() => deleteModule(courseModule)}>
+                  <span className="visually-hidden">Delete {courseModule.title}</span>
+                  <Trash2 aria-hidden="true" />
                 </button>
               </span>
             )}
@@ -169,7 +185,7 @@ export default function CourseOutline({ course }) {
           )}
 
           {manages && (
-            <AddForm id={`add-lesson-${courseModule.id}`} thing="lesson" onAdd={(title) => addLesson(courseModule.id, title)} />
+            <AddForm id={`add-lesson-${courseModule.id}`} thing="lesson" folded onAdd={(title) => addLesson(courseModule.id, title)} />
           )}
         </section>
       ))}

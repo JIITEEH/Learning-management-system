@@ -47,12 +47,14 @@ function parseTimestamp(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+// "25 Sept 2026": the viewer's own date style, month in words so 9/10 cannot be misread
 export function formatDate(value) {
-  return parseTimestamp(value)?.toLocaleDateString() ?? '—';
+  return parseTimestamp(value)?.toLocaleDateString(undefined, { dateStyle: 'medium' }) ?? '—';
 }
 
+// "25 Sept 2026, 5:48 PM": minutes are enough for anything a person reads here
 export function formatDateTime(value) {
-  return parseTimestamp(value)?.toLocaleString() ?? '—';
+  return parseTimestamp(value)?.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) ?? '—';
 }
 
 // A due date for display: "Thu, 1 Jan 2030, 9:00 AM" in the viewer's own time zone

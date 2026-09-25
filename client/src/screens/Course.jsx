@@ -9,6 +9,7 @@ import useApi from '../reusable-logic/useApi.js';
 import { courseStatus, plural, relationLabel } from '../helpers/format.js';
 import { Notice } from '../ui-pieces/basics/Feedback.jsx';
 import Tabs from '../ui-pieces/basics/Tabs.jsx';
+import CourseOutline from '../ui-pieces/course/CourseOutline.jsx';
 import CourseRoster from '../ui-pieces/course/CourseRoster.jsx';
 import CourseSettings from '../ui-pieces/course/CourseSettings.jsx';
 
@@ -59,7 +60,7 @@ export default function Course() {
       ),
     },
     manages && can('enrollment.read') && { id: 'people', label: 'People', content: <CourseRoster courseId={course.id} /> },
-    { id: 'lessons', label: 'Lessons', content: <><h2>Lessons</h2><p className="empty">Modules and lessons arrive in the next step of the build.</p></> },
+    { id: 'lessons', label: 'Lessons', content: <CourseOutline course={course} /> },
     { id: 'assignments', label: 'Assignments', content: <><h2>Assignments</h2><p className="empty">Assignments and submissions arrive in a later step of the build.</p></> },
     { id: 'schedule', label: 'Schedule', content: <><h2>Schedule</h2><p className="empty">Weekly class meetings arrive in a later step of the build.</p></> },
   ].filter(Boolean);

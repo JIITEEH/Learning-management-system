@@ -1265,6 +1265,27 @@ time,
 /* A description keeps the line breaks its author typed. */
 .prose { white-space: pre-line; max-width: var(--measure); }
 
+/* ==========================================================================
+   Course outline and lessons
+   ========================================================================== */
+
+.outline-module { margin-top: var(--space-5); }
+.outline-module h3 { flex: 1; }
+/* One line of the outline: a title, then its buttons pushed to the right */
+.outline-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; min-height: var(--tap-min); }
+.outline-row > a { flex: 1; min-width: 12ch; }
+.outline-tools { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.outline-lessons { display: grid; gap: var(--space-2); margin: var(--space-3) 0 0; padding-left: var(--space-5); }
+.outline-done { display: inline-flex; color: var(--success-light); }
+.outline-done svg, .file-list svg { width: 18px; height: 18px; flex: none; }
+.icon-btn:disabled { opacity: 0.35; cursor: default; }
+
+.lesson-text { display: grid; gap: var(--space-4); margin-top: var(--space-5); }
+.lesson-textarea { min-height: 18rem; }
+.file-list { display: grid; gap: var(--space-2); margin: var(--space-4) 0 0; padding: 0; list-style: none; }
+.lesson-nav { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: space-between; }
+.lesson-nav .btn svg, .actions .btn svg { width: 18px; height: 18px; }
+
 /* The join form and the add-a-student form: the field grows, the button
    sits at the end of the same line, and both stack on a phone. */
 .join-form { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: end; }

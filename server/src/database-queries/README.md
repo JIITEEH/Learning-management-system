@@ -27,6 +27,10 @@ One model per table or closely related group of tables:
 | `permissionModel.js` | `permissions`, `user_permissions` (`01_identity.sql`) | most controllers, `request-filters/auth.js` |
 | `courseModel.js` | `courses` (`02_catalog.sql`) | course and enrollment controllers, `permission-rules/access.js` |
 | `enrollmentModel.js` | `enrollments` (`03_enrollment.sql`) | course and enrollment controllers |
+| `moduleModel.js` | `modules` (`02_catalog.sql`) | module controller, `permission-rules/access.js` |
+| `lessonModel.js` | `lessons` (`02_catalog.sql`) | module, lesson and course controllers, `permission-rules/access.js` |
+| `progressModel.js` | `lesson_progress` (`03_enrollment.sql`) | module and lesson controllers |
+| `fileModel.js` | `files` (`05_files.sql`) | file, lesson, module and course controllers, `helpers/files.js` |
 
 Controllers import a model under a capitalised name, so a call says which
 table it touches:

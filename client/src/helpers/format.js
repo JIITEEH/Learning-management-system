@@ -18,6 +18,13 @@ export const accountStatus = (status) => ACCOUNT_STATUS[status] ?? { label: stat
 export const courseStatus = (status) => COURSE_STATUS[status] ?? { label: status, tone: '' };
 export const relationLabel = (relation) => RELATION_LABELS[relation] ?? relation;
 
+// 2048 -> "2 KB", 5300000 -> "5.1 MB"
+export function formatBytes(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 // "1 student", "3 students"
 export const plural = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`;
 

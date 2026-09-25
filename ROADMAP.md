@@ -81,10 +81,24 @@ Two more were fixed at the end of the pass:
 | # | Step | Status |
 |---|------|--------|
 | 5 | Courses and enrollment | **done** |
-| 6 | Modules and lessons | **to do** |
+| 6 | Modules and lessons | **done** |
 | 7 | Assignments and submissions | **to do** |
 | 8 | Grading and gradebook | **to do** |
 | 9 | Announcements and dashboards | **to do** |
+
+### Step 6 as built
+
+Instructors add, rename, reorder (up / down buttons) and delete modules and
+lessons, write lesson text and attach files. Lesson text is plain text: a
+blank line starts a paragraph and web addresses become links, and nothing
+typed can run as code. Students open lessons, download files, mark lessons
+done, and see a progress bar on the course's Lessons tab.
+
+Uploads are checked before anything reaches disk, a refused upload leaves
+nothing behind, and deleting a lesson, module or course deletes its files.
+While building it, MySQL 26.7.0 was found to skip part of a two-level
+cascade when a course is deleted; deletes now remove each level themselves
+(see `server/src/database/README.md`).
 
 ### Launch
 
@@ -109,11 +123,11 @@ Each screen is a file under `client/src/screens/`, shown at the address in
 | `/account` | `Account.jsx` | Every signed-in account | 4 — **built** |
 | `/dashboard` | `Dashboard.jsx` | Every role, different content | 9 (placeholders until then) |
 | `/courses` | `Courses.jsx` | Students and instructors | 5 — **built** |
-| `/courses/:id` | `Course.jsx` | One course, tabbed | 5 — **built** (Overview and People; the other tabs wait for steps 6 and 7) |
-| — | a lesson screen | A lesson and its files | 6 |
+| `/courses/:id` | `Course.jsx` | One course, tabbed | 5 — **built** (Overview, People, and Lessons from step 6; Assignments and Schedule wait for later steps) |
+| `/courses/:courseId/lessons/:lessonId` | `Lesson.jsx` | A lesson, its files, previous / next | 6 — **built** |
 | — | an assignments screen | Assignments and submissions | 7 |
 | — | a schedule screen | Weekly meetings | Not in the roadmap's step 5, so it follows as its own piece |
-| — | a files screen | Uploads the viewer may see | 6 |
+| — | a files screen | Uploads the viewer may see | 7 (moved from 6: step 7 adds submitted files, so it is built once, when both kinds exist) |
 | `/admin`, `/admin/users`, `/admin/roles` | `admin/Admin.jsx`, `admin/Users.jsx`, `admin/Roles.jsx` | Administrators | 4 — **built** |
 | anything else | `NotFound.jsx` | Everyone | 4 — **built** |
 

@@ -13,10 +13,13 @@ export function setUnauthorizedHandler(fn) {
 }
 
 async function request(path, { method = 'GET', body } = {}) {
+  // Files go as FormData, and the browser sets that request's Content-Type itself (it includes
+  // a boundary string the server needs). Everything else goes as JSON.
+  const isFormData = body instanceof FormData;
   const response = await fetch(`${BASE_URL}${path}`, {
     method,
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
+    headers: body && !isFormData ? { 'Content-Type': 'application/json' } : undefined,
+    body: body && !isFormData ? JSON.stringify(body) : body,
   });
   if (response.status === 204) return null;
 
@@ -82,4 +85,27 @@ export const api = {
   addToCourse: (courseId, email) => request('/enrollments', { method: 'POST', body: { courseId, email } }),
   setEnrollmentStatus: (id, status) => request(`/enrollments/${id}`, { method: 'PATCH', body: { status } }),
   removeEnrollment: (id) => request(`/enrollments/${id}`, { method: 'DELETE' }),
+
+  // Modules and lessons
+  getOutline: (courseId) => request(`/courses/${courseId}/modules`),
+  createModule: (courseId, title) => request(`/courses/${courseId}/modules`, { method: 'POST', body: { title } }),
+  renameModule: (id, title) => request(`/modules/${id}`, { method: 'PATCH', body: { title } }),
+  moveModule: (id, direction) => request(`/modules/${id}/move`, { method: 'POST', body: { direction } }),
+  deleteModule: (id) => request(`/modules/${id}`, { method: 'DELETE' }),
+  createLesson: (moduleId, title) => request(`/modules/${moduleId}/lessons`, { method: 'POST', body: { title } }),
+  getLesson: (id) => request(`/lessons/${id}`),
+  updateLesson: (id, data) => request(`/lessons/${id}`, { method: 'PATCH', body: data }),
+  moveLesson: (id, direction) => request(`/lessons/${id}/move`, { method: 'POST', body: { direction } }),
+  deleteLesson: (id) => request(`/lessons/${id}`, { method: 'DELETE' }),
+  setLessonDone: (id, completed) => request(`/lessons/${id}/progress`, { method: 'PUT', body: { completed } }),
+
+  // Files. Downloads are plain links to fileDownloadUrl(id), so the browser saves them itself.
+  uploadLessonFiles: (lessonId, fileList) => {
+    const form = new FormData();
+    for (const file of fileList) form.append('files', file);
+    return request(`/lessons/${lessonId}/files`, { method: 'POST', body: form });
+  },
+  deleteFile: (id) => request(`/files/${id}`, { method: 'DELETE' }),
 };
+
+export const fileDownloadUrl = (id) => `${BASE_URL}/files/${id}/download`;

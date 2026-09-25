@@ -21,6 +21,10 @@ npm-debug.log*
 # Dependencies and build output
 node_modules/
 dist/
+
+# Browser test output
+client/playwright-report/
+client/test-results/
 .cache/
 
 # Uploaded files are data, not source (see server/uploads/.gitignore)

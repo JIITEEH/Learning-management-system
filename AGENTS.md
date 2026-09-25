@@ -264,11 +264,13 @@ you changed:
 ```sh
 npm run lint
 npm test             # server tests, each file on its own throwaway database
+npm run test:e2e     # browser tests: every screen per role, and a whole course journey
 npm run dev          # http://localhost:5174
 ```
 
 A new rule about who may do what gets a test in `server/test/`, next to the
-others for that feature. Tests never touch your real database or send email:
+others for that feature. A new screen gets its address added to
+`client/e2e/smoke.spec.js` for each role that can open it. Tests never touch your real database or send email:
 `server/test/setup.js` points them at a database of their own, built from the
 schema and dropped afterwards.
 

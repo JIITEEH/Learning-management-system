@@ -21,7 +21,8 @@
     "db:migrate": "npm run db -w server -- migrate",
     "db:status": "npm run db -w server -- status",
     "lint": "eslint . --max-warnings 0",
-    "test": "npm test -w server"
+    "test": "npm test -w server",
+    "test:e2e": "npm run build && npm run e2e -w client"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

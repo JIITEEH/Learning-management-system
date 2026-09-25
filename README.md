@@ -97,6 +97,12 @@ The server restarts itself when a server file is saved. It boots without a
 database, but anything that touches one fails until MySQL is up and
 `db:setup` has run. `npm run db:status` says what the database holds.
 
+To check your work: `npm test` runs the server tests (about 6 seconds, each
+file on a throwaway database of its own), and `npm run test:e2e` runs the
+browser tests in your installed Chrome (about a minute; it builds the screens
+first and uses its own `lms_e2e` database, rebuilt on every run). Neither
+touches your real data or sends email.
+
 For a real deployment, `npm run build` turns the screens into plain files in
 `client/dist/`, and `npm start` serves them and the API together from port
 3000. While `client/dist/` exists, port 3000 serves that build even during

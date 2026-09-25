@@ -5,7 +5,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 
 export default [
   {
-    ignores: ['**/node_modules/**', '**/dist/**', 'server/uploads/**'],
+    ignores: ['**/node_modules/**', '**/dist/**', 'server/uploads/**', 'client/playwright-report/**', 'client/test-results/**'],
   },
 
   js.configs.recommended,
@@ -21,11 +21,19 @@ export default [
     },
   },
 
-  // API server and tooling config files run in Node
+  // API server, its tests and tooling config files run in Node
   {
-    files: ['server/**/*.js', 'client/vite.config.js', 'eslint.config.mjs'],
+    files: ['server/**/*.js', 'client/vite.config.js', 'client/playwright.config.js', 'eslint.config.mjs'],
     languageOptions: {
       globals: globals.node,
+    },
+  },
+
+  // Browser tests run in Node, but code passed to page.evaluate runs in the page
+  {
+    files: ['client/e2e/**/*.{js,mjs}'],
+    languageOptions: {
+      globals: { ...globals.node, ...globals.browser },
     },
   },
 

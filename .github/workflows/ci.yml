@@ -103,3 +103,18 @@ jobs:
           # The built screens are served, including at an address only the app knows
           curl -sf http://localhost:3000/ | grep -q '<div id="root">'
           curl -sf http://localhost:3000/courses/1 | grep -q '<div id="root">'
+
+      # Opens every screen as each role, and walks one course from setup to a
+      # returned grade, in Chrome (already on GitHub's Ubuntu runners). Once is
+      # enough, so only on the newest Node.
+      - name: Browser tests
+        if: matrix.node == '24'
+        run: npm run test:e2e
+
+      - name: Keep the browser test report
+        if: failure() && matrix.node == '24'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: client/playwright-report/
+          retention-days: 7

@@ -1,47 +1,48 @@
-import js from "@eslint/js";
-import globals from "globals";
+import js from '@eslint/js';
+import globals from 'globals';
 
-// The two halves of this project run in different places, so they get
-// different globals: server/ and scripts/ are Node with ES modules, public/ is
-// the browser.
 export default [
   {
-    ignores: ["node_modules/**", "storage/**"],
+    ignores: ['**/node_modules/**', '**/dist/**', 'server/uploads/**'],
   },
+
   js.configs.recommended,
+
   {
-    files: ["server/**/*.js", "scripts/**/*.mjs", "*.mjs"],
     languageOptions: {
-      ecmaVersion: 2023,
-      sourceType: "module",
-      globals: globals.node,
+      ecmaVersion: 'latest',
+      sourceType: 'module',
     },
     rules: {
-      // Routes take `next` and error handlers take four arguments whether or
-      // not they use them, so an unused argument prefixed with _ is fine.
-      "no-unused-vars": ["error", { argsIgnorePattern: "^_", caughtErrors: "none" }],
-      "no-console": "off",
+      // Unused function arguments before a used one are common in Express handlers
+      'no-unused-vars': ['error', { args: 'after-used', ignoreRestSiblings: true, caughtErrors: 'none' }],
     },
   },
+
+  // API server and tooling config run in Node
   {
-    files: ["public/**/*.js"],
+    files: ['server/**/*.js', 'eslint.config.mjs'],
     languageOptions: {
-      ecmaVersion: 2023,
-      sourceType: "module",
+      globals: globals.node,
+    },
+  },
+
+  // The plain HTML pages, until the React client replaces them
+  {
+    files: ['public/**/*.js'],
+    languageOptions: {
       globals: globals.browser,
     },
     rules: {
-      "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
-      // The browser half talks to the server through api.js and nowhere else.
-      "no-restricted-globals": [
-        "error",
-        { name: "fetch", message: "Pages call the API through assets/js/api.js, not fetch directly." },
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      'no-restricted-globals': [
+        'error',
+        { name: 'fetch', message: 'Pages call the API through assets/js/api.js, not fetch directly.' },
       ],
     },
   },
   {
-    // api.js is the one place the rule above does not apply: it IS the wrapper.
-    files: ["public/assets/js/api.js"],
-    rules: { "no-restricted-globals": "off" },
+    files: ['public/assets/js/api.js'],
+    rules: { 'no-restricted-globals': 'off' },
   },
 ];

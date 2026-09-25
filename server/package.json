@@ -1,0 +1,19 @@
+{
+  "name": "server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --env-file-if-exists=../.env src/index.js",
+    "start": "node --env-file-if-exists=../.env src/index.js",
+    "db": "node --env-file-if-exists=../.env src/database/manage.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "multer": "^2.4.0",
+    "mysql2": "^3.11.5",
+    "nodemailer": "^10.0.10"
+  }
+}

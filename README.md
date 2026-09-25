@@ -9,48 +9,40 @@ for storage.
 
 ## Layout
 
+Arranged like the thesis management system (ThesisTrack), so the two projects
+open the same way.
+
 ```
 .
-├── AGENTS.md                   # Rules for contributors and AI agents
-├── PRODUCT.md                  # What this is for, and for whom
-├── ROADMAP.md                  # The build plan, step by step
-├── package.json
-├── eslint.config.mjs
-├── .env.example                # Copy to .env and fill in
-├── database/                   # See database/README.md
-│   ├── reset.sql               # Drops every table
-│   ├── schema/                 # Structure, one file per domain
-│   ├── seed/                   # Roles and permission codes
-│   └── migrations/             # Dated changes, once there is real data
-├── scripts/db.mjs              # npm run db:setup, db:migrate, db:status
-├── server/
-│   ├── server.js               # Express entry point
-│   ├── config.js               # Environment settings, read once
-│   ├── db/
-│   │   ├── pool.js             # MySQL pool + query helpers
-│   │   └── repositories/       # Every SQL statement in the app, by domain
-│   ├── middleware/
-│   │   ├── auth.js             # Sessions, permission checks
-│   │   ├── upload.js           # Multer storage, type and size limits
-│   │   └── errors.js           # 404 and error handling
-│   └── routes/                 # JSON API, one module per resource
-│       ├── auth.js             users.js     roles.js
-│       ├── permissions.js      courses.js   lessons.js
-│       ├── enrollments.js      assignments.js
-│       └── files.js            schedules.js
-├── storage/uploads/            # Uploaded bytes — gitignored
-└── public/                     # Everything served to the browser
-    ├── index.html
-    ├── pages/                  # login, dashboard, courses, lesson,
-    │                           # users, roles, schedule, files, admin …
-    └── assets/                 # css, js, img
+├── AGENTS.md                   Rules for contributors and AI agents
+├── PRODUCT.md                  What this is for, and for whom
+├── ROADMAP.md                  The build plan, step by step
+├── package.json                npm workspace: one install, one set of commands
+├── .env.example                Copy to .env and fill in; .env is gitignored
+├── public/                     The web pages, until the React client replaces them
+└── server/
+    ├── package.json
+    ├── uploads/                Uploaded files — gitignored, never served directly
+    └── src/
+        ├── index.js            Starts the server
+        ├── app.js              Every request's path through the server
+        ├── config/             Settings, read once from .env
+        ├── api-endpoints/      Which addresses exist, and what guards each one
+        ├── request-handlers/   What happens at each address
+        ├── database-queries/   Every SQL statement, one model per table
+        ├── database/           Connection, schema, seed, and the db: commands
+        ├── request-filters/    Sign-in, permissions, limits, headers, uploads, errors
+        ├── permission-rules/   Who may reach a given course
+        └── helpers/            HttpError, input checks, passwords, email
 ```
 
-Pages in `public/` are served static and call the JSON API under `/api`
-through `public/assets/js/api.js`. There is no build step for the browser.
+A request travels down that list: `api-endpoints/courseRoutes.js` says
+`PATCH /api/courses/:id` needs the `course.update` permission and hands it to
+`request-handlers/courseController.js`, which checks this person manages this
+course, then calls `database-queries/courseModel.js` to save it.
 
-`storage/` sits outside `public/` on purpose — uploaded files are never served
-directly, only streamed after an access check.
+`server/uploads/` is outside anything the server hands to browsers on purpose:
+uploaded files are only ever streamed after an access check.
 
 ## Permissions
 
@@ -59,7 +51,7 @@ Access is permission-based rather than role-based. A role holds a set of codes
 gated on the code, not the role:
 
 ```js
-router.post("/", requirePermission("course.create"), handler);
+router.post('/', requirePermission('course.create'), createCourse);
 ```
 
 Per-account overrides in `user_permissions` layer on top of the role, and a
@@ -97,11 +89,11 @@ enough on your own computer. To send real email, fill in the `SMTP_` lines;
 Accounts work end to end: registering, signing in and out, changing a
 password, resetting a forgotten one by email, the role and permission routes, and the account lifecycle an
 administrator moves through. Every SQL statement behind them lives in
-`server/db/repositories/`.
+`server/src/database-queries/`.
 
-Courses and enrollments are implemented too. Four route modules are still
-stubs answering `501 Not Implemented`: `lessons`, `assignments`, `files`, and
-`schedules`.
+Courses and enrollments are implemented too. Lessons, assignments, files and
+schedules have their tables but no endpoints yet; each gets its routes,
+controller and model when its roadmap step is built.
 
 In the browser, the way in is built: the front page, signing in, registering,
 the account page with its change-password form, and a styled 404. The bar

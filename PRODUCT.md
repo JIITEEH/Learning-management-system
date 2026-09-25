@@ -51,9 +51,9 @@ management system:
 
 - Sessions are cookie-based and server-side; permissions are read per request
   so a revocation takes effect immediately.
-- Uploaded files live in `storage/uploads/`, outside the served directory,
+- Uploaded files live in `server/uploads/`, outside the served directory,
   and are only released after an access check.
-- The schema in `database/schema/` is the source of truth for structure,
+- The schema in `server/src/database/schema/` is the source of truth for structure,
   split one file per domain. Seed data is structural only — roles and
   permission codes.
 
@@ -73,7 +73,7 @@ placeholder.
 
 1. **Permissions are checked on the server.** What the front end renders is a
    convenience; the server decides what is allowed.
-2. **The schema is the contract.** Structure changes in `database/schema/`
+2. **The schema is the contract.** Structure changes in `server/src/database/schema/`
    first, in the file for that domain.
 3. **Never fabricate records.** Seeded data is structural, never plausible
    fake people or courses.

@@ -3,33 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "description": "Learning Management System",
-  "type": "module",
-  "main": "server/server.js",
-  "scripts": {
-    "start": "node server/server.js",
-    "dev": "node --watch server/server.js",
-    "db:setup": "node scripts/db.mjs setup",
-    "db:schema": "node scripts/db.mjs schema",
-    "db:seed": "node scripts/db.mjs seed",
-    "db:reset": "node scripts/db.mjs reset",
-    "db:migrate": "node scripts/db.mjs migrate",
-    "db:status": "node scripts/db.mjs status",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
-  },
+  "workspaces": [
+    "server"
+  ],
   "engines": {
     "node": ">=22.13"
   },
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.2",
-    "express-session": "^1.18.1",
-    "multer": "^2.4.0",
-    "mysql2": "^3.11.5",
-    "nodemailer": "^10.0.10"
+  "scripts": {
+    "dev": "npm run dev -w server",
+    "start": "npm run start -w server",
+    "db:setup": "npm run db -w server -- setup",
+    "db:schema": "npm run db -w server -- schema",
+    "db:seed": "npm run db -w server -- seed",
+    "db:reset": "npm run db -w server -- reset",
+    "db:migrate": "npm run db -w server -- migrate",
+    "db:status": "npm run db -w server -- status",
+    "lint": "eslint . --max-warnings 0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "eslint": "^9.39.5",
     "globals": "^17.12.0"
   }

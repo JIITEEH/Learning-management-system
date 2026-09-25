@@ -23,6 +23,7 @@ node_modules/
 dist/
 .cache/
 
-# Uploaded files are data, not source
-storage/uploads/*
-!storage/uploads/.gitkeep
+# Uploaded files are data, not source (see server/uploads/.gitignore)
+server/uploads/*
+!server/uploads/.gitignore
+!server/uploads/.gitkeep

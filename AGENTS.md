@@ -132,58 +132,82 @@ the description, but opening it and merging it stay the user's decision.
 
 - Write in the imperative mood: "Add course roster view", not "Added".
 - One logical change per commit; do not bundle unrelated edits.
-- Do not commit secrets, `.env` files, uploaded files under `storage/`, or
+- Do not commit secrets, `.env` files, uploaded files under `server/uploads/`, or
   anything already in `.gitignore`.
 
 ## Project conventions
 
-A Learning Management System: plain HTML and JavaScript in the browser,
-Node/Express on the server, MySQL for storage. The application sits at the
-repository root.
+A Learning Management System: Node/Express on the server, MySQL for storage.
+It follows the conventions of the owner's earlier thesis management system
+(ThesisTrack, in `~/Downloads/Capstone`) so the two read alike: JavaScript
+with ES modules throughout, an npm workspace at the top, the server in
+`server/src/` with the same plain-English folder names, and single quotes.
 
 ### Server
 
-- `server/` is native ES modules (`"type": "module"`). Use `import`, and
-  include the `.js` extension in relative imports — Node requires it.
-- **SQL lives in `server/db/repositories/`, and nowhere else.** A route
-  that needs data calls a repository function; it does not write a query. See
-  `server/db/repositories/README.md`.
-- Every query goes through the helpers in `server/db/pool.js`. Use
-  named placeholders (`:userId`) and never interpolate values into SQL.
-- Repositories return rows as the database spells them (`full_name`). Turning
-  a row into JSON is the route's job, because different endpoints return
+Each feature is split across three files, and a request passes through them
+in this order:
+
+| Folder | Holds | Example |
+|--------|-------|---------|
+| `api-endpoints/` | Which addresses exist, and which checks guard each one | `courseRoutes.js` |
+| `request-handlers/` | What happens at each address: read the request, apply the rules, reply | `courseController.js` |
+| `database-queries/` | The SQL, and nothing else | `courseModel.js` |
+
+Alongside them: `request-filters/` (checks every request can pass through:
+sign-in, rate limits, security headers, uploads, errors), `permission-rules/`
+(who may reach a given course), `helpers/` (small shared tools such as
+`HttpError`, input checks, passwords, email), `config/` (settings), and
+`database/` (the connection, the SQL files, and the `db:` commands).
+
+- Server code is native ES modules. Use `import`, and include the `.js`
+  extension in relative imports — Node requires it.
+- **SQL lives in `server/src/database-queries/`, and nowhere else.** A
+  controller that needs data calls a model function; it does not write a
+  query. See `server/src/database-queries/README.md`.
+- Every query goes through the helpers in `server/src/database/index.js`. Use
+  named placeholders (`:userId`) and never put values into the SQL text.
+- Models return rows as the database spells them (`full_name`). Turning a row
+  into JSON is the controller's job, because different endpoints return
   different views of the same record.
-- Repositories never decide who may do what — no `req`, no permission checks.
-  Authorization stays in the routes so it can be reviewed in one place.
-- Add a resource by adding a router under `server/routes/`, a matching
-  `<resource>.repo.js` under `db/repositories/`, and mounting the router in
-  `routes/index.js`. One module per resource, same name in both places.
-- Configuration is read once in `server/config.js`. Do not read
-  `process.env` anywhere else.
+- Models never decide who may do what — no `req`, no permission checks.
+- Controllers `throw new HttpError(status, message)` for anything the client
+  got wrong. Express 5 passes it to `errorHandler`, so there is no try/catch
+  and no wrapper around handlers.
+- Check request input with the functions in `helpers/validate.js`
+  (`requireText`, `requireEmail`, `oneOf`, `parseId`…) rather than writing a
+  new check, so a field is accepted or refused the same way everywhere.
+- Add a resource with `<resource>Routes.js`, `<resource>Controller.js` and
+  `<resource>Model.js`, and mount the routes in `api-endpoints/index.js`.
+- Configuration is read once in `server/src/config/index.js`. Do not read
+  `process.env` anywhere else. The values come from the `.env` file at the
+  top of the project, which the npm scripts hand to Node.
 
 ### Permissions
 
 - Access is permission-based, not role-based. Gate routes with
-  `requirePermission("course.create")` from `server/middleware/auth.js`.
-  Reserve `requireRole` for the rare case where the role itself is the rule.
+  `requirePermission('course.create')` from `request-filters/auth.js`.
+- A code is the first gate only. Whether this person may reach this
+  particular course is checked in the controller through
+  `permission-rules/access.js`.
 - A new permission code needs a row in `permissions` and a grant in
-  `role_permissions` — add both to `database/seed/`, in
+  `role_permissions` — add both to `server/src/database/seed/`, in
   `02_permissions.sql` and `03_role_permissions.sql`.
 - Permissions are read per request, not cached in the session, so that a
   revoked permission takes effect immediately. Keep it that way.
 
 ### Database
 
-Read `database/README.md` before changing anything here; it is the full
-account. In short:
+Read `server/src/database/README.md` before changing anything here; it is the
+full account. In short:
 
 - **One database, many tables.** Do not add a second MySQL schema. Courses,
   accounts, and submissions live together so foreign keys hold them
   consistent and a cross-domain write is one transaction. Separation belongs
   in the files, not in separate databases.
-- `database/schema/` is the single source of truth for structure, split
-  one file per domain and numbered in dependency order. Changing a table
-  means editing the file that defines it, not writing a migration alone.
+- `server/src/database/schema/` is the single source of truth for structure,
+  split one file per domain and numbered in dependency order. Changing a
+  table means editing the file that defines it, not writing a migration alone.
 - Adding a table means adding its `DROP TABLE` to `reset.sql` too.
 - `seed/` holds structural rows only — roles and permission codes. Real
   accounts, courses, and content are created through the application, never
@@ -195,12 +219,14 @@ account. In short:
 
 ### Uploads
 
-- Files go through `upload` in `server/middleware/upload.js`. It generates
-  the name on disk; never store a client-supplied filename as the path.
+- Files go through `upload` in `request-filters/upload.js`. It generates the
+  name on disk; never store a client-supplied filename as the path.
+- Mount `upload` only on a route whose handler is written. It saves files to
+  disk as the request arrives, before the handler runs.
 - Every upload gets a row in `files` with its `owner_type` / `owner_id`. The
-  bytes live in `storage/uploads/`, which is gitignored.
+  bytes live in `server/uploads/`, which is gitignored.
 - Serve a file only after checking the requester may see what it is attached
-  to. Do not expose `storage/` as a static directory.
+  to. Never serve `server/uploads/` as a static folder.
 
 ### Front end
 

@@ -35,6 +35,25 @@ The same applies to comments in code and to commit messages: explain the
 reason a reader could not have guessed, in words a newcomer to the project
 can follow.
 
+## Asking follow-up questions
+
+**Ask; do not assume.** The person who owns this project wants to make the
+decisions in it, and a silent guess makes one for them.
+
+- **When a request can be read more than one way, ask before acting.** Lay
+  out the likely readings as choices, say which you recommend and why, and
+  wait for the answer.
+- **When a decision comes up part way through** that the owner would
+  plausibly care about (a name, a trade-off, deleting something, a change in
+  scope), stop and ask rather than choosing quietly. Small mechanical choices
+  with one obvious answer do not need a question.
+- **End every finished piece of work with follow-up questions:** what to do
+  next, whether the result is what was meant, and any decision the work
+  turned up. A report that ends without a question is not finished.
+
+Asking does not replace doing. When a request is clear, do the work, and
+save the questions for the checkpoint rather than asking before every line.
+
 ## Git and GitHub
 
 ### Always confirm before pushing

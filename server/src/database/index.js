@@ -14,6 +14,13 @@ export const pool = mysql.createPool({
   dateStrings: true,
 });
 
+// Every connection works in UTC, so the times the API sends mean the same thing wherever the
+// server runs. Without this MySQL uses the server machine's own time zone, and a server set to UTC
+// would show a student in the Philippines every time 8 hours off. The browser turns UTC into the
+// viewer's local time (see client/src/helpers/format.js). `pool.pool` is the underlying pool,
+// which announces each new connection; the SET runs before any query on that connection.
+pool.pool.on('connection', (connection) => connection.query("SET time_zone = '+00:00'"));
+
 // Runs one statement and returns its rows (or, for INSERT/UPDATE/DELETE, the result object with
 // insertId and affectedRows). Values always go through placeholders, never into the SQL text.
 export async function query(sql, params = {}) {

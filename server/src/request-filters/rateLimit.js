@@ -1,25 +1,18 @@
 // A cap on how often one network address may call a route.
 //
-// For the routes anyone can reach without signing in — registering, asking
-// for a reset email, using a reset link. Each of them costs the server real
-// work (scrambling a password takes about a fifth of a second) or sends an
-// email, so without a cap one script could keep the server busy, fill the
-// approval list with junk accounts, or flood someone's inbox.
+// For the routes anyone can reach without signing in: registering, asking for a reset email,
+// using a reset link. Each costs the server real work (hashing a password takes about 0.2 s) or
+// sends an email, so without a cap one script could keep the server busy, fill the approval list
+// with junk accounts, or flood someone's inbox.
 //
-// Wrong passwords at sign-in have their own, finer rules in loginLimit.js:
-// there only failures count, and one account is protected separately.
-//
-// Like loginLimit.js, the counts live in this process's memory, so a
-// restart forgets them.
+// Wrong passwords at sign-in have their own, finer rules in loginLimit.js. Like those, these
+// counts live in this process's memory, so a restart forgets them.
 
-/**
- * Middleware allowing `max` requests per address in each `minutes` window:
- *   router.post("/forgot", limitPerAddress({ max: 10, minutes: 15 }), handler)
- */
+// Returns a request filter allowing `max` requests per address in each `minutes` window:
+//   router.post('/forgot', limitPerAddress({ max: 10, minutes: 15 }), forgotPassword);
 export function limitPerAddress({ max, minutes }) {
   const windowMs = minutes * 60 * 1000;
-  /** address -> { count, resetAt } */
-  const counts = new Map();
+  const counts = new Map(); // address -> { count, resetAt }
 
   // Forget windows that have run out, so the map cannot grow for ever.
   setInterval(() => {

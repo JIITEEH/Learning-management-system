@@ -1,20 +1,12 @@
-// Protections the browser applies on our behalf.
-//
-// Both functions run on every request, before any route, and are mounted in
-// app.js.
-
+// Protections the browser applies on our behalf. Both run before any route; see app.js.
 import config from '../config/index.js';
 
-/**
- * Where a page may load things from, and who may show it in a frame.
- *
- * Scripts, styles and requests may only come from this server, plus the
- * Google Fonts stylesheet and font files every page links to. So even if
- * someone slipped a <script> into a course title and it escaped escaping,
- * the browser would refuse to run it. `frame-ancestors 'none'` stops another
- * site showing our pages inside an invisible frame and tricking someone into
- * clicking "Delete" on it (clickjacking).
- */
+// Where a page may load things from, and who may show it in a frame (Content-Security-Policy).
+// Scripts, styles and requests may only come from this server, plus the Google Fonts stylesheet
+// and font files. So even if someone slipped a <script> into a course title and it got past
+// React's escaping, the browser would refuse to run it. frame-ancestors 'none' stops another site
+// showing our pages inside an invisible frame and tricking someone into clicking "Delete" on it
+// (clickjacking).
 const CONTENT_POLICY = [
   "default-src 'self'",
   "script-src 'self'",
@@ -28,7 +20,7 @@ const CONTENT_POLICY = [
   "frame-ancestors 'none'",
 ].join('; ');
 
-export function securityHeaders(_req, res, next) {
+export function securityHeaders(req, res, next) {
   res.set({
     'Content-Security-Policy': CONTENT_POLICY,
     // The older way of saying frame-ancestors 'none', for older browsers.
@@ -49,20 +41,13 @@ export function securityHeaders(_req, res, next) {
 
 const READ_ONLY = new Set(['GET', 'HEAD', 'OPTIONS']);
 
-/**
- * Refuse a request that changes something when it was sent by another
- * website (cross-site request forgery).
- *
- * The browser attaches our session cookie to requests wherever they come
- * from, within limits. SameSite=Lax on the cookie keeps out other domains,
- * but not other sites on the same domain — another app on localhost, or
- * another school subdomain. The browser also stamps every such request with
- * an Origin header naming the page that sent it, which a page cannot forge,
- * so a mismatch is refused.
- *
- * A request with no Origin at all is let through: that is a tool such as
- * curl, which has no session cookie to abuse unless it was handed one.
- */
+// Refuses a request that changes something when another website sent it (cross-site request
+// forgery). The browser attaches our session cookie to requests wherever they come from, within
+// limits: SameSite=Lax keeps out other domains, but not other sites on the same domain (another app
+// on localhost, another school subdomain). The browser also stamps every such request with an
+// Origin header naming the site that sent it, which a web page cannot forge, so a mismatch is
+// refused. A request with no Origin at all is a tool such as curl, which has no session cookie to
+// abuse unless it was handed one, so it is let through.
 export function sameOriginOnly(req, res, next) {
   if (READ_ONLY.has(req.method)) return next();
 

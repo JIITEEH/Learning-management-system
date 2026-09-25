@@ -76,6 +76,14 @@ data here.
 grant in `seed/03_role_permissions.sql`. A code the server checks for but
 never inserted will simply deny everyone.
 
+**Times are UTC.** Every connection from the app runs in UTC (see
+`index.js`), so `TIMESTAMP` columns and `NOW()` read and compare in UTC, and
+the browser converts to the viewer's local time. A `DATETIME` column is stored
+exactly as written, with no conversion, so the app must write it in UTC too —
+this matters for `assignments.due_at` when step 7 builds it. The schedule's
+`TIME` and `DATE` columns are the exception on purpose: "class at 9:00" means
+9:00 at the school, wherever the server runs.
+
 **Adding a table** means adding it to the right `schema/` file, and adding its
 `DROP TABLE` to `reset.sql` — otherwise `db:reset` leaves it behind and the
 next `db:schema` fails on a table that already exists.

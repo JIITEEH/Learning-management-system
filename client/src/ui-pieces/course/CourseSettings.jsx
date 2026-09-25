@@ -16,17 +16,18 @@ const STATUS_OPTIONS = [
   { value: 'archived', label: 'Archived: enrolled students can still look, nobody new can join' },
 ];
 
+// The editable fields of a course, as the form holds them
+function detailsOf(course) {
+  return { code: course.code, title: course.title, description: course.description ?? '' };
+}
+
 // `onSaved` receives the course as the server now has it
 export default function CourseSettings({ course, onSaved }) {
   const { can } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const [status, setStatus] = useState(course.status);
-  const [details, setDetails] = useState({
-    code: course.code,
-    title: course.title,
-    description: course.description ?? '',
-  });
+  const [details, setDetails] = useState(() => detailsOf(course));
   const update = (field) => (event) => setDetails({ ...details, [field]: event.target.value });
 
   const newCode = useSubmit(async () => {
@@ -44,7 +45,10 @@ export default function CourseSettings({ course, onSaved }) {
   });
 
   const saveDetails = useSubmit(async () => {
-    onSaved((await api.updateCourse(course.id, details)).course);
+    const saved = (await api.updateCourse(course.id, details)).course;
+    // Show what the server stored, which may differ from what was typed (codes become upper case)
+    setDetails(detailsOf(saved));
+    onSaved(saved);
     toast.success('Details saved.');
   });
 

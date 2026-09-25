@@ -1,5 +1,6 @@
-// File upload handling. Files land on disk in server/uploads with a
-// generated name; the `files` table keeps the metadata and the original name.
+// File upload handling. Files land on disk in server/uploads under a generated name; the files
+// table keeps the metadata and the original name. Mount `upload` only on a route whose handler is
+// written: it saves files to disk as the request arrives, before the handler runs.
 
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -10,9 +11,8 @@ import { HttpError } from '../helpers/httpError.js';
 
 fs.mkdirSync(config.uploadDir, { recursive: true });
 
-// 25 MB. Raise deliberately — the limit is what stops a single request
-// filling the disk.
-export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+// 25 MB. Raise deliberately: the limit is what stops a single request filling the disk.
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 
 const ALLOWED_MIME = new Set([
   'application/pdf',
@@ -32,11 +32,10 @@ const ALLOWED_MIME = new Set([
 ]);
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, done) => done(null, config.uploadDir),
-  filename: (_req, file, done) => {
-    // Never reuse the client's name on disk — it is attacker-controlled.
-    // Even the extension is kept only when it is plain letters and digits,
-    // so a name such as "notes.pdf%00.html" cannot smuggle anything through.
+  destination: (req, file, done) => done(null, config.uploadDir),
+  filename: (req, file, done) => {
+    // Never use the sender's file name on disk: they choose it. Even the extension is kept only
+    // when it is plain letters and digits, so "notes.pdf%00.html" cannot smuggle anything through.
     const ext = path.extname(file.originalname);
     const safeExt = /^\.[a-z0-9]{1,10}$/i.test(ext) ? ext.toLowerCase() : '';
     done(null, `${Date.now()}-${crypto.randomUUID()}${safeExt}`);
@@ -46,10 +45,9 @@ const storage = multer.diskStorage({
 export const upload = multer({
   storage,
   limits: { fileSize: MAX_UPLOAD_BYTES, files: 10 },
-  fileFilter: (_req, file, done) => {
+  fileFilter: (req, file, done) => {
     if (!ALLOWED_MIME.has(file.mimetype)) {
-      // 415 "unsupported media type": the sender's mistake, not a server
-      // fault, so it must not be reported as a 500.
+      // 415 "unsupported media type": the sender's mistake, not a server fault
       return done(new HttpError(415, `Unsupported file type: ${file.mimetype}`));
     }
     done(null, true);

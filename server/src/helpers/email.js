@@ -30,7 +30,7 @@ function getTransport() {
   return transport;
 }
 
-/** Turns a mail server error into what to change in .env. */
+// Turns a mail server error into what to change in .env
 function explain(error) {
   const hints = {
     EAUTH:
@@ -57,11 +57,9 @@ async function send({ to, subject, text, html }) {
   await mailer.sendMail({ from: config.mail.from, to, subject, text, html });
 }
 
-/**
- * Send without making the request wait for it. A slow mail server cannot
- * delay the page, and the reply takes the same time whether or not the
- * address has an account, so the timing cannot reveal who is registered.
- */
+// Sends without making the request wait for it. A slow mail server cannot delay the page, and the
+// reply takes the same time whether or not the address has an account, so the timing cannot
+// reveal who is registered.
 export function sendInBackground(message) {
   send(message).catch((error) => {
     console.error(`Could not email ${message.to}: ${explain(error)}`);
@@ -84,7 +82,7 @@ const esc = (value) =>
 const FONT = "'Plus Jakarta Sans', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 const BLUE = '#2451d6';
 
-/** A password reset email: a plain-text copy for simple mail programs, and HTML. */
+// A password reset email: a plain-text copy for simple mail programs, and HTML
 export function passwordResetMessage({ to, fullName, url, minutes }) {
   const text = [
     `Hello ${fullName},`,

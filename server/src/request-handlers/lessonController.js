@@ -20,7 +20,7 @@ export function fileToJson(file) {
 // student has finished it
 export async function getLesson(req, res) {
   const { lesson, course, relation } = await reachLesson(req, req.params.id);
-  const [files, inOrder] = await Promise.all([File.listForLesson(lesson.id), Lesson.listForCourse(course.id)]);
+  const [files, inOrder] = await Promise.all([File.listFor('lesson', lesson.id), Lesson.listForCourse(course.id)]);
   const index = inOrder.findIndex((other) => other.id === lesson.id);
   const neighbour = (other) => (other ? { id: other.id, title: other.title } : null);
   const finished = relation === 'enrolled' ? await Progress.completedInCourse(req.user.id, course.id) : null;
@@ -64,7 +64,7 @@ export async function moveLesson(req, res) {
 // Deletes the lesson, the progress recorded on it, and its uploaded files
 export async function deleteLesson(req, res) {
   const { lesson } = await reachLesson(req, req.params.id, { manage: true });
-  const files = await File.listForLesson(lesson.id);
+  const files = await File.listFor('lesson', lesson.id);
   await Lesson.remove(lesson.id);
   await discardFiles(files);
   res.status(204).end();

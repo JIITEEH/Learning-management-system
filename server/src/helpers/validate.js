@@ -60,3 +60,25 @@ export function parseId(value, notFoundMessage = 'Not found') {
   if (!Number.isInteger(id) || id <= 0) throw new HttpError(404, notFoundMessage);
   return id;
 }
+
+// A date and time that may be left empty, such as a due date. It must say its time zone (the
+// browser sends e.g. '2026-10-01T07:00:00.000Z'), so "3 pm" can never be misread as another
+// zone's 3 pm. Returns MySQL's format in UTC ('2026-10-01 07:00:00'), or null when empty.
+export function optionalDateTime(value, label) {
+  if (value === undefined || value === null || value === '') return null;
+  const hasZone = typeof value === 'string' && /(Z|[+-]\d{2}:\d{2})$/.test(value);
+  const date = hasZone ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) {
+    throw new HttpError(400, `${label} must be a date and time with its time zone`);
+  }
+  return date.toISOString().slice(0, 19).replace('T', ' ');
+}
+
+// A number within a range, such as a maximum score
+export function requireNumber(value, label, { min, max }) {
+  const number = typeof value === 'number' ? value : Number(value);
+  if (value === '' || value === null || !Number.isFinite(number) || number < min || number > max) {
+    throw new HttpError(400, `${label} must be a number from ${min} to ${max}`);
+  }
+  return number;
+}

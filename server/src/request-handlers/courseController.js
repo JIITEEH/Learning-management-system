@@ -1,9 +1,11 @@
 // Courses: listing, creating, editing, publishing, deleting, join codes, and the class list.
 import { randomInt } from 'node:crypto';
+import * as Assignment from '../database-queries/assignmentModel.js';
 import * as Course from '../database-queries/courseModel.js';
 import * as Enrollment from '../database-queries/enrollmentModel.js';
 import * as File from '../database-queries/fileModel.js';
 import * as Lesson from '../database-queries/lessonModel.js';
+import * as Submission from '../database-queries/submissionModel.js';
 import { discardFiles } from '../helpers/files.js';
 import { HttpError } from '../helpers/httpError.js';
 import { oneOf, optionalText, requireText } from '../helpers/validate.js';
@@ -103,12 +105,17 @@ export async function updateCourse(req, res) {
   res.json({ course: toJson(await Course.findById(course.id), relation) });
 }
 
-// Deleting a course takes its lessons, their files and its enrollments with it, so a published
-// course must be archived first: a moment for someone to notice it is still in use
+// Deleting a course takes its lessons, assignments, submissions, their files and its enrollments
+// with it, so a published course must be archived first: a moment for someone to notice it is
+// still in use
 export async function deleteCourse(req, res) {
   const { course } = await manageCourse(req, req.params.id);
   if (course.status === 'published') throw new HttpError(409, 'Archive the course before deleting it');
-  const files = await File.listForLessons(await Lesson.idsInCourse(course.id));
+  const submissionIds = await Submission.idsForAssignments(await Assignment.idsInCourse(course.id));
+  const files = [
+    ...(await File.listForAll('lesson', await Lesson.idsInCourse(course.id))),
+    ...(await File.listForAll('submission', submissionIds)),
+  ];
   await Course.remove(course.id);
   await discardFiles(files);
   res.status(204).end();

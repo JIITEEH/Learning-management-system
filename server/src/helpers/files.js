@@ -22,3 +22,29 @@ export async function discardFiles(files) {
 export async function discardUploads(uploads = []) {
   await Promise.all(uploads.map((upload) => fs.rm(upload.path, { force: true })));
 }
+
+// Records the files the upload filter just saved (req.files) as attached to one thing, e.g.
+// ('lesson', 12). If recording fails part way, removes the rows already written and every
+// uploaded file, so a failed upload leaves nothing behind on disk or in the table.
+export async function recordUploads(uploads, { ownerType, ownerId, uploadedBy }) {
+  const ids = [];
+  try {
+    for (const upload of uploads) {
+      ids.push(
+        await File.create({
+          uploadedBy,
+          ownerType,
+          ownerId,
+          originalName: upload.originalname.slice(0, 255),
+          storedName: upload.filename,
+          mimeType: upload.mimetype,
+          sizeBytes: upload.size,
+        }),
+      );
+    }
+  } catch (error) {
+    for (const id of ids) await File.remove(id);
+    await discardUploads(uploads);
+    throw error;
+  }
+}

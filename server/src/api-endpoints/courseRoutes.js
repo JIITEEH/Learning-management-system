@@ -9,6 +9,7 @@ import {
   setCourseStatus,
   updateCourse,
 } from '../request-handlers/courseController.js';
+import { createAssignment, listAssignments } from '../request-handlers/assignmentController.js';
 import { createModule, getOutline } from '../request-handlers/moduleController.js';
 import { requirePermission } from '../request-filters/auth.js';
 
@@ -26,5 +27,7 @@ router.post('/:id/join-code', requirePermission('course.update'), replaceJoinCod
 router.get('/:id/roster', requirePermission('enrollment.read'), getRoster);
 router.get('/:id/modules', requirePermission('lesson.read'), getOutline);
 router.post('/:id/modules', requirePermission('lesson.manage'), createModule);
+router.get('/:id/assignments', requirePermission('assignment.read'), listAssignments);
+router.post('/:id/assignments', requirePermission('assignment.manage'), createAssignment);
 
 export default router;

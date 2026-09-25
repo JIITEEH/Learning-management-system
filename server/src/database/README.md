@@ -81,8 +81,7 @@ finish them reliably: deleting a course removed the lessons of its first module
 and left the lessons of every later module behind, with nothing reported. One
 level (a lesson taking its progress rows with it) works. So a delete that
 reaches further removes each level itself, bottom up, in one transaction — see
-`remove` in `courseModel.js` and `moduleModel.js`. The same will apply to
-`courses → assignments → submissions` when step 7 builds them.
+`remove` in `courseModel.js`, `moduleModel.js` and `assignmentModel.js`.
 
 **Times are UTC.** Every connection from the app runs in UTC (see
 `index.js`), so `TIMESTAMP` columns and `NOW()` read and compare in UTC, and

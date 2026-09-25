@@ -49,7 +49,7 @@ export async function moveModule(req, res) {
 // Deletes the module, its lessons and everything attached to them, including uploaded files
 export async function deleteModule(req, res) {
   const { courseModule } = await reachModule(req, req.params.id, { manage: true });
-  const files = await File.listForLessons(await Lesson.idsInModule(courseModule.id));
+  const files = await File.listForAll('lesson', await Lesson.idsInModule(courseModule.id));
   await Module.remove(courseModule.id);
   await discardFiles(files);
   res.status(204).end();

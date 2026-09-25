@@ -89,9 +89,10 @@ export function updateJoinCode(id, joinCode) {
   return query('UPDATE courses SET join_code = :joinCode WHERE id = :id', { id, joinCode });
 }
 
-// Deletes the course and everything in it, from the bottom up: progress, lessons, modules, then the
-// course (which takes its enrollments with it). One transaction, so it happens completely or not
-// at all.
+// Deletes the course and everything in it, from the bottom up: progress, lessons, modules,
+// submissions, assignments, then the course (which takes its enrollments and schedules with it).
+// One transaction, so it happens completely or not at all. Uploaded files are not linked by the
+// schema, so the controller removes those.
 //
 // The schema's ON DELETE CASCADE should do this alone, but MySQL 26.7.0 does not follow a cascade
 // two levels down reliably: deleting a course removed the lessons of its first module and left
@@ -103,6 +104,11 @@ export function remove(id) {
     await connection.execute(`DELETE p FROM lesson_progress p JOIN lessons l ON l.id = p.lesson_id ${inCourse}`, { id });
     await connection.execute(`DELETE l FROM lessons l ${inCourse}`, { id });
     await connection.execute('DELETE FROM modules WHERE course_id = :id', { id });
+    await connection.execute(
+      'DELETE s FROM submissions s JOIN assignments a ON a.id = s.assignment_id WHERE a.course_id = :id',
+      { id },
+    );
+    await connection.execute('DELETE FROM assignments WHERE course_id = :id', { id });
     await connection.execute('DELETE FROM courses WHERE id = :id', { id });
   });
 }

@@ -1,6 +1,7 @@
 // Who may see or manage a course, and so its modules and lessons. Written once here and used by
 // every controller that touches a course. Every function must run after requirePermission, which
 // sets req.permissions.
+import * as Assignment from '../database-queries/assignmentModel.js';
 import * as Course from '../database-queries/courseModel.js';
 import * as Lesson from '../database-queries/lessonModel.js';
 import * as Module from '../database-queries/moduleModel.js';
@@ -54,4 +55,12 @@ export async function reachLesson(req, lessonIdValue, { manage = false } = {}) {
   const courseId = lesson.course_id;
   const reached = manage ? await manageCourse(req, courseId) : await reachCourse(req, courseId);
   return { lesson, ...reached };
+}
+
+export async function reachAssignment(req, assignmentIdValue, { manage = false } = {}) {
+  const assignment = await Assignment.findById(parseId(assignmentIdValue, 'Assignment not found'));
+  if (!assignment) throw new HttpError(404, 'Assignment not found');
+  const courseId = assignment.course_id;
+  const reached = manage ? await manageCourse(req, courseId) : await reachCourse(req, courseId);
+  return { assignment, ...reached };
 }

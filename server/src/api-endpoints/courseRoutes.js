@@ -9,6 +9,7 @@ import {
   setCourseStatus,
   updateCourse,
 } from '../request-handlers/courseController.js';
+import { createModule, getOutline } from '../request-handlers/moduleController.js';
 import { requirePermission } from '../request-filters/auth.js';
 
 const router = Router();
@@ -23,5 +24,7 @@ router.delete('/:id', requirePermission('course.delete'), deleteCourse);
 router.patch('/:id/status', requirePermission('course.publish'), setCourseStatus);
 router.post('/:id/join-code', requirePermission('course.update'), replaceJoinCode);
 router.get('/:id/roster', requirePermission('enrollment.read'), getRoster);
+router.get('/:id/modules', requirePermission('lesson.read'), getOutline);
+router.post('/:id/modules', requirePermission('lesson.manage'), createModule);
 
 export default router;

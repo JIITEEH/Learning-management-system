@@ -11,6 +11,9 @@ export function requireText(value, label, { max = 200 } = {}) {
   return text;
 }
 
+// The longest lesson text accepted: about 25 printed pages, far past any single lesson
+export const LESSON_TEXT_MAX = 50000;
+
 // Text that may be left empty. Returns null when empty, which is what the database stores.
 export function optionalText(value, label, { max = 200 } = {}) {
   if (value === undefined || value === null) return null;

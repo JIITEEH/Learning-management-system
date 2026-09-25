@@ -2,6 +2,9 @@
 import { randomInt } from 'node:crypto';
 import * as Course from '../database-queries/courseModel.js';
 import * as Enrollment from '../database-queries/enrollmentModel.js';
+import * as File from '../database-queries/fileModel.js';
+import * as Lesson from '../database-queries/lessonModel.js';
+import { discardFiles } from '../helpers/files.js';
 import { HttpError } from '../helpers/httpError.js';
 import { oneOf, optionalText, requireText } from '../helpers/validate.js';
 import { manageCourse, reachCourse } from '../permission-rules/access.js';
@@ -100,12 +103,14 @@ export async function updateCourse(req, res) {
   res.json({ course: toJson(await Course.findById(course.id), relation) });
 }
 
-// Deleting a course takes its lessons and enrollments with it, so a published course must be
-// archived first: a moment for someone to notice it is still in use
+// Deleting a course takes its lessons, their files and its enrollments with it, so a published
+// course must be archived first: a moment for someone to notice it is still in use
 export async function deleteCourse(req, res) {
   const { course } = await manageCourse(req, req.params.id);
   if (course.status === 'published') throw new HttpError(409, 'Archive the course before deleting it');
+  const files = await File.listForLessons(await Lesson.idsInCourse(course.id));
   await Course.remove(course.id);
+  await discardFiles(files);
   res.status(204).end();
 }
 

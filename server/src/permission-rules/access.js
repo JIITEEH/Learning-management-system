@@ -1,6 +1,9 @@
-// Who may see or manage a course. Written once here and used by every controller that touches a
-// course. Both functions must run after requirePermission, which sets req.permissions.
+// Who may see or manage a course, and so its modules and lessons. Written once here and used by
+// every controller that touches a course. Every function must run after requirePermission, which
+// sets req.permissions.
 import * as Course from '../database-queries/courseModel.js';
+import * as Lesson from '../database-queries/lessonModel.js';
+import * as Module from '../database-queries/moduleModel.js';
 import { HttpError } from '../helpers/httpError.js';
 import { parseId } from '../helpers/validate.js';
 
@@ -32,4 +35,23 @@ export async function manageCourse(req, courseIdValue) {
     throw new HttpError(403, "Only the course's instructor or an administrator can do this");
   }
   return reached;
+}
+
+// Modules and lessons follow their course: whoever may see the course may see them, and whoever
+// manages the course may change them. Each returns the item plus reachCourse's { course, relation }.
+
+export async function reachModule(req, moduleIdValue, { manage = false } = {}) {
+  const courseModule = await Module.findById(parseId(moduleIdValue, 'Module not found'));
+  if (!courseModule) throw new HttpError(404, 'Module not found');
+  const courseId = courseModule.course_id;
+  const reached = manage ? await manageCourse(req, courseId) : await reachCourse(req, courseId);
+  return { courseModule, ...reached };
+}
+
+export async function reachLesson(req, lessonIdValue, { manage = false } = {}) {
+  const lesson = await Lesson.findById(parseId(lessonIdValue, 'Lesson not found'));
+  if (!lesson) throw new HttpError(404, 'Lesson not found');
+  const courseId = lesson.course_id;
+  const reached = manage ? await manageCourse(req, courseId) : await reachCourse(req, courseId);
+  return { lesson, ...reached };
 }

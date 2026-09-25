@@ -20,7 +20,8 @@
     "db:reset": "npm run db -w server -- reset",
     "db:migrate": "npm run db -w server -- migrate",
     "db:status": "npm run db -w server -- status",
-    "lint": "eslint . --max-warnings 0"
+    "lint": "eslint . --max-warnings 0",
+    "test": "npm test -w server"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

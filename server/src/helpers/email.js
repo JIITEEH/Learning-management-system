@@ -49,7 +49,9 @@ async function send({ to, subject, text, html }) {
   if (!mailer) {
     if (config.isProduction) {
       console.error(`Could not email ${to}: SMTP_HOST is not set, so "${subject}" was not sent.`);
-    } else {
+    } else if (config.env !== 'test') {
+      // On a laptop the message is printed instead, so the reset flow can be tried without mail.
+      // Automated tests stay quiet.
       console.log(`\n[email not sent: SMTP_HOST is not set]\nTo: ${to}\nSubject: ${subject}\n\n${text}\n`);
     }
     return;

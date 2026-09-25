@@ -258,13 +258,19 @@ screens, `api-client/`, `shared-state/`, `reusable-logic/` and `helpers/`.
 
 ## Checking your work
 
-There are no tests yet. Before handing work back, lint, run the app, and
-exercise what you changed:
+Before handing work back, lint, run the tests, run the app, and exercise what
+you changed:
 
 ```sh
 npm run lint
+npm test             # server tests, each file on its own throwaway database
 npm run dev          # http://localhost:5174
 ```
+
+A new rule about who may do what gets a test in `server/test/`, next to the
+others for that feature. Tests never touch your real database or send email:
+`server/test/setup.js` points them at a database of their own, built from the
+schema and dropped afterwards.
 
 Check that the server boots without errors, that the routes you touched answer
 as expected, that the browser console stays free of errors, and that screens

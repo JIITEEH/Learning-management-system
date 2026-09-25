@@ -46,11 +46,14 @@ export async function getDashboard(req, res) {
     toGrade: toGrade?.map((row) => ({ id: row.id, title: row.title, waiting: Number(row.waiting), courseId: row.course_id, courseCode: row.course_code })),
     deadlines: deadlines?.map((row) => ({ id: row.id, title: row.title, dueAt: row.due_at, courseId: row.course_id, courseCode: row.course_code })),
     announcements: announcements?.map((row) => ({ id: row.id, title: row.title, createdAt: row.created_at, courseId: row.course_id, courseCode: row.course_code })),
-    totals: totals && {
-      accounts: Number(totals.accounts),
-      pendingAccounts: Number(totals.pending_accounts),
-      courses: Number(totals.courses),
-      openCourses: Number(totals.open_courses),
-    },
+    // A section that does not apply to this account is left out of the reply entirely
+    totals: totals
+      ? {
+          accounts: Number(totals.accounts),
+          pendingAccounts: Number(totals.pending_accounts),
+          courses: Number(totals.courses),
+          openCourses: Number(totals.open_courses),
+        }
+      : undefined,
   });
 }

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node --watch --env-file-if-exists=../.env src/index.js",
     "start": "node --env-file-if-exists=../.env src/index.js",
-    "db": "node --env-file-if-exists=../.env src/database/manage.js"
+    "db": "node --env-file-if-exists=../.env src/database/manage.js",
+    "test": "node --env-file-if-exists=../.env --test --test-concurrency=4 \"test/*.test.js\""
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

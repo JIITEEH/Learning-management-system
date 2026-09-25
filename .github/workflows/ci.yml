@@ -85,6 +85,11 @@ jobs:
       - name: Check the database reports itself ready
         run: npm run db:status
 
+      # Every permission rule and privacy rule, each against its own throwaway
+      # database. A rule that stops holding turns this red.
+      - name: Server tests
+        run: npm test
+
       - name: Boot the server and check it answers
         run: |
           npm start &

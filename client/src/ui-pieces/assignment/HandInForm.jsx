@@ -36,16 +36,25 @@ export default function HandInForm({ assignment, submission, courseOpen, onChang
     <>
       <div className="card-head">
         <h2>Your work</h2>
-        <SubmissionStatus submission={submission} dueAt={assignment.dueAt} />
+        <SubmissionStatus submission={submission} dueAt={assignment.dueAt} maxScore={assignment.maxScore} />
       </div>
+      {submission?.status === 'returned' && (
+        <div className="inset" aria-label="Your result">
+          <p className="metric">
+            <span className="metric-value">{submission.score}</span>
+            <span className="metric-label">out of {assignment.maxScore}, returned {formatDateTime(submission.gradedAt)}</span>
+          </p>
+          {submission.feedback ? <p className="prose">{submission.feedback}</p> : <p className="field-hint">No written feedback.</p>}
+        </div>
+      )}
       {submission && (
         <p className="field-hint">
           Handed in {formatDateTime(submission.submittedAt)}{submission.late ? ', after the due date' : ''}.
         </p>
       )}
       {!courseOpen && <Notice tone="ok">This course is closed, so work can no longer be handed in or changed.</Notice>}
-      {courseOpen && submission && submission.status !== 'submitted' && (
-        <Notice tone="ok">Your work has been graded, so it can no longer be changed.</Notice>
+      {courseOpen && submission?.status === 'graded' && (
+        <Notice tone="ok">Your work has been marked, so it can no longer be changed. The result appears here when your instructor returns it.</Notice>
       )}
 
       {submission?.files.length > 0 && (

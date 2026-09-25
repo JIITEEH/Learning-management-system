@@ -126,8 +126,13 @@ lessons done and see their progress.
 Assignments work (roadmap step 7): instructors set them with due dates;
 students hand in text and files, late work is marked late, and work can be
 changed until it is graded. The Files page lists every file an account may
-see. Grading and the gradebook come next, per [ROADMAP.md](ROADMAP.md);
-schedules have their table but no screens yet.
+see.
+
+Grading works (roadmap step 8): instructors score and comment, then return
+work when ready; each course has a gradebook that downloads as CSV, and
+students see their own running total. Announcements and real dashboards come
+next, per [ROADMAP.md](ROADMAP.md); schedules have their table but no screens
+yet.
 
 The dashboard shows placeholder cards, which stay as dashes until roadmap
 step 9 gives them something real to count.

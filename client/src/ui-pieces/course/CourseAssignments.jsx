@@ -43,6 +43,14 @@ export default function CourseAssignments({ course }) {
         </div>
       )}
 
+      {data.myTotal && (
+        <p className="card-intro">
+          {data.myTotal.percent === null
+            ? 'No returned grades yet.'
+            : `Your grade so far: ${data.myTotal.earned} of ${data.myTotal.possible} points (${data.myTotal.percent}%), counting returned work and anything missed after its due date.`}
+        </p>
+      )}
+
       {assignments.length === 0 ? (
         <p className="empty">{manages ? 'No assignments yet.' : 'Your instructor has not set any assignments yet.'}</p>
       ) : (
@@ -52,7 +60,7 @@ export default function CourseAssignments({ course }) {
               <Link to={`/courses/${course.id}/assignments/${assignment.id}`}>{assignment.title}</Link>
               <span className="field-hint">{formatDue(assignment.dueAt)}</span>
               {'mySubmission' in assignment ? (
-                <SubmissionStatus submission={assignment.mySubmission} dueAt={assignment.dueAt} />
+                <SubmissionStatus submission={assignment.mySubmission} dueAt={assignment.dueAt} maxScore={assignment.maxScore} />
               ) : (
                 <span className="tag">{assignment.submissionCount} handed in</span>
               )}

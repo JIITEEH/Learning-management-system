@@ -85,7 +85,7 @@ Two more were fixed at the end of the pass:
 | 5 | Courses and enrollment | **done** |
 | 6 | Modules and lessons | **done** |
 | 7 | Assignments and submissions | **done** |
-| 8 | Grading and gradebook | **to do** |
+| 8 | Grading and gradebook | **done** |
 | 9 | Announcements and dashboards | **to do** |
 
 ### Step 6 as built
@@ -113,6 +113,18 @@ the server's clock. A classmate can never see another student's work or
 files. The Files page lists every lesson and submission file the account may
 see. Downloading every submission as one zip was left for later.
 
+### Step 8 as built
+
+Instructors score each submission (up to the assignment's maximum) with
+written feedback. Grades stay private until returned, one at a time or all
+at once, and until then the score is left out of every reply to the student.
+A returned grade can be corrected, and the student sees the correction.
+The course's Gradebook tab shows every student against every assignment
+with a total, and downloads as CSV with spreadsheet formulas neutralised.
+Totals follow one rule (server/src/helpers/grades.js): a score counts; work
+handed in but not scored is left out; nothing handed in counts as 0 once
+past due. Students see their own running total on the Assignments tab.
+
 ### Launch
 
 | # | Step | Status | Notes for this stack |
@@ -136,7 +148,7 @@ Each screen is a file under `client/src/screens/`, shown at the address in
 | `/account` | `Account.jsx` | Every signed-in account | 4 — **built** |
 | `/dashboard` | `Dashboard.jsx` | Every role, different content | 9 (placeholders until then) |
 | `/courses` | `Courses.jsx` | Students and instructors | 5 — **built** |
-| `/courses/:id` | `Course.jsx` | One course, tabbed | 5 — **built** (Overview, People, Lessons from step 6, Assignments from step 7; Schedule waits) |
+| `/courses/:id` | `Course.jsx` | One course, tabbed | 5 — **built** (Overview, People, Lessons from step 6, Assignments from step 7, Gradebook from step 8; Schedule waits) |
 | `/courses/:courseId/lessons/:lessonId` | `Lesson.jsx` | A lesson, its files, previous / next | 6 — **built** |
 | `/courses/:courseId/assignments/:assignmentId` | `Assignment.jsx` | An assignment, handing in, and the instructor's list of submissions | 7 — **built** |
 | — | a schedule screen | Weekly meetings | Not in the roadmap's step 5, so it follows as its own piece |
@@ -144,7 +156,7 @@ Each screen is a file under `client/src/screens/`, shown at the address in
 | `/admin`, `/admin/users`, `/admin/roles` | `admin/Admin.jsx`, `admin/Users.jsx`, `admin/Roles.jsx` | Administrators | 4 — **built** |
 | anything else | `NotFound.jsx` | Everyone | 4 — **built** |
 
-A gradebook screen is not in the list above and is added in step 8.
+The gradebook is a tab of the course page rather than a screen of its own (step 8).
 
 ## Rules for every step
 

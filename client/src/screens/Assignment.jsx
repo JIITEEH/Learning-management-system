@@ -71,7 +71,7 @@ export default function Assignment() {
         {editing ? (
           <AssignmentForm assignment={assignment} submitLabel="Save assignment" onSave={save} onCancel={() => setEditing(false)} />
         ) : (
-          <LessonText text={assignment.instructions} />
+          <LessonText text={assignment.instructions} emptyText="No instructions." />
         )}
 
         {manages && !editing && (

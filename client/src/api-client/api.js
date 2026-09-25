@@ -115,6 +115,10 @@ export const api = {
     return request(`/assignments/${assignmentId}/submission`, { method: 'POST', body: form });
   },
   removeSubmissionFile: (submissionId, fileId) => request(`/submissions/${submissionId}/files/${fileId}`, { method: 'DELETE' }),
+  gradeSubmission: (id, score, feedback) => request(`/submissions/${id}/grade`, { method: 'PATCH', body: { score, feedback } }),
+  returnSubmission: (id) => request(`/submissions/${id}/return`, { method: 'POST' }),
+  returnAllGraded: (assignmentId) => request(`/assignments/${assignmentId}/return-all`, { method: 'POST' }),
+  getGradebook: (courseId) => request(`/courses/${courseId}/gradebook`),
 
   // Files. Downloads are plain links to fileDownloadUrl(id), so the browser saves them itself.
   listFiles: () => request('/files'),
@@ -127,3 +131,4 @@ export const api = {
 };
 
 export const fileDownloadUrl = (id) => `${BASE_URL}/files/${id}/download`;
+export const gradebookCsvUrl = (courseId) => `${BASE_URL}/courses/${courseId}/gradebook.csv`;

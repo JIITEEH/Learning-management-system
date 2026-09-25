@@ -10,6 +10,7 @@ import { courseStatus, plural, relationLabel } from '../helpers/format.js';
 import { Notice } from '../ui-pieces/basics/Feedback.jsx';
 import Tabs from '../ui-pieces/basics/Tabs.jsx';
 import CourseAssignments from '../ui-pieces/course/CourseAssignments.jsx';
+import CourseGradebook from '../ui-pieces/course/CourseGradebook.jsx';
 import CourseOutline from '../ui-pieces/course/CourseOutline.jsx';
 import CourseRoster from '../ui-pieces/course/CourseRoster.jsx';
 import CourseSettings from '../ui-pieces/course/CourseSettings.jsx';
@@ -63,6 +64,7 @@ export default function Course() {
     manages && can('enrollment.read') && { id: 'people', label: 'People', content: <CourseRoster courseId={course.id} /> },
     { id: 'lessons', label: 'Lessons', content: <CourseOutline course={course} /> },
     { id: 'assignments', label: 'Assignments', content: <CourseAssignments course={course} /> },
+    manages && can('submission.read') && { id: 'gradebook', label: 'Gradebook', content: <CourseGradebook course={course} /> },
     { id: 'schedule', label: 'Schedule', content: <><h2>Schedule</h2><p className="empty">Weekly class meetings arrive in a later step of the build.</p></> },
   ].filter(Boolean);
 

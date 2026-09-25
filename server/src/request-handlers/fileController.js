@@ -2,7 +2,7 @@
 // A file is only ever sent after checking the requester may see what it is attached to.
 import * as File from '../database-queries/fileModel.js';
 import * as Submission from '../database-queries/submissionModel.js';
-import { discardFiles, pathOnDisk, recordUploads } from '../helpers/files.js';
+import { checkFileTotal, discardFiles, pathOnDisk, recordUploads } from '../helpers/files.js';
 import { HttpError } from '../helpers/httpError.js';
 import { parseId } from '../helpers/validate.js';
 import { reachAssignment, reachLesson } from '../permission-rules/access.js';
@@ -12,6 +12,7 @@ import { fileToJson } from './lessonController.js';
 // arrive. Checking first means someone who may not edit this lesson never gets a byte onto disk.
 export async function allowLessonUpload(req, res, next) {
   req.reached = await reachLesson(req, req.params.id, { manage: true });
+  await checkFileTotal('lesson', req.reached.lesson.id);
   next();
 }
 
@@ -20,6 +21,7 @@ export async function uploadLessonFiles(req, res) {
   const uploads = req.files ?? [];
   if (uploads.length === 0) throw new HttpError(400, 'Choose at least one file to upload');
   const { lesson } = req.reached;
+  await checkFileTotal('lesson', lesson.id, uploads);
   await recordUploads(uploads, { ownerType: 'lesson', ownerId: lesson.id, uploadedBy: req.user.id });
   const files = await File.listFor('lesson', lesson.id);
   res.status(201).json({ files: files.map(fileToJson) });

@@ -19,8 +19,9 @@ app.set('trust proxy', config.trustProxy);
 app.use(securityHeaders);
 
 // Only JSON bodies are read. A plain HTML form (the kind another website can submit on a
-// visitor's behalf) therefore arrives with nothing the API will act on.
-app.use(express.json());
+// visitor's behalf) therefore arrives with nothing the API will act on. 256 KB fits the longest
+// lesson (50,000 characters, up to 3 bytes each) with room to spare; the default 100 KB did not.
+app.use(express.json({ limit: '256kb' }));
 
 // Sessions: the browser holds only a random id in a cookie; who it belongs to stays on the server
 app.use(

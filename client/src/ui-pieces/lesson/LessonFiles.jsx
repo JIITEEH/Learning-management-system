@@ -65,7 +65,7 @@ export default function LessonFiles({ lessonId, files, canManage, onChanged }) {
               <label htmlFor="lesson-files">Add files</label>
               <input className="input" id="lesson-files" type="file" multiple accept={ACCEPTED} ref={picker}
                 aria-describedby="lesson-files-hint" />
-              <p className="field-hint" id="lesson-files-hint">Up to 10 at a time, 25 MB each: documents, slides, spreadsheets, images, zip.</p>
+              <p className="field-hint" id="lesson-files-hint">Up to 10 at a time and 30 in total, 25 MB each: documents, slides, spreadsheets, images, zip.</p>
             </div>
             <button className="btn" type="submit" disabled={upload.busy} data-loading={upload.busy}>Upload</button>
           </form>

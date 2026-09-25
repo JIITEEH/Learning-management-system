@@ -2,7 +2,7 @@
 import * as Enrollment from '../database-queries/enrollmentModel.js';
 import * as File from '../database-queries/fileModel.js';
 import * as Submission from '../database-queries/submissionModel.js';
-import { discardFiles, recordUploads } from '../helpers/files.js';
+import { checkFileTotal, discardFiles, recordUploads } from '../helpers/files.js';
 import { HttpError } from '../helpers/httpError.js';
 import { optionalText, parseId, requireNumber } from '../helpers/validate.js';
 import { reachAssignment } from '../permission-rules/access.js';
@@ -28,6 +28,8 @@ async function reachOwnSubmissionSlot(req, assignmentIdValue) {
 // byte onto disk
 export async function allowHandIn(req, res, next) {
   req.reached = await reachOwnSubmissionSlot(req, req.params.id);
+  // The file total is checked after the upload instead (in handIn): a hand-in may carry only a
+  // changed answer and no files, which must still work when the submission is full
   next();
 }
 
@@ -43,6 +45,7 @@ async function ownSubmissionResponse(submissionId, assignment) {
 export async function handIn(req, res) {
   const { assignment, existing } = req.reached;
   const uploads = req.files ?? [];
+  if (uploads.length > 0) await checkFileTotal('submission', existing?.id, uploads);
   const body = optionalText(req.body?.body, 'Answer', { max: ANSWER_MAX });
   const filesAlready = existing ? (await File.listFor('submission', existing.id)).length : 0;
   if (!body && uploads.length === 0 && filesAlready === 0) {

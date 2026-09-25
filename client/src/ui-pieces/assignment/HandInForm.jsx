@@ -89,7 +89,7 @@ export default function HandInForm({ assignment, submission, courseOpen, onChang
               <label htmlFor="hand-in-files">{submission ? 'Add more files' : 'Attach files'}</label>
               <input className="input" id="hand-in-files" type="file" multiple accept={ACCEPTED} ref={picker}
                 aria-describedby="hand-in-files-hint" />
-              <p className="field-hint" id="hand-in-files-hint">Up to 10 at a time, 25 MB each.</p>
+              <p className="field-hint" id="hand-in-files-hint">Up to 10 files in total, 25 MB each.</p>
             </div>
             <div className="actions">
               <button className="btn btn-primary" type="submit" disabled={handIn.busy} data-loading={handIn.busy}>

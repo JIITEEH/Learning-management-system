@@ -14,6 +14,10 @@ fs.mkdirSync(config.uploadDir, { recursive: true });
 // 25 MB. Raise deliberately: the limit is what stops a single request filling the disk.
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 
+// How many files one thing may hold in total, across every upload to it. Without a total,
+// someone could upload 10 more files again and again until the disk is full.
+export const MAX_FILES = { lesson: 30, submission: 10 };
+
 const ALLOWED_MIME = new Set([
   'application/pdf',
   'application/msword',

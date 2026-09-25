@@ -291,8 +291,7 @@ button { font: inherit; letter-spacing: inherit; color: inherit; }
 /* Numbers that sit in columns must line up. */
 time,
 [data-numeric],
-.metric-value,
-.tally-value { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+.metric-value { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
 
 /* ==========================================================================
    Utilities
@@ -531,10 +530,6 @@ time,
 
 .avatar svg { width: 60%; height: 60%; }
 
-.avatar-stack { display: flex; }
-.avatar-stack .avatar { margin-left: -10px; }
-.avatar-stack .avatar:first-child { margin-left: 0; }
-
 /* ==========================================================================
    Board — Mondly's three-column arrangement
    ========================================================================== */
@@ -543,7 +538,13 @@ time,
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--card-gap);
+  align-items: start;
 }
+
+/* The dashboard's cards fill the board in order; the welcome runs across the top */
+.dashboard-welcome { grid-column: 1 / -1; }
+.dashboard-courses { display: grid; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.dashboard-courses li { display: grid; gap: var(--space-2); }
 
 .card {
   padding: var(--space-6);
@@ -554,18 +555,6 @@ time,
   -webkit-backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-highlight-strong), var(--shadow);
 }
-
-.card-activity {
-  grid-column: 1;
-  grid-row: 1 / span 2;
-  display: grid;
-  grid-template-rows: auto auto auto auto auto minmax(0, 1fr);
-  align-content: start;
-}
-.card-activity > .inset:last-child { display: grid; align-content: center; }
-.card-progress { grid-column: 2; grid-row: 1; }
-.card-feature  { grid-column: 3; grid-row: 1; }
-.card-schedule { grid-column: 2 / span 2; grid-row: 2; }
 
 .card-head {
   display: flex;
@@ -612,29 +601,6 @@ time,
    Chips and tags
    ========================================================================== */
 
-.chip {
-  display: inline-flex;
-  gap: var(--space-2);
-  align-items: center;
-  min-height: 38px;
-  padding: 0 var(--space-4);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-full);
-  background: rgb(255 255 255 / 0.09);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: var(--glass-highlight);
-  color: var(--chalk);
-  font-size: var(--text-base);
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background-color var(--duration-fast) var(--ease-out);
-}
-
-@media (hover: hover) { .chip:hover { background: var(--glass-hover); } }
-.chip svg { width: 16px; height: 16px; color: var(--chalk-muted); }
-
 .tag {
   display: inline-flex;
   align-items: center;
@@ -657,124 +623,8 @@ time,
 .tag-warn { border-color: rgb(245 177 103 / 0.32); background: rgb(220 104 3 / 0.2); color: var(--warning-light); }
 
 /* ==========================================================================
-   Bar chart — days of the week
-   ========================================================================== */
-
-.chart {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: var(--space-2);
-  align-items: end;
-  height: 200px;
-  margin: var(--space-6) 0 var(--space-3);
-}
-
-.chart-col { display: grid; align-items: end; height: 100%; }
-
-.chart-bar {
-  width: 100%;
-  height: var(--bar-height, 0%);
-  min-height: 4px;
-  border-radius: var(--radius-sm);
-  background: rgb(123 156 245 / 0.32);
-  transition: height var(--duration-slow) var(--ease-out);
-}
-
-.chart-col[data-peak="true"] .chart-bar { background-image: var(--primary-face); }
-
-/* The empty baseline that shows when no activity has been recorded. The
-   plotting area collapses too, so the card does not hold an empty void. */
-.chart[data-empty="true"] { height: 64px; margin-top: var(--space-4); }
-.chart[data-empty="true"] .chart-bar { height: 4px; background: rgb(255 255 255 / 0.12); }
-
-.chart-days {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: var(--space-2);
-  color: var(--chalk-muted);
-  font-size: var(--text-sm);
-  text-align: center;
-}
-
-.chart-note { padding-top: var(--space-4); color: var(--chalk-faint); font-size: var(--text-sm); text-align: center; }
-.chart-note + .inset { margin-top: var(--space-6); }
-
-/* ==========================================================================
-   Segmented progress
-   ========================================================================== */
-
-.segments {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: var(--seg-basis, 1fr);
-  gap: var(--space-3);
-  margin: var(--space-5) 0 var(--space-2);
-}
-
-.segment-bar { display: block; height: 7px; border-radius: var(--radius-full); background: rgb(255 255 255 / 0.12); }
-.segment[data-tone="primary"] .segment-bar { background: var(--primary-light); }
-.segment[data-tone="ok"] .segment-bar { background: var(--success-light); }
-.segment[data-tone="warn"] .segment-bar { background: var(--warning-light); }
-.segment-label { padding-top: var(--space-2); color: var(--chalk-muted); font-size: var(--text-sm); }
-
-/* ==========================================================================
-   Tally — three counts sharing one inset, divided
-   ========================================================================== */
-
-.tally {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: var(--space-6);
-  padding: var(--space-6) var(--space-3);
-}
-
-.tally-cell {
-  display: grid;
-  gap: var(--space-2);
-  justify-items: center;
-  padding: 0 var(--space-3);
-  border-left: 1px solid var(--glass-border-soft);
-  text-align: center;
-}
-.tally-cell:first-child { border-left: 0; }
-
-.tally-mark {
-  display: grid;
-  place-items: center;
-  width: 46px; height: 46px;
-  margin-bottom: var(--space-3);
-  border: 1px solid var(--glass-border);
-  border-radius: 50%;
-  box-shadow: var(--glass-highlight);
-  color: #fff;
-}
-.tally-mark svg { width: 21px; height: 21px; }
-.tally-cell[data-tone="primary"] .tally-mark { background-image: var(--primary-face); }
-.tally-cell[data-tone="ok"] .tally-mark { background: var(--success); }
-.tally-cell[data-tone="warn"] .tally-mark { background: var(--warning); }
-
-.tally-value { color: var(--chalk); font-size: var(--text-xl); font-weight: 700; line-height: 1; }
-.tally-value.placeholder { color: var(--chalk-faint); font-weight: 500; }
-.tally-label { color: var(--chalk-muted); font-size: var(--text-base); }
-
-/* ==========================================================================
    Feature card
    ========================================================================== */
-
-.feature-tags { display: flex; gap: var(--space-2); margin-bottom: var(--space-4); }
-.card-feature h2 { font-size: var(--text-xl); margin-bottom: var(--space-3); }
-.card-feature > p { color: var(--chalk-muted); }
-
-.feature-split {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
-  margin: var(--space-5) 0;
-}
-
-.feature-split .inset { display: grid; gap: var(--space-4); align-content: start; }
-.feature-split .field-label { color: var(--chalk-muted); font-size: var(--text-base); }
 
 .meter {
   position: relative;
@@ -874,74 +724,6 @@ time,
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* --- Round stepper buttons, as used by the schedule pager */
-
-.stepper { display: flex; gap: var(--space-3); align-items: center; }
-
-.stepper-btn {
-  display: grid;
-  place-items: center;
-  width: 38px; height: 38px;
-  border: 1px solid var(--glass-border);
-  border-radius: 50%;
-  background: rgb(255 255 255 / 0.09);
-  box-shadow: var(--glass-highlight);
-  color: var(--chalk);
-  cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-out);
-}
-@media (hover: hover) { .stepper-btn:hover { background: var(--glass-hover); } }
-.stepper-btn svg { width: 16px; height: 16px; }
-.stepper-label { color: var(--chalk); font-weight: 600; }
-
-/* ==========================================================================
-   Schedule
-   ========================================================================== */
-
-.schedule-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
-}
-
-.session {
-  display: grid;
-  gap: var(--space-3);
-  align-content: start;
-  min-height: 236px;
-  padding: var(--space-5);
-  border: 1px solid var(--glass-border-soft);
-  border-radius: var(--radius-lg);
-  background: var(--glass-fill-soft);
-  box-shadow: var(--glass-highlight);
-}
-
-.session-top { display: flex; gap: var(--space-3); align-items: center; justify-content: space-between; }
-.session-time { color: var(--chalk-muted); font-size: var(--text-base); }
-.session h3 { font-size: var(--text-lg); font-weight: 600; }
-.session-tag { justify-self: start; }
-
-.session-mentor {
-  display: flex;
-  gap: var(--space-3);
-  align-items: center;
-  margin-top: auto;
-  padding-top: var(--space-4);
-}
-.session-mentor-name { color: var(--chalk); font-weight: 500; }
-.session-mentor-role { color: var(--chalk-muted); font-size: var(--text-sm); }
-
-/* The session happening now takes the primary field. */
-.session[data-now="true"] {
-  border-color: rgb(255 255 255 / 0.24);
-  background-image: var(--primary-face);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.32), 0 16px 34px -16px rgb(2 4 14 / 0.7);
-}
-.session[data-now="true"] .session-time,
-.session[data-now="true"] .session-mentor-role { color: rgb(255 255 255 / 0.78); }
-.session[data-now="true"] .session-mentor-name,
-.session[data-now="true"] h3 { color: #fff; }
 
 /* ==========================================================================
    Empty states
@@ -1372,17 +1154,6 @@ time,
 
 @media (max-width: 1180px) {
   .board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .card-activity {
-  grid-column: 1;
-  grid-row: 1 / span 2;
-  display: grid;
-  grid-template-rows: auto auto auto auto auto minmax(0, 1fr);
-  align-content: start;
-}
-.card-activity > .inset:last-child { display: grid; align-content: center; }
-  .card-progress { grid-column: 2; grid-row: 1; }
-  .card-feature  { grid-column: 2; grid-row: 2; }
-  .card-schedule { grid-column: 1 / span 2; grid-row: 3; }
 }
 
 /* The row of links is centred, so the logo and the account controls each
@@ -1435,15 +1206,8 @@ time,
   .brand { font-size: var(--text-md); gap: var(--space-2); }
 
   .board { grid-template-columns: minmax(0, 1fr); }
-  .card-activity,
-  .card-progress,
-  .card-feature,
-  .card-schedule { grid-column: 1; grid-row: auto; }
 
   .card { padding: var(--space-5); }
-  .schedule-grid { grid-template-columns: minmax(0, 1fr); }
-  .session { min-height: 0; }
-  .feature-split { grid-template-columns: minmax(0, 1fr); }
   .metric-value { font-size: 2.5rem; }
 
   .perm-row:not(.perm-row-check) { grid-template-columns: minmax(0, 1fr); }
@@ -1454,9 +1218,8 @@ time,
    narrow screen. An iPad is wide enough for the desktop layout, but it is
    still used with a finger, so width alone cannot decide this. */
 @media (max-width: 900px), (pointer: coarse) {
-  .btn, .btn-sm, .chip, .tab, .navpill-item, .account-btn,
-  .select-sm, .perm-row .select { min-height: var(--tap-min); }
-  .icon-btn, .stepper-btn { width: var(--tap-min); height: var(--tap-min); }
+  .btn, .btn-sm, .tab, .navpill-item, .account-btn, .select-sm, .perm-row .select { min-height: var(--tap-min); }
+  .icon-btn { width: var(--tap-min); height: var(--tap-min); }
 }
 
 /* Below this the wordmark gives way to the mark so the controls keep their

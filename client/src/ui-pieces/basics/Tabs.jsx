@@ -2,13 +2,14 @@
 // arrow keys move between them, and only the chosen tab is reachable with Tab, so the next press
 // goes into its panel rather than through every other tab.
 //
+// `initialId` opens a tab other than the first, e.g. from a link to /courses/7?tab=announcements.
 //   <Tabs label="Course sections" tabs={[{ id: 'overview', label: 'Overview', content: <Overview /> }, ...]}>
 //     <h1>Heading shown above the tabs, in the same card</h1>
 //   </Tabs>
 import { useRef, useState } from 'react';
 
-export default function Tabs({ label, tabs, children }) {
-  const [selectedId, setSelectedId] = useState(tabs[0].id);
+export default function Tabs({ label, tabs, initialId, children }) {
+  const [selectedId, setSelectedId] = useState(initialId ?? tabs[0].id);
   const buttons = useRef({});
   const selected = tabs.find((tab) => tab.id === selectedId) ?? tabs[0];
 

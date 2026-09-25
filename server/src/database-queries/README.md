@@ -32,7 +32,9 @@ One model per table or closely related group of tables:
 | `progressModel.js` | `lesson_progress` (`03_enrollment.sql`) | module and lesson controllers |
 | `fileModel.js` | `files` (`05_files.sql`) | file, lesson, module, assignment, submission and course controllers, `helpers/files.js` |
 | `assignmentModel.js` | `assignments` (`04_assessment.sql`) | assignment and course controllers, `permission-rules/access.js` |
-| `submissionModel.js` | `submissions` (`04_assessment.sql`) | submission, assignment, file and course controllers |
+| `submissionModel.js` | `submissions` (`04_assessment.sql`) | submission, assignment, gradebook, file and course controllers |
+| `announcementModel.js` | `announcements` (`07_communication.sql`) | announcement controller |
+| `dashboardModel.js` | read-only summaries across several tables | dashboard controller |
 
 Controllers import a model under a capitalised name, so a call says which
 table it touches:

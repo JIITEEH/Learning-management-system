@@ -30,7 +30,7 @@ export default function CourseGradebook({ course }) {
         <p className="empty">{students.length === 0 ? 'Nobody is enrolled yet.' : 'No assignments yet.'}</p>
       ) : (
         <div className="table-wrap">
-          <table className="table gradebook">
+          <table className="table">
             <thead>
               <tr>
                 <th scope="col">Student</th>

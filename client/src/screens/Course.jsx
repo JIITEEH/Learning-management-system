@@ -2,13 +2,14 @@
 // administrators also get the settings and the People tab; which of those appear follows the
 // `relation` the server reports, and the server checks again on every change.
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 import { api } from '../api-client/api.js';
 import { useAuth } from '../shared-state/AuthContext.jsx';
 import useApi from '../reusable-logic/useApi.js';
 import { courseStatus, plural, relationLabel } from '../helpers/format.js';
 import { Notice } from '../ui-pieces/basics/Feedback.jsx';
 import Tabs from '../ui-pieces/basics/Tabs.jsx';
+import CourseAnnouncements from '../ui-pieces/course/CourseAnnouncements.jsx';
 import CourseAssignments from '../ui-pieces/course/CourseAssignments.jsx';
 import CourseGradebook from '../ui-pieces/course/CourseGradebook.jsx';
 import CourseOutline from '../ui-pieces/course/CourseOutline.jsx';
@@ -34,6 +35,7 @@ function CourseNotFound() {
 
 export default function Course() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const { can } = useAuth();
   const { data, error } = useApi(() => api.getCourse(id), [id]);
   // Kept separately so a save can show the server's updated copy without reloading the page
@@ -62,6 +64,7 @@ export default function Course() {
       ),
     },
     manages && can('enrollment.read') && { id: 'people', label: 'People', content: <CourseRoster courseId={course.id} /> },
+    can('announcement.read') && { id: 'announcements', label: 'Announcements', content: <CourseAnnouncements course={course} /> },
     { id: 'lessons', label: 'Lessons', content: <CourseOutline course={course} /> },
     { id: 'assignments', label: 'Assignments', content: <CourseAssignments course={course} /> },
     manages && can('submission.read') && { id: 'gradebook', label: 'Gradebook', content: <CourseGradebook course={course} /> },
@@ -71,7 +74,7 @@ export default function Course() {
   return (
     <main className="stack stack-wide" id="main">
       <title>{`${course.title} — LearnHub`}</title>
-      <Tabs label="Course sections" tabs={tabs}>
+      <Tabs label="Course sections" tabs={tabs} initialId={searchParams.get('tab') ?? undefined}>
         <span className="tag-row">
           <span className="tag">{course.code}</span>
           <span className={`tag ${status.tone}`}>{status.label}</span>

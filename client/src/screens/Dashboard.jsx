@@ -1,146 +1,148 @@
-// The dashboard. Every card is still a placeholder from the design pass: it shows a dash rather
-// than a number, because the lessons, deadlines and schedules it would report do not exist yet.
-// Roadmap step 9 fills it in once there is something real to count.
+// The dashboard: one card per thing this account should know about, and only the cards its role
+// has use for (the server decides which sections to send, see dashboardController.js). Every
+// number shown is real; there are no placeholders.
 import { Link } from 'react-router';
-import { BookOpen, Calendar, CalendarClock, ChevronLeft, ChevronRight, CircleCheck, Clock, User } from 'lucide-react';
-import { EmptyState } from '../ui-pieces/basics/Feedback.jsx';
+import { BookOpen, CalendarClock, ClipboardCheck, Megaphone, UserCheck } from 'lucide-react';
+import { api } from '../api-client/api.js';
+import { useAuth } from '../shared-state/AuthContext.jsx';
+import useApi from '../reusable-logic/useApi.js';
+import { formatDate, formatDue, isPastDue, plural } from '../helpers/format.js';
+import { EmptyState, Notice } from '../ui-pieces/basics/Feedback.jsx';
 
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const TALLIES = [
-  { tone: 'primary', label: 'In progress', Icon: Clock },
-  { tone: 'ok', label: 'Completed', Icon: CircleCheck },
-  { tone: 'warn', label: 'Upcoming', Icon: CalendarClock },
-];
-
-function PersonAvatar() {
+// A dashboard card with a heading, and an empty message when it has nothing to list
+function Card({ title, Icon, empty, children, hasItems }) {
   return (
-    <span className="avatar" aria-hidden="true">
-      <User />
-    </span>
+    <section className="card" aria-label={title}>
+      <div className="card-head"><h2>{title}</h2></div>
+      {hasItems ? children : <EmptyState icon={Icon}>{empty}</EmptyState>}
+    </section>
+  );
+}
+
+function ProgressBar({ done, total }) {
+  const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+  return (
+    <div className="meter" role="img" aria-label={`${done} of ${total} lessons done`}>
+      <span className="meter-fill" style={{ '--meter-at': `${percent}%` }}>{percent}%</span>
+    </div>
   );
 }
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const { data, error } = useApi(() => api.getDashboard(), []);
+  const firstName = user.fullName.split(/\s+/)[0];
+
+  if (error) return <main className="stack" id="main"><Notice>{error.message}</Notice></main>;
+  if (!data) return null;
+  const { courses, dueSoon, recentGrades, toGrade, deadlines, announcements, totals } = data;
+  const courseLink = (item, kind) => `/courses/${item.courseId}/${kind}/${item.id}`;
+
   return (
-    <main className="board" id="main">
-      <h1 className="visually-hidden">Dashboard</h1>
-
-      <section className="card card-activity" aria-labelledby="activity-title">
-        <div className="card-head">
-          <h2 id="activity-title">Activity</h2>
-          <button className="chip" type="button" disabled>
-            <Calendar aria-hidden="true" />
-            Last 7 days
-          </button>
-        </div>
-        <p className="metric">
-          <span className="metric-value placeholder">—</span>
-          <span className="metric-label">Hours spent</span>
-        </p>
-        <div className="chart" data-empty="true" role="img" aria-label="Hours studied per day. No activity recorded yet.">
-          {DAYS.map((day) => (
-            <div key={day} className="chart-col"><span className="chart-bar" /></div>
-          ))}
-        </div>
-        <div className="chart-days" aria-hidden="true">
-          {DAYS.map((day) => <span key={day}>{day}</span>)}
-        </div>
-        <p className="chart-note">No activity recorded yet.</p>
-        <div className="inset">
-          <h3>By course</h3>
-          <EmptyState icon={BookOpen}>Time spent will break down by course once you are enrolled in one.</EmptyState>
-        </div>
+    <main className="board dashboard" id="main">
+      <section className="card dashboard-welcome">
+        <h1>Welcome back, {firstName}</h1>
+        <p className="card-intro">Here is what needs you today.</p>
       </section>
 
-      <section className="card card-progress" aria-labelledby="progress-title">
-        <div className="card-head">
-          <h2 id="progress-title">Progress statistics</h2>
-        </div>
-        <p className="metric">
-          <span className="metric-value placeholder">—</span>
-          <span className="metric-label">Total activity</span>
-        </p>
-        <div className="segments">
-          {TALLIES.map(({ tone }) => (
-            <div key={tone} className="segment" data-tone={tone}>
-              <span className="segment-bar" />
-              <span className="segment-label placeholder">—</span>
-            </div>
-          ))}
-        </div>
-        <div className="inset tally">
-          {TALLIES.map(({ tone, label, Icon }) => (
-            <div key={tone} className="tally-cell" data-tone={tone}>
-              <span className="tally-mark"><Icon aria-hidden="true" /></span>
-              <span className="tally-value placeholder">—</span>
-              <span className="tally-label">{label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+      {totals && (
+        <Card title="Accounts" Icon={UserCheck} hasItems>
+          <p className="metric">
+            <span className="metric-value">{totals.pendingAccounts}</span>
+            <span className="metric-label">{totals.pendingAccounts === 1 ? 'account waiting' : 'accounts waiting'} for approval</span>
+          </p>
+          {totals.pendingAccounts > 0 && (
+            <Link className="btn btn-primary" to="/admin/users?status=pending">Review them</Link>
+          )}
+          <p className="field-hint">
+            {plural(totals.accounts, 'account')} in total · {plural(totals.openCourses, 'open course')} of {totals.courses}
+          </p>
+        </Card>
+      )}
 
-      <section className="card card-feature" aria-labelledby="feature-title">
-        <div className="feature-tags">
-          <span className="tag tag-ok">No course selected</span>
-          <span className="tag tag-info">—</span>
-        </div>
-        <h2 id="feature-title" className="placeholder">No course to continue yet</h2>
-        <p>
-          When you are enrolled in a course, the one you are partway through appears here with its participants and your
-          progress.
-        </p>
-        <div className="feature-split">
-          <div className="inset">
-            <span className="field-label">Participants</span>
-            <div className="avatar-stack" aria-label="No participants yet">
-              <PersonAvatar /><PersonAvatar /><PersonAvatar />
-            </div>
-          </div>
-          <div className="inset">
-            <span className="field-label">Course progress</span>
-            <div className="meter" role="img" aria-label="No progress recorded yet">
-              <span className="meter-fill placeholder">—</span>
-            </div>
-          </div>
-        </div>
-        <Link className="btn btn-contrast btn-block" to="/courses">Browse courses</Link>
-      </section>
+      {toGrade && (
+        <Card title="To grade" Icon={ClipboardCheck} empty="Nothing waiting to be graded." hasItems={toGrade.length > 0}>
+          <ul className="file-list">
+            {toGrade.map((item) => (
+              <li key={item.id} className="outline-row">
+                <Link to={courseLink(item, 'assignments')}>{item.courseCode} · {item.title}</Link>
+                <span className="tag tag-info">{item.waiting} waiting</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
-      <section className="card card-schedule" aria-labelledby="schedule-title">
-        <div className="card-head">
-          <h2 id="schedule-title">My schedule</h2>
-          <div className="stepper">
-            <button className="stepper-btn" type="button" disabled>
-              <span className="visually-hidden">Previous day</span>
-              <ChevronLeft aria-hidden="true" />
-            </button>
-            <span className="stepper-label">Today</span>
-            <button className="stepper-btn" type="button" disabled>
-              <span className="visually-hidden">Next day</span>
-              <ChevronRight aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-        <div className="schedule-grid">
-          {[1, 2, 3].map((slot) => (
-            <article key={slot} className="session">
-              <div className="session-top">
-                <span className="session-time placeholder">—:— — —:—</span>
-              </div>
-              <h3 className="placeholder">No session scheduled</h3>
-              <span className="tag session-tag">—</span>
-              <div className="session-mentor">
-                <PersonAvatar />
-                <span>
-                  <span className="session-mentor-name placeholder">—</span>
-                  <br />
-                  <span className="session-mentor-role">Instructor</span>
+      {dueSoon && (
+        <Card title="Due soon" Icon={CalendarClock} empty="Nothing due. Everything with a deadline is handed in." hasItems={dueSoon.length > 0}>
+          <ul className="file-list">
+            {dueSoon.map((item) => (
+              <li key={item.id} className="outline-row">
+                <Link to={courseLink(item, 'assignments')}>{item.courseCode} · {item.title}</Link>
+                <span className={`tag ${isPastDue(item.dueAt) ? 'tag-warn' : ''}`}>
+                  {isPastDue(item.dueAt) ? 'Overdue' : formatDue(item.dueAt)}
                 </span>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {courses && (
+        <Card title="My courses" Icon={BookOpen} empty="You are not in any course yet. Join one from the Courses page." hasItems={courses.length > 0}>
+          <ul className="dashboard-courses">
+            {courses.map((course) => (
+              <li key={course.id}>
+                <Link to={`/courses/${course.id}`}>{course.code} · {course.title}</Link>
+                {course.lessonCount > 0 ? (
+                  <ProgressBar done={course.lessonsDone} total={course.lessonCount} />
+                ) : (
+                  <p className="field-hint">No lessons yet.</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {recentGrades && (
+        <Card title="Recent grades" Icon={ClipboardCheck} empty="No grades returned yet." hasItems={recentGrades.length > 0}>
+          <ul className="file-list">
+            {recentGrades.map((grade) => (
+              <li key={grade.assignmentId} className="outline-row">
+                <Link to={`/courses/${grade.courseId}/assignments/${grade.assignmentId}`}>{grade.courseCode} · {grade.title}</Link>
+                <span className="tag tag-ok">{grade.score}/{grade.maxScore}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {deadlines && (
+        <Card title="Upcoming deadlines" Icon={CalendarClock} empty="No deadlines ahead." hasItems={deadlines.length > 0}>
+          <ul className="file-list">
+            {deadlines.map((item) => (
+              <li key={item.id} className="outline-row">
+                <Link to={courseLink(item, 'assignments')}>{item.courseCode} · {item.title}</Link>
+                <span className="field-hint">{formatDue(item.dueAt)}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {announcements && (
+        <Card title="Announcements" Icon={Megaphone} empty="No announcements in your courses." hasItems={announcements.length > 0}>
+          <ul className="file-list">
+            {announcements.map((item) => (
+              <li key={item.id} className="outline-row">
+                <Link to={`/courses/${item.courseId}?tab=announcements`}>{item.courseCode} · {item.title}</Link>
+                <span className="field-hint">{formatDate(item.createdAt)}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
     </main>
   );
 }

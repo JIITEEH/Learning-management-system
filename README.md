@@ -130,9 +130,12 @@ see.
 
 Grading works (roadmap step 8): instructors score and comment, then return
 work when ready; each course has a gradebook that downloads as CSV, and
-students see their own running total. Announcements and real dashboards come
-next, per [ROADMAP.md](ROADMAP.md); schedules have their table but no screens
-yet.
+students see their own running total.
 
-The dashboard shows placeholder cards, which stay as dashes until roadmap
-step 9 gives them something real to count.
+Announcements and dashboards work (roadmap step 9): each role's dashboard
+shows real progress, deadlines, work to grade and announcements. What is
+left before a first release is automated tests and a security review (step
+12) and deploying (step 13), per [ROADMAP.md](ROADMAP.md). Schedules have
+their table but no screens yet.
+
+

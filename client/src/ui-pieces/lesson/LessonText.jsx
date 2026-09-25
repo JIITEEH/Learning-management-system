@@ -14,10 +14,11 @@ function withLinks(text) {
   );
 }
 
-// Also used for assignment instructions, which pass their own `emptyText`
+// Also used for assignment instructions and announcements, which pass their own `emptyText`
+// ('' shows nothing at all when there is no text)
 export default function LessonText({ text, emptyText = 'This lesson has no text yet.' }) {
   const paragraphs = text.split(/\n\s*\n/).filter((paragraph) => paragraph.trim());
-  if (paragraphs.length === 0) return <p className="placeholder">{emptyText}</p>;
+  if (paragraphs.length === 0) return emptyText ? <p className="placeholder">{emptyText}</p> : null;
   return (
     <div className="lesson-text">
       {paragraphs.map((paragraph, index) => (

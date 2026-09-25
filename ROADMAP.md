@@ -86,7 +86,7 @@ Two more were fixed at the end of the pass:
 | 6 | Modules and lessons | **done** |
 | 7 | Assignments and submissions | **done** |
 | 8 | Grading and gradebook | **done** |
-| 9 | Announcements and dashboards | **to do** |
+| 9 | Announcements and dashboards | **done** |
 
 ### Step 6 as built
 
@@ -125,6 +125,20 @@ Totals follow one rule (server/src/helpers/grades.js): a score counts; work
 handed in but not scored is left out; nothing handed in counts as 0 once
 past due. Students see their own running total on the Assignments tab.
 
+### Step 9 as built
+
+Instructors post announcements to a course; everyone who can see the course
+reads them on its Announcements tab. The dashboard shows only real
+information, chosen by the account's role: a student's courses with lesson
+progress, work due soon (overdue first) and recent grades; for staff, work
+waiting to be graded and upcoming deadlines; for administrators, accounts
+awaiting approval and totals; for everyone, the latest announcements. The
+placeholder cards (hours spent, a weekly schedule) and their styles are
+gone until something records that information.
+
+The announcements table arrived as the project's first migration, so the
+local database kept its administrator account.
+
 ### Launch
 
 | # | Step | Status | Notes for this stack |
@@ -146,9 +160,9 @@ Each screen is a file under `client/src/screens/`, shown at the address in
 | `/login`, `/register` | `auth/Login.jsx`, `auth/Register.jsx` | Signed out | 4 — **built** |
 | `/forgot-password`, `/reset-password` | `auth/ForgotPassword.jsx`, `auth/ResetPassword.jsx` | Signed out | 3 — **built** |
 | `/account` | `Account.jsx` | Every signed-in account | 4 — **built** |
-| `/dashboard` | `Dashboard.jsx` | Every role, different content | 9 (placeholders until then) |
+| `/dashboard` | `Dashboard.jsx` | Every role, different content | 9 — **built** |
 | `/courses` | `Courses.jsx` | Students and instructors | 5 — **built** |
-| `/courses/:id` | `Course.jsx` | One course, tabbed | 5 — **built** (Overview, People, Lessons from step 6, Assignments from step 7, Gradebook from step 8; Schedule waits) |
+| `/courses/:id` | `Course.jsx` | One course, tabbed | 5 — **built** (Overview, People, Announcements from step 9, Lessons from step 6, Assignments from step 7, Gradebook from step 8; Schedule waits) |
 | `/courses/:courseId/lessons/:lessonId` | `Lesson.jsx` | A lesson, its files, previous / next | 6 — **built** |
 | `/courses/:courseId/assignments/:assignmentId` | `Assignment.jsx` | An assignment, handing in, and the instructor's list of submissions | 7 — **built** |
 | — | a schedule screen | Weekly meetings | Not in the roadmap's step 5, so it follows as its own piece |

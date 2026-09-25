@@ -120,6 +120,13 @@ export const api = {
   returnAllGraded: (assignmentId) => request(`/assignments/${assignmentId}/return-all`, { method: 'POST' }),
   getGradebook: (courseId) => request(`/courses/${courseId}/gradebook`),
 
+  // Announcements and the dashboard
+  listAnnouncements: (courseId) => request(`/courses/${courseId}/announcements`),
+  postAnnouncement: (courseId, data) => request(`/courses/${courseId}/announcements`, { method: 'POST', body: data }),
+  updateAnnouncement: (id, data) => request(`/announcements/${id}`, { method: 'PATCH', body: data }),
+  deleteAnnouncement: (id) => request(`/announcements/${id}`, { method: 'DELETE' }),
+  getDashboard: () => request('/dashboard'),
+
   // Files. Downloads are plain links to fileDownloadUrl(id), so the browser saves them itself.
   listFiles: () => request('/files'),
   uploadLessonFiles: (lessonId, fileList) => {

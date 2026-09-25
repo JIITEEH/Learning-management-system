@@ -3,6 +3,7 @@ import * as Assignment from '../database-queries/assignmentModel.js';
 import * as File from '../database-queries/fileModel.js';
 import * as Submission from '../database-queries/submissionModel.js';
 import { discardFiles } from '../helpers/files.js';
+import { totalFor } from '../helpers/grades.js';
 import { optionalDateTime, optionalText, requireNumber, requireText } from '../helpers/validate.js';
 import { manageCourse, reachAssignment, reachCourse } from '../permission-rules/access.js';
 import { fileToJson } from './lessonController.js';
@@ -23,7 +24,11 @@ export function assignmentToJson(row) {
 export const isLate = (submission, assignment) =>
   Boolean(assignment.due_at && submission.submitted_at > assignment.due_at);
 
-export function submissionToJson(row, assignment) {
+// `forStudent`: the reply goes to the student who handed the work in. Until the instructor returns
+// it, the score and feedback are left out of the reply entirely, not just hidden on screen, so they
+// cannot be read from the browser's network tools either.
+export function submissionToJson(row, assignment, { forStudent = false } = {}) {
+  const released = !forStudent || row.status === 'returned';
   return {
     id: row.id,
     userId: row.user_id,
@@ -32,11 +37,15 @@ export function submissionToJson(row, assignment) {
     status: row.status,
     submittedAt: row.submitted_at,
     late: isLate(row, assignment),
-    score: row.score === null ? null : Number(row.score),
-    feedback: row.feedback,
-    gradedAt: row.graded_at,
+    score: released && row.score !== null ? Number(row.score) : null,
+    feedback: released ? row.feedback : null,
+    gradedAt: released ? row.graded_at : null,
   };
 }
+
+// What counts towards a student's own total: returned scores only (see helpers/grades.js)
+export const studentResult = (submission) =>
+  !submission ? null : submission.status === 'returned' ? Number(submission.score) : 'waiting';
 
 // Reads title, instructions, due date and maximum score. When editing, a field left out keeps the
 // assignment's current value.
@@ -64,9 +73,11 @@ export async function listAssignments(req, res) {
     assignments: rows.map((row) => ({
       ...assignmentToJson(row),
       ...(mine
-        ? { mySubmission: mine.has(row.id) ? submissionToJson(mine.get(row.id), row) : null }
+        ? { mySubmission: mine.has(row.id) ? submissionToJson(mine.get(row.id), row, { forStudent: true }) : null }
         : { submissionCount: Number(row.submission_count) }),
     })),
+    // A student's running total, counting only work that has been returned
+    myTotal: mine ? totalFor(rows, (row) => studentResult(mine.get(row.id))) : null,
   });
 }
 
@@ -84,7 +95,7 @@ export async function getAssignment(req, res) {
     const row = await Submission.findFor(assignment.id, req.user.id);
     if (row) {
       const files = await File.listFor('submission', row.id);
-      mySubmission = { ...submissionToJson(row, assignment), files: files.map(fileToJson) };
+      mySubmission = { ...submissionToJson(row, assignment, { forStudent: true }), files: files.map(fileToJson) };
     }
   }
   res.json({

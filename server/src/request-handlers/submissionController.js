@@ -4,7 +4,7 @@ import * as File from '../database-queries/fileModel.js';
 import * as Submission from '../database-queries/submissionModel.js';
 import { discardFiles, recordUploads } from '../helpers/files.js';
 import { HttpError } from '../helpers/httpError.js';
-import { optionalText, parseId } from '../helpers/validate.js';
+import { optionalText, parseId, requireNumber } from '../helpers/validate.js';
 import { reachAssignment } from '../permission-rules/access.js';
 import { submissionToJson } from './assignmentController.js';
 import { fileToJson } from './lessonController.js';
@@ -34,7 +34,7 @@ export async function allowHandIn(req, res, next) {
 async function ownSubmissionResponse(submissionId, assignment) {
   const row = await Submission.findById(submissionId);
   const files = await File.listFor('submission', row.id);
-  return { ...submissionToJson(row, assignment), files: files.map(fileToJson) };
+  return { ...submissionToJson(row, assignment, { forStudent: true }), files: files.map(fileToJson) };
 }
 
 // Hands in: a written answer (form field "body") and/or files (form field "files", up to 10).
@@ -108,6 +108,38 @@ export async function getSubmission(req, res) {
 
   const files = await File.listFor('submission', submission.id);
   res.json({
-    submission: { ...submissionToJson(submission, assignment), files: files.map(fileToJson) },
+    submission: { ...submissionToJson(submission, assignment, { forStudent: isOwn }), files: files.map(fileToJson) },
   });
+}
+
+// Saves a score (0 to the assignment's maximum) and feedback. Returned work stays returned, so a
+// corrected grade reaches the student at once.
+export async function gradeSubmission(req, res) {
+  const submission = await Submission.findById(parseId(req.params.id, 'Submission not found'));
+  if (!submission) throw new HttpError(404, 'Submission not found');
+  const { assignment } = await reachAssignment(req, submission.assignment_id, { manage: true });
+  const maxScore = Number(assignment.max_score);
+  // Scores are stored with two decimal places, so 7.456 is kept as 7.46
+  const score = Math.round(requireNumber(req.body?.score, 'Score', { min: 0, max: maxScore }) * 100) / 100;
+  const feedback = optionalText(req.body?.feedback, 'Feedback', { max: 10000 });
+
+  await Submission.grade({ id: submission.id, score, feedback, gradedBy: req.user.id });
+  res.json({ submission: submissionToJson(await Submission.findById(submission.id), assignment) });
+}
+
+// Releases one graded submission to its student
+export async function returnSubmission(req, res) {
+  const submission = await Submission.findById(parseId(req.params.id, 'Submission not found'));
+  if (!submission) throw new HttpError(404, 'Submission not found');
+  const { assignment } = await reachAssignment(req, submission.assignment_id, { manage: true });
+  if (submission.status === 'submitted') throw new HttpError(409, 'Grade this work before returning it');
+  await Submission.returnGraded({ id: submission.id });
+  res.json({ submission: submissionToJson(await Submission.findById(submission.id), assignment) });
+}
+
+// Releases every graded submission for an assignment at once, so a whole class gets results together
+export async function returnAllGraded(req, res) {
+  const { assignment } = await reachAssignment(req, req.params.id, { manage: true });
+  const returned = await Submission.returnGraded({ assignmentId: assignment.id });
+  res.json({ returned });
 }

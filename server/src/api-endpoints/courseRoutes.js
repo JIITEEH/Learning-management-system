@@ -10,6 +10,7 @@ import {
   updateCourse,
 } from '../request-handlers/courseController.js';
 import { createAssignment, listAssignments } from '../request-handlers/assignmentController.js';
+import { exportGradebook, getGradebook } from '../request-handlers/gradebookController.js';
 import { createModule, getOutline } from '../request-handlers/moduleController.js';
 import { requirePermission } from '../request-filters/auth.js';
 
@@ -29,5 +30,7 @@ router.get('/:id/modules', requirePermission('lesson.read'), getOutline);
 router.post('/:id/modules', requirePermission('lesson.manage'), createModule);
 router.get('/:id/assignments', requirePermission('assignment.read'), listAssignments);
 router.post('/:id/assignments', requirePermission('assignment.manage'), createAssignment);
+router.get('/:id/gradebook', requirePermission('submission.read'), getGradebook);
+router.get('/:id/gradebook.csv', requirePermission('submission.read'), exportGradebook);
 
 export default router;

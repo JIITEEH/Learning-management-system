@@ -60,3 +60,35 @@ export async function idsForAssignments(assignmentIds) {
   const rows = await query(`SELECT id FROM submissions WHERE assignment_id IN (${placeholders})`, params);
   return rows.map((row) => row.id);
 }
+
+// Every submission in a course, for the gradebook
+export function listForCourse(courseId) {
+  return query(
+    `${SELECT_SUBMISSION}
+       JOIN assignments a ON a.id = s.assignment_id
+      WHERE a.course_id = :courseId`,
+    { courseId },
+  );
+}
+
+// Saves a score and feedback. Work not yet returned becomes 'graded' (visible to staff only);
+// work already returned stays 'returned', so the student sees the corrected grade at once.
+export function grade({ id, score, feedback, gradedBy }) {
+  return query(
+    `UPDATE submissions
+        SET score = :score, feedback = :feedback, graded_by = :gradedBy, graded_at = CURRENT_TIMESTAMP,
+            status = IF(status = 'returned', 'returned', 'graded')
+      WHERE id = :id`,
+    { id, score, feedback, gradedBy },
+  );
+}
+
+// Releases graded work to the student. Returns how many were released.
+export async function returnGraded({ id = null, assignmentId = null }) {
+  const result = await query(
+    `UPDATE submissions SET status = 'returned'
+      WHERE status = 'graded' AND (id = :id OR assignment_id = :assignmentId)`,
+    { id, assignmentId },
+  );
+  return result.affectedRows;
+}

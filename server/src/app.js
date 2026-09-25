@@ -1,5 +1,6 @@
 // Builds the Express app: every request passes through these steps, top to bottom.
 // index.js starts it listening; keeping the two apart lets tests use the app without a port.
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
@@ -41,11 +42,21 @@ app.use(currentUser);
 app.use('/api', sameOriginOnly, routes);
 app.use('/api', notFound);
 
-// The web pages. Until the React client replaces them, these are the plain HTML pages in public/.
-const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../public');
-app.use(express.static(publicDir));
-app.use((req, res) => res.status(404).sendFile(path.join(publicDir, 'pages/404.html')));
+// The screens. Every address outside /api is one the React app draws itself (/courses/7, say),
+// so each gets the same index.html and the app picks the screen from the address.
+const clientDist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../client/dist');
+const SCREEN_ADDRESS = /^\/(?!api(\/|$)).*/;
+if (fs.existsSync(clientDist)) {
+  // After `npm run build`: the finished screens, served by this server
+  app.use(express.static(clientDist));
+  app.get(SCREEN_ADDRESS, (req, res) => res.sendFile(path.join(clientDist, 'index.html')));
+} else if (!config.isProduction) {
+  // In development the screens come from Vite on port 5174 (see client/vite.config.js), so a page
+  // opened here, such as a reset link from an email, is sent on there
+  app.get(SCREEN_ADDRESS, (req, res) => res.redirect(`http://localhost:5174${req.originalUrl}`));
+}
 
+app.use(notFound);
 app.use(errorHandler);
 
 export default app;

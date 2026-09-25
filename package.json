@@ -4,13 +4,15 @@
   "private": true,
   "description": "Learning Management System",
   "workspaces": [
+    "client",
     "server"
   ],
   "engines": {
     "node": ">=22.13"
   },
   "scripts": {
-    "dev": "npm run dev -w server",
+    "dev": "concurrently -n server,client -c blue,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w client",
     "start": "npm run start -w server",
     "db:setup": "npm run db -w server -- setup",
     "db:schema": "npm run db -w server -- schema",
@@ -22,7 +24,10 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "concurrently": "^9.1.0",
     "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.12.0"
   }
 }

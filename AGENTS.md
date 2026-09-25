@@ -137,11 +137,12 @@ the description, but opening it and merging it stay the user's decision.
 
 ## Project conventions
 
-A Learning Management System: Node/Express on the server, MySQL for storage.
-It follows the conventions of the owner's earlier thesis management system
-(ThesisTrack, in `~/Downloads/Capstone`) so the two read alike: JavaScript
-with ES modules throughout, an npm workspace at the top, the server in
-`server/src/` with the same plain-English folder names, and single quotes.
+A Learning Management System: React and Vite in the browser, Node/Express on
+the server, MySQL for storage. It follows the conventions of the owner's
+earlier thesis management system (ThesisTrack, in `~/Downloads/Capstone`) so
+the two read alike: JavaScript with ES modules throughout, an npm workspace
+with `client/` and `server/`, the same plain-English folder names, and single
+quotes.
 
 ### Server
 
@@ -230,25 +231,43 @@ full account. In short:
 
 ### Front end
 
-- **Do not add a front-end framework or bundler without asking.** The pages are
-  plain HTML served as authored; there is no build step for the browser.
-- Pages talk to the server through `public/assets/js/api.js`. Do not call
-  `fetch` directly from a page script.
+The screens are React, built with Vite, arranged like ThesisTrack's client:
+`screens/` for one file per screen, `ui-pieces/` for parts shared between
+screens, `api-client/`, `shared-state/`, `reusable-logic/` and `helpers/`.
+
+- **Do not add a library without asking.** React, react-router, Vite and
+  lucide-react (icons) are what ThesisTrack uses; anything beyond them is the
+  owner's decision.
+- Screens talk to the server through `client/src/api-client/api.js`: add a
+  named function there and call it. Lint refuses `fetch` anywhere else.
+- Load data with `useApi` and send forms with `useSubmit`
+  (`client/src/reusable-logic/`), so loading, busy buttons and error messages
+  behave the same on every screen.
+- Guard a screen in `App.jsx` with `RequireAuth`, `GuestOnly` or
+  `RequirePermission`. These are a courtesy to the person using the app, not
+  protection: the server checks the same permission on every request.
 - All colour, type, and spacing values are custom properties in the `:root`
-  block at the top of `public/assets/css/styles.css`. Add new values there
+  block at the top of `client/src/styles/index.css`. Add new values there
   rather than hard-coding them in a rule.
+- The server sends a strict Content-Security-Policy, so no inline `<script>`,
+  no inline `style="..."` in HTML, and nothing loaded from other sites except
+  Google Fonts. React's `style={{ }}` is fine; it does not count as inline.
 - **Accessibility** — keep visible focus styles, label every form control, and
   keep `aria-expanded` in sync on anything that expands. Images need real
   `alt` text, or `alt=""` when decorative.
 
 ## Checking your work
 
-There are no tests yet. Before handing work back, run the server and exercise
-what you changed:
+There are no tests yet. Before handing work back, lint, run the app, and
+exercise what you changed:
 
 ```sh
-npm run dev          # http://localhost:3000
+npm run lint
+npm run dev          # http://localhost:5174
 ```
 
 Check that the server boots without errors, that the routes you touched answer
-as expected, and that pages render in a narrow viewport as well as a wide one.
+as expected, that the browser console stays free of errors, and that screens
+render in a narrow viewport as well as a wide one. For a change that touches
+security headers or how files are served, also run `npm run build` and check
+the result on http://localhost:3000, then delete `client/dist/`.

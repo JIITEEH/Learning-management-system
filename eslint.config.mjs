@@ -1,5 +1,7 @@
 import js from '@eslint/js';
 import globals from 'globals';
+import react from 'eslint-plugin-react';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 export default [
   {
@@ -19,30 +21,39 @@ export default [
     },
   },
 
-  // API server and tooling config run in Node
+  // API server and tooling config files run in Node
   {
-    files: ['server/**/*.js', 'eslint.config.mjs'],
+    files: ['server/**/*.js', 'client/vite.config.js', 'eslint.config.mjs'],
     languageOptions: {
       globals: globals.node,
     },
   },
 
-  // The plain HTML pages, until the React client replaces them
+  // React client
   {
-    files: ['public/**/*.js'],
+    files: ['client/src/**/*.{js,jsx}'],
     languageOptions: {
       globals: globals.browser,
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    plugins: {
+      react,
+      'react-hooks': reactHooks,
+    },
+    settings: {
+      react: { version: 'detect' },
     },
     rules: {
-      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      'no-restricted-globals': [
-        'error',
-        { name: 'fetch', message: 'Pages call the API through assets/js/api.js, not fetch directly.' },
-      ],
+      // Counts components used only in JSX as used
+      'react/jsx-uses-vars': 'error',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      // Screens talk to the server through api-client/api.js, never fetch directly
+      'no-restricted-globals': ['error', { name: 'fetch', message: 'Call the server through api-client/api.js.' }],
     },
   },
   {
-    files: ['public/assets/js/api.js'],
+    files: ['client/src/api-client/api.js'],
     rules: { 'no-restricted-globals': 'off' },
   },
 ];

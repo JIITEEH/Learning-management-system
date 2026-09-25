@@ -4,8 +4,8 @@ Courses, lessons, enrolment, assignments, and grading — built on five
 foundations carried over from the thesis management system: **accounts**,
 **roles**, **permissions**, **file uploads**, and **schedules**.
 
-Plain HTML and JavaScript in the browser, Node/Express on the server, MySQL
-for storage.
+React (built with Vite) in the browser, Node/Express on the server, MySQL for
+storage — the same tools as the thesis management system (ThesisTrack).
 
 ## Layout
 
@@ -19,7 +19,19 @@ open the same way.
 ├── ROADMAP.md                  The build plan, step by step
 ├── package.json                npm workspace: one install, one set of commands
 ├── .env.example                Copy to .env and fill in; .env is gitignored
-├── public/                     The web pages, until the React client replaces them
+├── client/                     The screens (React + Vite)
+│   ├── index.html
+│   ├── vite.config.js          Port 5174, and /api passed on to the server
+│   └── src/
+│       ├── main.jsx            Starts the app
+│       ├── App.jsx             Which screen shows at which address
+│       ├── screens/            One file per screen (auth/, admin/ grouped)
+│       ├── ui-pieces/          Parts shared by screens: layout, tabs, forms…
+│       ├── api-client/api.js   Every call to the server
+│       ├── shared-state/       Who is signed in; pop-up messages
+│       ├── reusable-logic/     useApi (load data), useSubmit (send a form)
+│       ├── helpers/            Turning stored codes and dates into words
+│       └── styles/index.css    Every colour, font and spacing value
 └── server/
     ├── package.json
     ├── uploads/                Uploaded files — gitignored, never served directly
@@ -70,51 +82,42 @@ npm install
 cp .env.example .env        # then fill in your database credentials
 
 npm run db:setup            # creates the database, schema, then seed
-npm run dev                 # http://localhost:3000
+npm run dev                 # open http://localhost:5174
 ```
 
-`npm run dev` uses Node's own `--watch`, so edits to the server restart it.
-Pages under `public/` are served as authored and need no restart, but there is
-no hot reload either — reload the browser yourself. The server boots without a
-database, but any route that touches one will fail until MySQL is up and
-`db:setup` has run. `npm run db:status` says what the database currently holds.
+`npm run dev` starts two programs side by side, as in ThesisTrack: the server
+on port 3000, and Vite on port 5174, which shows the screens and updates them
+the moment a file is saved. Vite passes every `/api` request on to the
+server. Port 5174 rather than ThesisTrack's 5173, so both can run at once.
+Opening a page on 3000 during development sends you on to 5174.
+
+The server restarts itself when a server file is saved. It boots without a
+database, but anything that touches one fails until MySQL is up and
+`db:setup` has run. `npm run db:status` says what the database holds.
+
+For a real deployment, `npm run build` turns the screens into plain files in
+`client/dist/`, and `npm start` serves them and the API together from port
+3000. While `client/dist/` exists, port 3000 serves that build even during
+development, so delete it when you are done checking a build.
 
 "Forgot password" sends its link by email. Without a mail server in `.env`,
 the link is printed in the terminal running `npm run dev` instead, which is
 enough on your own computer. To send real email, fill in the `SMTP_` lines;
-`.env.example` explains how to use a Gmail app password.
+`.env.example` explains how to use a Gmail app password. Set `APP_URL` to the
+address people open the site at, since the link in the email points there.
 
 ## Status
 
 Accounts work end to end: registering, signing in and out, changing a
-password, resetting a forgotten one by email, the role and permission routes, and the account lifecycle an
-administrator moves through. Every SQL statement behind them lives in
-`server/src/database-queries/`.
+password, resetting a forgotten one by email, and the approve / suspend
+lifecycle an administrator moves an account through. Roles and permissions,
+with per-account exceptions, are managed from the Administration screens.
 
-Courses and enrollments are implemented too. Lessons, assignments, files and
-schedules have their tables but no endpoints yet; each gets its routes,
-controller and model when its roadmap step is built.
-
-In the browser, the way in is built: the front page, signing in, registering,
-the account page with its change-password form, and a styled 404. The bar
-across the top of a signed-in page is drawn by `public/assets/js/shell.js`
-from the account's own permissions, so it is written once rather than copied
-into every file, and a link nobody may follow is never shown. The dashboard
-carries that bar over placeholder cards, which stay as dashes until there is
-something real to count.
-
-The administrator screens are built too. `users.html` lists every account,
-approves or suspends one, changes its role, and sets per-account exceptions
-to what the role allows. `roles.html` creates, edits and deletes roles and
-chooses their permissions. `admin.html` links to both, with counts. Each
-screen switches off the controls the viewer's permissions do not cover; the
-server checks the same permissions again on every request.
-
-`courses.html` lists the courses an account teaches or takes (every course,
-for an administrator), lets a student join one with a code, and lets an
-instructor create one. `course.html` shows one course in tabs; its Overview
-and People tabs work, and the rest wait for later steps.
-
-Still empty shells with a blank `<body>`: `lesson`, `assignments`,
-`schedule`, and `files`. Modules and lessons come next, per
+Courses and enrollments work: instructors create, publish and archive
+courses; students join with a code; the course's People tab manages who is
+enrolled. Lessons, assignments, files and schedules have their tables but no
+endpoints or screens yet. Modules and lessons come next, per
 [ROADMAP.md](ROADMAP.md).
+
+The dashboard shows placeholder cards, which stay as dashes until roadmap
+step 9 gives them something real to count.

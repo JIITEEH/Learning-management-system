@@ -6,10 +6,10 @@ Web.
 
 ## Stack
 
-Plain HTML, CSS, and JavaScript in the browser with no build step and no
-front-end framework. Node and Express on the server, MySQL for storage.
-Adding a front-end framework or bundler is a decision that goes back to the
-user.
+React, built with Vite, in the browser; Node and Express on the server;
+MySQL for storage. The same tools as the user's thesis management system,
+chosen so the two projects read alike. Adding any further library is a
+decision that goes back to the user.
 
 ## Product Purpose
 
@@ -77,7 +77,8 @@ placeholder.
    first, in the file for that domain.
 3. **Never fabricate records.** Seeded data is structural, never plausible
    fake people or courses.
-4. **No dependency creep on the front end.** Pages are served as authored.
+4. **No dependency creep on the front end.** React, react-router and the
+   icon set ThesisTrack uses, and nothing further without asking.
 5. **Uploads are untrusted.** Names, types, and sizes are all validated, and
    nothing client-supplied becomes a path.
 

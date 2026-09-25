@@ -69,6 +69,11 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # Vite turns the React screens into plain files in client/dist, which
+      # the server then hands out. A screen that fails to compile fails here.
+      - name: Build the screens
+        run: npm run build
+
       # Through the npm script, not by piping files into mysql: the script
       # reads the same .env-backed config as the server, applies schema/ and
       # seed/ in their numbered order, and baselines the migration ledger.
@@ -88,3 +93,6 @@ jobs:
           curl -sf http://localhost:3000/api/health
           # A protected route must refuse an anonymous caller.
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/auth/me)" = "401"
+          # The built screens are served, including at an address only the app knows
+          curl -sf http://localhost:3000/ | grep -q '<div id="root">'
+          curl -sf http://localhost:3000/courses/1 | grep -q '<div id="root">'

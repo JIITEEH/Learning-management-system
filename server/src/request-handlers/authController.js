@@ -133,7 +133,7 @@ export async function forgotPassword(req, res) {
       passwordResetMessage({
         to: account.email,
         fullName: account.full_name,
-        url: `${config.appUrl}/pages/reset.html#token=${token}`,
+        url: `${config.appUrl}/reset-password#token=${token}`,
         minutes: RESET_MINUTES,
       }),
     );

@@ -2,7 +2,8 @@
 import './setup.js';
 import assert from 'node:assert/strict';
 import { before, describe, it } from 'node:test';
-import { fileForm, filesOnDisk, makeCourse, makeUser, startApi } from './helpers.js';
+import { PASSWORD, fileForm, filesOnDisk, makeCourse, makeUser, startApi } from './helpers.js';
+import { query } from '../src/database/index.js';
 
 const api = await startApi();
 
@@ -50,5 +51,35 @@ describe('long text within the stated limits', () => {
     const lessonId = (await api.post(`/modules/${moduleId}/lessons`, { as: instructor, body: { title: 'Long' } })).data.lesson.id;
     const res = await api.patch(`/lessons/${lessonId}`, { as: instructor, body: { content: '字'.repeat(50000) } });
     assert.equal(res.status, 204);
+  });
+});
+
+describe('guessing a password from inside a signed-in session', () => {
+  it('limits wrong current-password attempts when changing the password', async () => {
+    const victim = await makeUser(api);
+    const statuses = [];
+    for (let i = 0; i < 11; i++) {
+      const res = await api.patch('/auth/password', { as: victim, body: { currentPassword: `guess-${i}`, newPassword: 'new-password-1' } });
+      statuses.push(res.status);
+    }
+    assert.equal(statuses.at(-1), 429, `answers were ${statuses.join(', ')}`);
+    assert.equal((await api.signIn(victim.email, PASSWORD)).status, 200, 'the real password still works at sign-in');
+  });
+});
+
+describe('deleting an account', () => {
+  it('deletes the files of the work that goes with it', async () => {
+    const admin = await makeUser(api, 'admin');
+    const leaving = await makeUser(api);
+    await api.post('/enrollments', { as: instructor, body: { courseId: course.id, email: leaving.email } });
+    const assignment = (await api.post(`/courses/${course.id}/assignments`, { as: instructor, body: { title: 'Leaver task' } })).data.assignment;
+    await api.post(`/assignments/${assignment.id}/submission`, { as: leaving, form: fileForm([{ name: 'a.txt' }, { name: 'b.txt' }], { body: 'x' }) });
+    const before = filesOnDisk();
+    assert.equal((await api.delete(`/users/${leaving.id}`, { as: admin })).status, 204);
+    assert.equal(filesOnDisk(), before - 2);
+    const [{ orphans }] = await query(
+      "SELECT COUNT(*) AS orphans FROM files f LEFT JOIN submissions s ON s.id = f.owner_id WHERE f.owner_type = 'submission' AND s.id IS NULL",
+    );
+    assert.equal(orphans, 0);
   });
 });

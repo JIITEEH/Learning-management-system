@@ -19,12 +19,15 @@ const router = Router();
 const registerLimit = limitPerAddress({ max: 30, minutes: 15 });
 const forgotLimit = limitPerAddress({ max: 10, minutes: 15 });
 const resetLimit = limitPerAddress({ max: 10, minutes: 15 });
+// Changing a password checks the current one, so without a cap someone holding a signed-in
+// browser could guess the owner's password there, at 0.2 s of server work per guess
+const passwordChangeLimit = limitPerAddress({ max: 10, minutes: 15 });
 
 router.post('/register', registerLimit, register);
 router.post('/login', login);
 router.post('/logout', logout);
 router.get('/me', requireAuth, me);
-router.patch('/password', requireAuth, changePassword);
+router.patch('/password', passwordChangeLimit, requireAuth, changePassword);
 router.post('/forgot', forgotLimit, forgotPassword);
 router.post('/reset', resetLimit, resetPassword);
 

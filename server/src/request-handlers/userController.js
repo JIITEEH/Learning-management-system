@@ -2,7 +2,10 @@
 // per-account permission overrides.
 import * as User from '../database-queries/userModel.js';
 import * as Role from '../database-queries/roleModel.js';
+import * as File from '../database-queries/fileModel.js';
 import * as Permission from '../database-queries/permissionModel.js';
+import * as Submission from '../database-queries/submissionModel.js';
+import { discardFiles } from '../helpers/files.js';
 import { HttpError } from '../helpers/httpError.js';
 import { hashPassword } from '../helpers/password.js';
 import { oneOf, parseId, requireEmail, requirePassword, requireText } from '../helpers/validate.js';
@@ -112,10 +115,15 @@ export async function setUserStatus(req, res) {
   res.json({ user: toJson(await User.findById(account.id)) });
 }
 
+// Deleting an account also deletes the work it handed in (the schema does that), and the files of
+// that work, which the schema does not link, so they are removed here. Lesson files it uploaded
+// stay with their lessons.
 export async function deleteUser(req, res) {
   const account = await findAccount(req.params.id);
   if (account.id === req.user.id) throw new HttpError(409, 'You cannot delete your own account');
+  const files = await File.listForAll('submission', await Submission.idsForUser(account.id));
   await User.remove(account.id);
+  await discardFiles(files);
   res.status(204).end();
 }
 

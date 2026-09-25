@@ -53,6 +53,11 @@ export function touch(id) {
   return query('UPDATE submissions SET submitted_at = CURRENT_TIMESTAMP WHERE id = :id', { id });
 }
 
+export async function idsForUser(userId) {
+  const rows = await query('SELECT id FROM submissions WHERE user_id = :userId', { userId });
+  return rows.map((row) => row.id);
+}
+
 export async function idsForAssignments(assignmentIds) {
   if (assignmentIds.length === 0) return [];
   const placeholders = assignmentIds.map((id, index) => `:id${index}`).join(', ');

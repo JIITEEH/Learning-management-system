@@ -139,9 +139,11 @@ work when ready; each course has a gradebook that downloads as CSV, and
 students see their own running total.
 
 Announcements and dashboards work (roadmap step 9): each role's dashboard
-shows real progress, deadlines, work to grade and announcements. What is
-left before a first release is automated tests and a security review (step
-12) and deploying (step 13), per [ROADMAP.md](ROADMAP.md). Schedules have
-their table but no screens yet.
+shows real progress, deadlines, work to grade and announcements.
+
+Tests cover it (roadmap step 12): 76 server tests for every permission and
+privacy rule, and browser tests for every screen and one whole course. What
+is left before a first release is deploying (step 13), per
+[ROADMAP.md](ROADMAP.md). Schedules have their table but no screens yet.
 
 

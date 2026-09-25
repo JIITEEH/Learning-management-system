@@ -139,11 +139,27 @@ gone until something records that information.
 The announcements table arrived as the project's first migration, so the
 local database kept its administrator account.
 
+### Step 12 as built
+
+76 server tests cover every permission and privacy rule; 11 browser tests
+open every screen as each role and walk one course from setup to a returned
+grade. The security review of steps 6 to 9 found and fixed four holes, each
+with a test that failed before its fix: no total on the files a lesson or
+submission could hold (a student could fill the disk), long lessons in
+three-byte scripts refused as too large, unlimited password guesses while
+changing a password, and a deleted account's files left on disk.
+
+Left for step 13, where they belong: sessions and rate-limit counts live in
+the server's memory, so a restart signs everyone out and forgets the counts;
+before going live, sessions move into MySQL. File contents are not checked
+against their stated type; downloads are always attachments with
+`nosniff`, so an uploaded file cannot run as part of the site.
+
 ### Launch
 
 | # | Step | Status | Notes for this stack |
 |---|------|--------|----------------------|
-| 12 | Testing and security review | **to do** | There is no test framework yet; choosing one is part of this step. |
+| 12 | Testing and security review | **done** | Server tests with Node's own runner (`npm test`, 76 tests, each file on a throwaway database) and browser tests with Playwright (`npm run test:e2e`, every screen per role on desktop and phone, and one course journey), as in ThesisTrack. Both run in the GitHub check. |
 | 13 | Deploy and launch | **to do** | MySQL replaces SQLite, so the backup step is `mysqldump`, not `VACUUM INTO`. |
 
 Step 10 (quizzes) and step 11 (notifications and calendar) are held on the

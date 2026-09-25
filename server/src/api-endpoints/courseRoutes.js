@@ -9,6 +9,7 @@ import {
   setCourseStatus,
   updateCourse,
 } from '../request-handlers/courseController.js';
+import { createAnnouncement, listAnnouncements } from '../request-handlers/announcementController.js';
 import { createAssignment, listAssignments } from '../request-handlers/assignmentController.js';
 import { exportGradebook, getGradebook } from '../request-handlers/gradebookController.js';
 import { createModule, getOutline } from '../request-handlers/moduleController.js';
@@ -32,5 +33,7 @@ router.get('/:id/assignments', requirePermission('assignment.read'), listAssignm
 router.post('/:id/assignments', requirePermission('assignment.manage'), createAssignment);
 router.get('/:id/gradebook', requirePermission('submission.read'), getGradebook);
 router.get('/:id/gradebook.csv', requirePermission('submission.read'), exportGradebook);
+router.get('/:id/announcements', requirePermission('announcement.read'), listAnnouncements);
+router.post('/:id/announcements', requirePermission('announcement.manage'), createAnnouncement);
 
 export default router;

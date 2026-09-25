@@ -1,8 +1,10 @@
 // Every API address, mounted under /api in app.js. One routes file per resource.
 import { Router } from 'express';
+import announcementRoutes from './announcementRoutes.js';
 import assignmentRoutes from './assignmentRoutes.js';
 import authRoutes from './authRoutes.js';
 import courseRoutes from './courseRoutes.js';
+import dashboardRoutes from './dashboardRoutes.js';
 import enrollmentRoutes from './enrollmentRoutes.js';
 import fileRoutes from './fileRoutes.js';
 import lessonRoutes from './lessonRoutes.js';
@@ -26,5 +28,7 @@ router.use('/lessons', lessonRoutes);
 router.use('/assignments', assignmentRoutes);
 router.use('/submissions', submissionRoutes);
 router.use('/files', fileRoutes);
+router.use('/announcements', announcementRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 export default router;

@@ -153,6 +153,8 @@
   --duration-fast: 130ms;
   --duration-base: 240ms;
   --duration-slow: 560ms;
+  /* How long a page takes to fade in: short, because it replays on every page switch */
+  --duration-enter: 150ms;
 
   /* ----------------------------------------------------------------- Layout */
   --shell-max: 1660px;
@@ -342,13 +344,7 @@ time,
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .shell > * { animation: settle var(--duration-slow) var(--ease-out) backwards; }
-  /* Keyed to the cards themselves, so a non-card child (the visually hidden
-     page heading) cannot shift the sequence. */
-  .board > section:nth-of-type(1) { animation-delay: 40ms; }
-  .board > section:nth-of-type(2) { animation-delay: 80ms; }
-  .board > section:nth-of-type(3) { animation-delay: 120ms; }
-  .board > section:nth-of-type(4) { animation-delay: 160ms; }
+  .shell > * { animation: settle var(--duration-enter) var(--ease-out) backwards; }
 }
 
 @keyframes settle {

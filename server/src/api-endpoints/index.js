@@ -11,6 +11,7 @@ import lessonRoutes from './lessonRoutes.js';
 import moduleRoutes from './moduleRoutes.js';
 import permissionRoutes from './permissionRoutes.js';
 import roleRoutes from './roleRoutes.js';
+import scheduleRoutes from './scheduleRoutes.js';
 import submissionRoutes from './submissionRoutes.js';
 import userRoutes from './userRoutes.js';
 
@@ -29,6 +30,7 @@ router.use('/assignments', assignmentRoutes);
 router.use('/submissions', submissionRoutes);
 router.use('/files', fileRoutes);
 router.use('/announcements', announcementRoutes);
+router.use('/schedules', scheduleRoutes);
 router.use('/dashboard', dashboardRoutes);
 
 export default router;

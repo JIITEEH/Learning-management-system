@@ -82,3 +82,25 @@ export function requireNumber(value, label, { min, max }) {
   }
   return number;
 }
+
+// A clock time as '09:30' (24-hour). Returns it with seconds, as MySQL's TIME stores it.
+export function requireTime(value, label) {
+  const valid = typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+  if (!valid) throw new HttpError(400, `${label} must be a time like 09:30`);
+  return `${value}:00`;
+}
+
+// A calendar day as '2026-06-02', checked to be a real date (so no 2026-02-30). Returns null
+// when empty and not required.
+export function readDay(value, label, { required = false } = {}) {
+  if (value === undefined || value === null || value === '') {
+    if (required) throw new HttpError(400, `${label} is required`);
+    return null;
+  }
+  const valid =
+    typeof value === 'string' &&
+    /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+    new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
+  if (!valid) throw new HttpError(400, `${label} must be a date like 2026-06-02`);
+  return value;
+}

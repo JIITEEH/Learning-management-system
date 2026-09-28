@@ -13,6 +13,7 @@ import { createAnnouncement, listAnnouncements } from '../request-handlers/annou
 import { createAssignment, listAssignments } from '../request-handlers/assignmentController.js';
 import { exportGradebook, getGradebook } from '../request-handlers/gradebookController.js';
 import { createModule, getOutline } from '../request-handlers/moduleController.js';
+import { createMeeting, listCourseSchedule } from '../request-handlers/scheduleController.js';
 import { requirePermission } from '../request-filters/auth.js';
 
 const router = Router();
@@ -35,5 +36,7 @@ router.get('/:id/gradebook', requirePermission('submission.read'), getGradebook)
 router.get('/:id/gradebook.csv', requirePermission('submission.read'), exportGradebook);
 router.get('/:id/announcements', requirePermission('announcement.read'), listAnnouncements);
 router.post('/:id/announcements', requirePermission('announcement.manage'), createAnnouncement);
+router.get('/:id/schedules', requirePermission('schedule.read'), listCourseSchedule);
+router.post('/:id/schedules', requirePermission('schedule.manage'), createMeeting);
 
 export default router;

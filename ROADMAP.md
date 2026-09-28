@@ -155,6 +155,17 @@ before going live, sessions move into MySQL. File contents are not checked
 against their stated type; downloads are always attachments with
 `nosniff`, so an uploaded file cannot run as part of the site.
 
+### The schedule, as built
+
+Each course's Schedule tab lists its weekly classes (day, times, an
+optional title and room, and the dates it runs from and until); its
+instructor adds, edits and removes them, and an overlapping class is saved
+with a warning rather than refused. "My week" (`/schedule`) shows every
+class across a person's courses, Monday to Sunday, week by week, with today
+marked; the dashboard shows today's classes. Times are school clock time.
+Changing a time mid-term is done by giving the old class a last date and
+adding a new one. No schema change was needed.
+
 ### Launch
 
 | # | Step | Status | Notes for this stack |
@@ -178,10 +189,10 @@ Each screen is a file under `client/src/screens/`, shown at the address in
 | `/account` | `Account.jsx` | Every signed-in account | 4 — **built** |
 | `/dashboard` | `Dashboard.jsx` | Every role, different content | 9 — **built** |
 | `/courses` | `Courses.jsx` | Students and instructors | 5 — **built** |
-| `/courses/:id` | `Course.jsx` | One course, tabbed | 5 — **built** (Overview, People, Announcements from step 9, Lessons from step 6, Assignments from step 7, Gradebook from step 8; Schedule waits) |
+| `/courses/:id` | `Course.jsx` | One course, tabbed | 5 — **built** (Overview, People, Announcements from step 9, Lessons from step 6, Assignments from step 7, Gradebook from step 8, and Schedule) |
 | `/courses/:courseId/lessons/:lessonId` | `Lesson.jsx` | A lesson, its files, previous / next | 6 — **built** |
 | `/courses/:courseId/assignments/:assignmentId` | `Assignment.jsx` | An assignment, handing in, and the instructor's list of submissions | 7 — **built** |
-| — | a schedule screen | Weekly meetings | Not in the roadmap's step 5, so it follows as its own piece |
+| `/schedule` | `Schedule.jsx` | A person's week across all their courses; each course also has a Schedule tab | **built** after step 12, as its own piece |
 | `/files` | `Files.jsx` | Every lesson and submission file the viewer may see | 7 — **built** (moved from step 6, so it was built once, when both kinds of file existed) |
 | `/admin`, `/admin/users`, `/admin/roles` | `admin/Admin.jsx`, `admin/Users.jsx`, `admin/Roles.jsx` | Administrators | 4 — **built** |
 | anything else | `NotFound.jsx` | Everyone | 4 — **built** |

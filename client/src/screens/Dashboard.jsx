@@ -2,11 +2,12 @@
 // has use for (the server decides which sections to send, see dashboardController.js). Every
 // number shown is real; there are no placeholders.
 import { Link } from 'react-router';
-import { BookOpen, CalendarClock, ClipboardCheck, Megaphone, UserCheck } from 'lucide-react';
+import { BookOpen, CalendarClock, CalendarDays, ClipboardCheck, MapPin, Megaphone, UserCheck } from 'lucide-react';
 import { api } from '../api-client/api.js';
 import { useAuth } from '../shared-state/AuthContext.jsx';
 import useApi from '../reusable-logic/useApi.js';
 import { formatDate, formatDue, isPastDue, plural } from '../helpers/format.js';
+import { meetingsOn, timeRange } from '../helpers/schedule.js';
 import { EmptyState, Notice } from '../ui-pieces/basics/Feedback.jsx';
 
 // A dashboard card with a heading, and an empty message when it has nothing to list
@@ -29,8 +30,11 @@ function ProgressBar({ done, total }) {
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, can } = useAuth();
   const { data, error } = useApi(() => api.getDashboard(), []);
+  // Today's classes come from the person's timetable, filtered here by the browser's own date
+  const timetable = useApi(() => (can('schedule.read') ? api.mySchedule() : null), []);
+  const today = timetable.data ? meetingsOn(new Date(), timetable.data.schedules) : null;
   const firstName = user.fullName.split(/\s+/)[0];
 
   if (error) return <main className="stack" id="main"><Notice>{error.message}</Notice></main>;
@@ -44,6 +48,21 @@ export default function Dashboard() {
         <h1>Welcome back, {firstName}</h1>
         <p className="card-intro">Here is what needs you today.</p>
       </section>
+
+      {today && (
+        <Card title="Today's classes" Icon={CalendarDays} empty="No classes today." hasItems={today.length > 0}>
+          <ul className="file-list">
+            {today.map((meeting) => (
+              <li key={meeting.id} className="outline-row">
+                <span className="meeting-time" data-numeric>{timeRange(meeting)}</span>
+                <Link to={`/courses/${meeting.courseId}?tab=schedule`}>{meeting.courseCode} · {meeting.title ?? meeting.courseTitle}</Link>
+                {meeting.location && <span className="field-hint"><MapPin aria-hidden="true" /> {meeting.location}</span>}
+              </li>
+            ))}
+          </ul>
+          <Link className="btn btn-sm" to="/schedule">See the whole week</Link>
+        </Card>
+      )}
 
       {totals && (
         <Card title="Accounts" Icon={UserCheck} hasItems>

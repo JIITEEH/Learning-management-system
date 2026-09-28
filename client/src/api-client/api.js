@@ -127,6 +127,13 @@ export const api = {
   deleteAnnouncement: (id) => request(`/announcements/${id}`, { method: 'DELETE' }),
   getDashboard: () => request('/dashboard'),
 
+  // Weekly class meetings
+  listCourseSchedule: (courseId) => request(`/courses/${courseId}/schedules`),
+  addMeeting: (courseId, data) => request(`/courses/${courseId}/schedules`, { method: 'POST', body: data }),
+  updateMeeting: (id, data) => request(`/schedules/${id}`, { method: 'PATCH', body: data }),
+  deleteMeeting: (id) => request(`/schedules/${id}`, { method: 'DELETE' }),
+  mySchedule: () => request('/schedules/me'),
+
   // Files. Downloads are plain links to fileDownloadUrl(id), so the browser saves them itself.
   listFiles: () => request('/files'),
   uploadLessonFiles: (lessonId, fileList) => {

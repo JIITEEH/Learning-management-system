@@ -113,6 +113,8 @@
   --primary-ink: #ffffff;
   --primary-face: linear-gradient(145deg, rgb(47 95 227 / 0.96), rgb(26 63 176 / 0.94));
   --primary-face-hover: linear-gradient(145deg, rgb(58 108 240 / 0.97), rgb(30 72 196 / 0.95));
+  /* The primary blue as a faint wash, for "this is the current one" (today in the week view) */
+  --primary-wash: rgb(36 81 214 / 0.14);
 
   /* ------------------------------------------------- Status — ThesisTrack's */
   --success: #079455;
@@ -820,6 +822,7 @@ time,
 .notice + .btn { margin-top: var(--space-4); }
 
 .notice-error { border-color: rgb(245 139 130 / 0.34); background: rgb(217 45 32 / 0.16); color: var(--danger-light); }
+.notice-warn { border-color: rgb(245 177 103 / 0.34); background: rgb(220 104 3 / 0.16); color: var(--warning-light); }
 .notice-ok { border-color: rgb(95 211 155 / 0.34); background: rgb(7 148 85 / 0.16); color: var(--success-light); }
 
 @keyframes rise {
@@ -1086,6 +1089,26 @@ time,
 .outline-add { justify-self: start; margin-top: var(--space-3); }
 .outline-add svg, .btn-sm svg { width: 16px; height: 16px; }
 .icon-btn-danger { color: var(--danger-light); }
+
+/* ==========================================================================
+   Schedule — a course's weekly classes, and a person's week
+   ========================================================================== */
+
+.form-row-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.meeting-row { align-items: flex-start; }
+.meeting-time { min-width: 12ch; color: var(--chalk); font-weight: 600; }
+.meeting-what { display: grid; flex: 1 1 18ch; gap: var(--space-1); }
+.meeting-what svg, .meeting svg, .file-list .field-hint svg { display: inline; width: 14px; height: 14px; vertical-align: -2px; }
+
+.week-nav { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.week-label { min-width: 13ch; color: var(--chalk); font-weight: 600; text-align: center; }
+.week-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.week-day { display: grid; gap: var(--space-2); align-content: start; min-height: 8rem; padding: var(--space-3); border: 1px solid var(--glass-border-soft); border-radius: var(--radius); background: rgb(255 255 255 / 0.04); }
+.week-day[aria-current="date"] { border-color: var(--primary-light); background: var(--primary-wash); }
+.week-day-name { display: grid; font-size: var(--text-base); }
+.meeting { display: grid; gap: var(--space-1); padding: var(--space-2); border-radius: var(--radius-sm); background: rgb(255 255 255 / 0.06); font-size: var(--text-sm); overflow-wrap: anywhere; }
+@media (max-width: 1100px) { .week-grid { grid-template-columns: minmax(0, 1fr); } .week-day { min-height: 0; } }
+@media (max-width: 640px) { .form-row-3 { grid-template-columns: minmax(0, 1fr); } }
 .outline-lessons { display: grid; gap: var(--space-2); margin: var(--space-3) 0 0; padding-left: var(--space-5); }
 .outline-done { display: inline-flex; color: var(--success-light); }
 .outline-done svg, .file-list svg { width: 18px; height: 18px; flex: none; }

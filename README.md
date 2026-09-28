@@ -144,6 +144,10 @@ shows real progress, deadlines, work to grade and announcements.
 Tests cover it (roadmap step 12): 76 server tests for every permission and
 privacy rule, and browser tests for every screen and one whole course. What
 is left before a first release is deploying (step 13), per
-[ROADMAP.md](ROADMAP.md). Schedules have their table but no screens yet.
+[ROADMAP.md](ROADMAP.md).
+
+Weekly class schedules work: each course has a Schedule tab, everyone has a
+"My week" timetable across their courses, and the dashboard shows today's
+classes.
 
 

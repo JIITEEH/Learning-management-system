@@ -990,6 +990,8 @@ time,
 .table .cell-strong { color: var(--chalk); font-weight: 600; }
 .table .cell-action { text-align: right; }
 .table tr[aria-current="true"] td { background: rgb(255 255 255 / 0.06); }
+/* A second, quieter line under a table cell's main text, as in the audit log */
+.audit-sub { display: block; }
 
 /* On a phone, each row becomes a small card instead of a line of a table
    that scrolls sideways. Scrolling hid every column past the second, the

@@ -15,7 +15,7 @@ export default function Admin() {
     <main className="stack" id="main">
       <section className="card" aria-labelledby="admin-title">
         <h1 id="admin-title">Administration</h1>
-        <p className="card-intro">Who has an account, what each role may do, and which accounts are still waiting to be let in.</p>
+        <p className="card-intro">Who has an account, what each role may do, which accounts are still waiting to be let in, and a record of every change.</p>
       </section>
 
       <div className="link-grid">
@@ -38,6 +38,12 @@ export default function Admin() {
             <span className="metric-label">roles</span>
           </p>
         </Link>
+        {can('audit.read') && (
+          <Link className="card link-card" to="/admin/audit">
+            <h2>Audit log</h2>
+            <p>Who changed what, and when: approvals, suspensions, role changes, and students added to or removed from a course.</p>
+          </Link>
+        )}
       </div>
     </main>
   );

@@ -23,6 +23,7 @@ const Schedule = lazy(() => import('./screens/Schedule.jsx'));
 const Admin = lazy(() => import('./screens/admin/Admin.jsx'));
 const Users = lazy(() => import('./screens/admin/Users.jsx'));
 const Roles = lazy(() => import('./screens/admin/Roles.jsx'));
+const AuditLog = lazy(() => import('./screens/admin/AuditLog.jsx'));
 
 export default function App() {
   return (
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="admin" element={<RequirePermission code="role.manage"><Admin /></RequirePermission>} />
         <Route path="admin/users" element={<RequirePermission code="user.read"><Users /></RequirePermission>} />
         <Route path="admin/roles" element={<RequirePermission code="role.manage"><Roles /></RequirePermission>} />
+        <Route path="admin/audit" element={<RequirePermission code="audit.read"><AuditLog /></RequirePermission>} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

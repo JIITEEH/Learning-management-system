@@ -7,7 +7,7 @@ import { expectNoSidewaysScroll, signIn, watchForProblems } from './support.js';
 const ROLES = {
   student: ['/dashboard', '/courses', '/schedule', '/schedule?view=month', '/files', '/account'],
   instructor: ['/dashboard', '/courses', '/schedule', '/schedule?view=month', '/files', '/account'],
-  admin: ['/dashboard', '/courses', '/schedule', '/schedule?view=month', '/files', '/account', '/admin', '/admin/users', '/admin/roles'],
+  admin: ['/dashboard', '/courses', '/schedule', '/schedule?view=month', '/files', '/account', '/admin', '/admin/users', '/admin/roles', '/admin/audit'],
 };
 
 for (const [role, paths] of Object.entries(ROLES)) {

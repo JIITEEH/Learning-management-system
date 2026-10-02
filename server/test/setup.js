@@ -12,11 +12,14 @@ export const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lms-test-'));
 process.env.NODE_ENV = 'test';
 process.env.DB_NAME = `lms_test_${process.pid}`;
 process.env.UPLOAD_DIR = path.join(tempDir, 'uploads');
+process.env.BACKUP_DIR = path.join(tempDir, 'backups');
 process.env.SESSION_SECRET = 'test-only-secret';
 // Never send real email from a test, whatever the developer's .env says
 process.env.SMTP_HOST = '';
 // A value left in the developer's shell must not change what the tests see
 delete process.env.TRUST_PROXY;
+// ...nor may a backup made by a test be copied to the developer's real backup destination
+delete process.env.BACKUP_REMOTE;
 
 // Build the database from the schema and seed files, exactly as `npm run db:setup` does
 const manage = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../src/database/manage.js');

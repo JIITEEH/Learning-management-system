@@ -36,9 +36,6 @@ build.
 
 - Quizzes with server-side auto-grading (roadmap step 10 — the largest
   single feature, and the one with no equivalent in ThesisTrack)
-- An audit log recording who changed what, such as an administrator
-  removing a student from a course (roadmap step 5 asks for it; this
-  project's database has no table for it yet)
 - Discussion forums
 - Parent accounts
 - Analytics and charts
@@ -187,12 +184,25 @@ their own action, and a grade is never announced while it is still hidden from
 the student. The count refreshes every minute while the tab is in view; there
 is no email and no push to the phone.
 
+### The audit log, as built
+
+Roadmap step 5 asks for a record of who changed what. It copies the thesis
+management system's audit log: an `audit_log` table (`schema/08_audit.sql`,
+migration `2026-10-02_add_audit_log.sql`) that is only ever added to, and an
+administrators' screen at `/admin/audit`, behind the new code `audit.read`.
+It records accounts created by an administrator, approved, suspended,
+reactivated, given another role, edited by someone else, given permission
+overrides or deleted; roles created, edited, deleted or given other codes;
+courses opened, archived or deleted; and students added to, dropped from or
+removed from a course. Names are copied in when the change is made, so an entry
+still reads correctly after either account is deleted.
+
 ### Launch
 
 | # | Step | Status | Notes for this stack |
 |---|------|--------|----------------------|
 | 12 | Testing and security review | **done** | Server tests with Node's own runner (`npm test`, 76 tests, each file on a throwaway database) and browser tests with Playwright (`npm run test:e2e`, every screen per role on desktop and phone, and one course journey), as in ThesisTrack. Both run in the GitHub check. |
-| 13 | Deploy and launch | **to do** | MySQL replaces SQLite, so the backup step is `mysqldump`, not `VACUUM INTO`. |
+| 13 | Deploy and launch | **partly done** | The restorable backup is built: `npm run db:backup` copies the database (with `mysqldump`, not `VACUUM INTO`) and the uploaded files, `-- --restore` puts one back, and old ones are pruned, as in ThesisTrack (see `server/src/database/README.md`). Putting the site online is left out at the owner's request. |
 
 Step 11 (notifications and calendar) is built; see above. Step 10 (quizzes)
 is held on the Later list above. The roadmap marks both as "Next" rather than

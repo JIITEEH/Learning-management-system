@@ -49,6 +49,11 @@ const config = {
   // controls: a forged one would send password reset links to someone else's site.
   appUrl: (process.env.APP_URL || `http://localhost:${port}`).replace(/\/+$/, ''),
   uploadDir: path.resolve(serverRoot, process.env.UPLOAD_DIR || './uploads'),
+  // Backups (npm run db:backup): where they are kept, for how many days, and an optional rclone
+  // destination such as 'gdrive:learnhub-backups' that each one is copied to
+  backupDir: path.resolve(serverRoot, process.env.BACKUP_DIR || './backups'),
+  backupKeepDays: Number(process.env.BACKUP_KEEP_DAYS) || 14,
+  backupRemote: process.env.BACKUP_REMOTE || '',
   // Outgoing email. With no SMTP_HOST, messages are printed in the terminal instead.
   mail: {
     host: process.env.SMTP_HOST || '',

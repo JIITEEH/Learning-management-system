@@ -7,6 +7,7 @@
     "dev": "node --watch --env-file-if-exists=../.env src/index.js",
     "start": "node --env-file-if-exists=../.env src/index.js",
     "db": "node --env-file-if-exists=../.env src/database/manage.js",
+    "backup": "node --env-file-if-exists=../.env src/database/backup.js",
     "test": "node --env-file-if-exists=../.env --test --test-concurrency=4 \"test/*.test.js\""
   },
   "dependencies": {

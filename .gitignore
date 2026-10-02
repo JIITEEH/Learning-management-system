@@ -27,6 +27,9 @@ client/playwright-report/
 client/test-results/
 .cache/
 
+# Backups hold every account and every file: data, never source
+server/backups/
+
 # Uploaded files are data, not source (see server/uploads/.gitignore)
 server/uploads/*
 !server/uploads/.gitignore

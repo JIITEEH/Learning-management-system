@@ -141,10 +141,13 @@ students see their own running total.
 Announcements and dashboards work (roadmap step 9): each role's dashboard
 shows real progress, deadlines, work to grade and announcements.
 
-Tests cover it (roadmap step 12): 76 server tests for every permission and
-privacy rule, and browser tests for every screen and one whole course. What
-is left before a first release is deploying (step 13), per
-[ROADMAP.md](ROADMAP.md).
+Tests cover it (roadmap step 12): 103 server tests for every permission and
+privacy rule, and browser tests for every screen and one whole course.
+
+Backups work (the half of roadmap step 13 that does not need hosting):
+`npm run db:backup` copies the database and every uploaded file into a dated
+folder, and `npm run db:backup -- --restore <name>` puts one back. Putting
+the site online is left out for now.
 
 Weekly class schedules work: each course has a Schedule tab, everyone has a
 "My week" timetable across their courses, and the dashboard shows today's
@@ -155,5 +158,9 @@ screen has a Month view of every due date, and a bell in the top bar tells
 people about new announcements and assignments, returned grades, and being
 added to a course. A database built before this needs `npm run db:migrate`
 once, to add the notifications table.
+
+Administrators have an audit log at `/admin/audit`: who approved, suspended or
+deleted an account, changed a role, or removed a student from a course, and
+when. `npm run db:migrate` adds it to an existing database.
 
 

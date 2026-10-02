@@ -10,6 +10,7 @@ the running app sends lives next door, in `../database-queries/`.
 database/
 ├── index.js         the connection pool, and the query helpers every model uses
 ├── manage.js        the npm run db:… commands
+├── backup.js        npm run db:backup: copy, list and restore backups
 ├── reset.sql        drops every table, so the schema can be reapplied
 ├── schema/          the structure, one file per domain, applied in order
 │   ├── 01_identity.sql      roles, permissions, users, overrides
@@ -45,6 +46,7 @@ same database the server does.
 | `npm run db:reset` | Drop every table. Destroys all data. |
 | `npm run db:migrate` | Apply any migration not yet applied. |
 | `npm run db:status` | Table count, whether the seed has run, migrations outstanding. |
+| `npm run db:backup` | Copy the database and uploaded files into `server/backups/<date>/`. Add `-- --list` to see them, or `-- --restore <name>` to put one back. |
 
 Starting from nothing:
 
@@ -56,6 +58,32 @@ npm run dev
 
 `db:setup` creates the database if it does not exist, so there is no step
 before it.
+
+## Backups
+
+`npm run db:backup` writes one folder per backup, named by the time it was
+made: `database.sql` (every table and row, from MySQL's own `mysqldump`, read
+as one consistent moment even while the site is in use), `uploads/` (every
+uploaded file) and `manifest.json` (how many accounts, courses and
+submissions it holds, for checking a backup before trusting it). Backups older
+than `BACKUP_KEEP_DAYS` (14) are deleted, but never the newest. With
+`BACKUP_REMOTE` set to an rclone destination, each one is copied off the
+machine too; a copy on the same disk does not survive losing the disk.
+
+```sh
+npm run db:backup                                   # make one
+npm run db:backup -- --list                         # what is stored
+npm run db:backup -- --restore 2026-10-02T17-30-45  # put one back
+```
+
+A restore first backs up what is there now, into a folder ending
+`-before-restore`, so restoring the wrong backup can be undone the same way.
+It then empties the database and loads the backup into it, and replaces the
+uploaded files. Restart the server afterwards. `mysqldump` and `mysql` come
+with MySQL; the password reaches them through a temporary file only this
+account can read, never on the command line where other programs could see it.
+The same tool as the thesis management system's, with `mysqldump` in place of
+SQLite's `VACUUM INTO`.
 
 ## The rules
 

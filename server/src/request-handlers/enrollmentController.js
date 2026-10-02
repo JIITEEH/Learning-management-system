@@ -1,5 +1,6 @@
 // Enrollments: a student joining with a code, and an instructor adding, changing or removing
 // people on a course's class list.
+import * as Audit from '../database-queries/auditModel.js';
 import * as Course from '../database-queries/courseModel.js';
 import * as Enrollment from '../database-queries/enrollmentModel.js';
 import * as Notification from '../database-queries/notificationModel.js';
@@ -27,8 +28,20 @@ function toJson(row) {
 async function findManagedEnrollment(req) {
   const enrollment = await Enrollment.findById(parseId(req.params.id, 'Enrollment not found'));
   if (!enrollment) throw new HttpError(404, 'Enrollment not found');
-  await manageCourse(req, enrollment.course_id);
-  return enrollment;
+  const { course } = await manageCourse(req, enrollment.course_id);
+  return { enrollment, course };
+}
+
+// Changes to who takes a course are logged against the course, naming the student
+function auditEnrollment(req, course, student, action, details = '') {
+  return Audit.record({
+    actor: req.user,
+    action,
+    targetType: 'course',
+    targetId: course.id,
+    targetLabel: `${course.code} · ${student.full_name} (${student.email})`,
+    details,
+  });
 }
 
 // Joins a course with the code the instructor handed out. Case, spaces and dashes are ignored,
@@ -65,6 +78,7 @@ export async function addToCourse(req, res) {
   if (existing && existing.status !== 'dropped') throw new HttpError(409, `${student.full_name} is already enrolled`);
 
   const id = await Enrollment.enroll(course.id, student.id);
+  await auditEnrollment(req, course, student, 'enrollment.added');
   // Someone else added them, so they would not otherwise know. A draft course stays hidden from
   // its students until it opens, so they hear nothing yet.
   if (course.status !== 'draft') {
@@ -82,15 +96,20 @@ export async function addToCourse(req, res) {
 
 // Marks an enrollment completed or dropped, or brings it back to active
 export async function setEnrollmentStatus(req, res) {
-  const enrollment = await findManagedEnrollment(req);
-  await Enrollment.updateStatus(enrollment.id, oneOf(req.body?.status, STATUSES, 'Status'));
+  const { enrollment, course } = await findManagedEnrollment(req);
+  const status = oneOf(req.body?.status, STATUSES, 'Status');
+  await Enrollment.updateStatus(enrollment.id, status);
+  if (status !== enrollment.status) {
+    await auditEnrollment(req, course, enrollment, 'enrollment.status_changed', `${enrollment.status} → ${status}`);
+  }
   res.json({ enrollment: toJson(await Enrollment.findById(enrollment.id)) });
 }
 
 // Deletes the record outright, for mistakes such as adding the wrong person. Setting the status
 // to dropped is the way to take someone out while keeping the record that they took part.
 export async function removeEnrollment(req, res) {
-  const enrollment = await findManagedEnrollment(req);
+  const { enrollment, course } = await findManagedEnrollment(req);
   await Enrollment.remove(enrollment.id);
+  await auditEnrollment(req, course, enrollment, 'enrollment.removed', `Was ${enrollment.status}`);
   res.status(204).end();
 }

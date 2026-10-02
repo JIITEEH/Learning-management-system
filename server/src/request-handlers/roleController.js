@@ -1,5 +1,6 @@
 // Roles and the permission codes each one carries. Adding a role needs no code change: roles are
 // rows in the database, and the server only ever checks permission codes.
+import * as Audit from '../database-queries/auditModel.js';
 import * as Role from '../database-queries/roleModel.js';
 import * as Permission from '../database-queries/permissionModel.js';
 import { HttpError } from '../helpers/httpError.js';
@@ -54,6 +55,10 @@ export async function listRoles(req, res) {
   res.json({ roles: rows.map(toJson) });
 }
 
+function auditRole(req, role, action, details = '') {
+  return Audit.record({ actor: req.user, action, targetType: 'role', targetId: role.id, targetLabel: role.label, details });
+}
+
 export async function getRole(req, res) {
   const role = await findRole(req.params.id);
   res.json(await roleResponse(role.id));
@@ -67,6 +72,7 @@ export async function createRole(req, res) {
 
   const permissionIds = await permissionIdsFor(req.body?.codes ?? []);
   const id = await Role.create({ name, label, description, permissionIds });
+  await auditRole(req, { id, label }, 'role.created', `Name: ${name}. ${permissionIds.length} permission(s).`);
   res.status(201).json(await roleResponse(id));
 }
 
@@ -87,6 +93,11 @@ export async function updateRole(req, res) {
     body.description === undefined ? role.description : optionalText(body.description, 'Description', { max: 255 });
 
   await Role.update({ id: role.id, name, label, description });
+  const changed = [];
+  if (name !== role.name) changed.push(`Name: ${role.name} → ${name}`);
+  if (label !== role.label) changed.push(`Label: ${role.label} → ${label}`);
+  if (description !== role.description) changed.push('Description changed');
+  if (changed.length > 0) await auditRole(req, role, 'role.updated', changed.join('. '));
   res.json(await roleResponse(role.id));
 }
 
@@ -96,6 +107,7 @@ export async function deleteRole(req, res) {
   const holders = await Role.countAccounts(role.id);
   if (holders > 0) throw new HttpError(409, `${holders} account(s) still hold this role`);
   await Role.remove(role.id);
+  await auditRole(req, role, 'role.deleted', `Name: ${role.name}`);
   res.status(204).end();
 }
 
@@ -103,6 +115,14 @@ export async function deleteRole(req, res) {
 // the role, on their next request
 export async function setRolePermissions(req, res) {
   const role = await findRole(req.params.id);
+  const before = new Set(await Role.codesFor(role.id));
   await Role.replacePermissions(role.id, await permissionIdsFor(req.body?.codes ?? []));
-  res.json({ roleId: role.id, codes: await Role.codesFor(role.id) });
+  const after = await Role.codesFor(role.id);
+  const added = after.filter((code) => !before.has(code));
+  const removed = [...before].filter((code) => !after.includes(code));
+  if (added.length > 0 || removed.length > 0) {
+    const details = [added.length && `Added: ${added.join(', ')}`, removed.length && `Removed: ${removed.join(', ')}`];
+    await auditRole(req, role, 'role.permissions_changed', details.filter(Boolean).join('. '));
+  }
+  res.json({ roleId: role.id, codes: after });
 }

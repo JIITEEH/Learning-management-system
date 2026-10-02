@@ -1,6 +1,7 @@
 // Courses: listing, creating, editing, publishing, deleting, join codes, and the class list.
 import { randomInt } from 'node:crypto';
 import * as Assignment from '../database-queries/assignmentModel.js';
+import * as Audit from '../database-queries/auditModel.js';
 import * as Course from '../database-queries/courseModel.js';
 import * as Enrollment from '../database-queries/enrollmentModel.js';
 import * as File from '../database-queries/fileModel.js';
@@ -108,6 +109,12 @@ export async function updateCourse(req, res) {
 // Deleting a course takes its lessons, assignments, submissions, their files and its enrollments
 // with it, so a published course must be archived first: a moment for someone to notice it is
 // still in use
+function auditCourse(req, course, action, details = '') {
+  return Audit.record({
+    actor: req.user, action, targetType: 'course', targetId: course.id, targetLabel: `${course.code} · ${course.title}`, details,
+  });
+}
+
 export async function deleteCourse(req, res) {
   const { course } = await manageCourse(req, req.params.id);
   if (course.status === 'published') throw new HttpError(409, 'Archive the course before deleting it');
@@ -117,6 +124,7 @@ export async function deleteCourse(req, res) {
     ...(await File.listForAll('submission', submissionIds)),
   ];
   await Course.remove(course.id);
+  await auditCourse(req, course, 'course.deleted', `It had ${course.student_count} active student(s).`);
   await discardFiles(files);
   res.status(204).end();
 }
@@ -124,7 +132,9 @@ export async function deleteCourse(req, res) {
 // draft -> published -> archived, in whatever order the instructor needs
 export async function setCourseStatus(req, res) {
   const { course, relation } = await manageCourse(req, req.params.id);
-  await Course.updateStatus(course.id, oneOf(req.body?.status, STATUSES, 'Status'));
+  const status = oneOf(req.body?.status, STATUSES, 'Status');
+  await Course.updateStatus(course.id, status);
+  if (status !== course.status) await auditCourse(req, course, 'course.status_changed', `${course.status} → ${status}`);
   res.json({ course: toJson(await Course.findById(course.id), relation) });
 }
 

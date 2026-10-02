@@ -12,6 +12,7 @@ INSERT INTO permissions (code, category, description) VALUES
   ('user.update',       'accounts',  'Edit accounts.'),
   ('user.delete',       'accounts',  'Delete accounts.'),
   ('role.manage',       'accounts',  'Create roles and assign permissions.'),
+  ('audit.read',        'accounts',  'Read the audit log of administrative changes.'),
 
   ('course.read',       'courses',   'View courses.'),
   ('course.create',     'courses',   'Create courses.'),

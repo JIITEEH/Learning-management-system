@@ -1,5 +1,6 @@
 // Managing accounts: listing, creating, editing, approving or suspending, deleting, and
 // per-account permission overrides.
+import * as Audit from '../database-queries/auditModel.js';
 import * as User from '../database-queries/userModel.js';
 import * as Role from '../database-queries/roleModel.js';
 import * as File from '../database-queries/fileModel.js';
@@ -25,6 +26,25 @@ function toJson(row) {
     lastLoginAt: row.last_login_at,
     createdAt: row.created_at,
   };
+}
+
+// Writes an audit entry about an account, naming it the way a person would recognise it
+function auditAccount(req, account, action, details = '') {
+  return Audit.record({
+    actor: req.user,
+    action,
+    targetType: 'user',
+    targetId: account.id,
+    targetLabel: `${account.full_name} (${account.email})`,
+    details,
+  });
+}
+
+// What a status change is called in the audit log
+function statusAction(from, to) {
+  if (to === 'suspended') return 'user.suspended';
+  if (to === 'active') return from === 'pending' ? 'user.approved' : 'user.reactivated';
+  return 'user.status_changed';
 }
 
 async function findAccount(idValue) {
@@ -64,7 +84,9 @@ export async function createUser(req, res) {
   if (await User.emailTaken(email)) throw new HttpError(409, 'That email address is already registered');
 
   const id = await User.create({ email, passwordHash: await hashPassword(password), fullName, roleId: role.id, status });
-  res.status(201).json({ user: toJson(await User.findById(id)) });
+  const created = await User.findById(id);
+  await auditAccount(req, created, 'user.created', `Role: ${created.role_label}. Status: ${status}.`);
+  res.status(201).json({ user: toJson(created) });
 }
 
 // Anyone may read their own account; reading someone else's takes user.read
@@ -91,6 +113,7 @@ export async function updateUser(req, res) {
   }
 
   let roleId = account.role_id;
+  let newRole = null;
   if (body.role !== undefined && body.role !== account.role) {
     if (!(await holds(req, 'role.manage'))) throw new HttpError(403, 'Changing a role requires role.manage');
     // An administrator changing their own role is how the last administrator locks everyone out
@@ -98,9 +121,17 @@ export async function updateUser(req, res) {
     const role = await Role.findByName(String(body.role));
     if (!role) throw new HttpError(400, `No such role: ${body.role}`);
     roleId = role.id;
+    newRole = role;
   }
 
   await User.updateProfile({ id: account.id, fullName, email, roleId });
+  // Someone editing their own name or email is not an administrative change; anything done to
+  // another account is
+  if (newRole) await auditAccount(req, account, 'user.role_changed', `${account.role_label} → ${newRole.label}`);
+  const changed = [];
+  if (fullName !== account.full_name) changed.push(`Name: ${account.full_name} → ${fullName}`);
+  if (email !== account.email) changed.push(`Email: ${account.email} → ${email}`);
+  if (!isSelf && changed.length > 0) await auditAccount(req, account, 'user.details_changed', changed.join('. '));
   res.json({ user: toJson(await User.findById(account.id)) });
 }
 
@@ -112,6 +143,9 @@ export async function setUserStatus(req, res) {
     throw new HttpError(409, 'You cannot suspend your own account');
   }
   await User.updateStatus(account.id, status);
+  if (status !== account.status) {
+    await auditAccount(req, account, statusAction(account.status, status), `${account.status} → ${status}`);
+  }
   res.json({ user: toJson(await User.findById(account.id)) });
 }
 
@@ -123,6 +157,7 @@ export async function deleteUser(req, res) {
   if (account.id === req.user.id) throw new HttpError(409, 'You cannot delete your own account');
   const files = await File.listForAll('submission', await Submission.idsForUser(account.id));
   await User.remove(account.id);
+  await auditAccount(req, account, 'user.deleted', `Role: ${account.role_label}`);
   await discardFiles(files);
   res.status(204).end();
 }
@@ -165,5 +200,8 @@ export async function setUserPermissions(req, res) {
   }
 
   await Permission.replaceOverrides(account.id, overrides, req.user.id);
+  const summary = entries.map((entry) => `${entry.effect ?? 'allow'} ${entry.code}`).join(', ');
+  await auditAccount(req, account, 'user.permissions_changed',
+    summary ? `Overrides now: ${summary}` : 'Overrides cleared; the role decides everything again');
   res.json({ userId: account.id, effective: [...(await Permission.effectiveCodes(account.id))].sort() });
 }

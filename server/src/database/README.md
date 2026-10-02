@@ -18,7 +18,8 @@ database/
 │   ├── 04_assessment.sql    assignments, submissions
 │   ├── 05_files.sql         upload metadata
 │   ├── 06_scheduling.sql    weekly course meetings
-│   └── 07_communication.sql announcements, notifications
+│   ├── 07_communication.sql announcements, notifications
+│   └── 08_audit.sql         the audit log of administrative changes
 ├── seed/            structural rows only, applied in order
 │   ├── 01_roles.sql
 │   ├── 02_permissions.sql

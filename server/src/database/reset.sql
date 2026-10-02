@@ -10,6 +10,9 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+-- 08 · audit
+DROP TABLE IF EXISTS audit_log;
+
 -- 07 · communication
 DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS announcements;

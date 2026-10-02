@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import announcementRoutes from './announcementRoutes.js';
 import assignmentRoutes from './assignmentRoutes.js';
+import auditRoutes from './auditRoutes.js';
 import authRoutes from './authRoutes.js';
 import courseRoutes from './courseRoutes.js';
 import dashboardRoutes from './dashboardRoutes.js';
@@ -34,5 +35,6 @@ router.use('/announcements', announcementRoutes);
 router.use('/schedules', scheduleRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/audit', auditRoutes);
 
 export default router;

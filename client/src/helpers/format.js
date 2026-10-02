@@ -68,6 +68,12 @@ export function formatDue(value) {
 // lateness by its own clock when work is handed in.
 export const isPastDue = (value) => Boolean(value) && parseTimestamp(value) < new Date();
 
+// A quiz's closing time: "Closes Thu, 1 Jan 2030, 9:00 AM", "Closed", or "Open, no closing time"
+export function closingText(dueAt) {
+  if (!dueAt) return 'Open, no closing time';
+  return isPastDue(dueAt) ? 'Closed' : `Closes ${formatDue(dueAt)}`;
+}
+
 // An <input type="datetime-local"> works in the viewer's local time with no zone ('2030-01-01T09:00').
 // These convert between that and the server's UTC.
 export function toLocalInput(value) {

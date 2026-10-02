@@ -1176,6 +1176,39 @@ time,
 .month-date { margin: 0; color: var(--chalk); font-weight: 600; }
 .month-day .meeting-time { min-width: 0; }
 .month-day .tag { justify-self: start; }
+
+/* Quizzes (ui-pieces/quiz/). Each choice is a whole-row label, so the target to tap is the full
+   width rather than a 20px circle. */
+.question-list { display: grid; gap: var(--space-3); margin: var(--space-4) 0 0; padding: 0; list-style: none; }
+.question-item { display: grid; gap: var(--space-2); }
+.question-item .outline-tools { margin-left: auto; }
+.question-item fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.question-prompt { margin: 0; color: var(--chalk); font-weight: 600; overflow-wrap: anywhere; white-space: pre-wrap; }
+.question-prompt svg { display: inline; width: 18px; height: 18px; margin-right: var(--space-1); vertical-align: -3px; }
+.question-right .question-prompt svg { color: var(--success-light); }
+.question-wrong .question-prompt svg { color: var(--danger-light); }
+.choice-list { display: grid; gap: var(--space-2); margin-top: var(--space-2); }
+.choice-inline { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.choice-row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--glass-border-soft);
+  border-radius: var(--radius-sm);
+  color: var(--chalk-secondary);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.choice-row:has(input:checked) { border-color: var(--primary-light); background: var(--primary-wash); color: var(--chalk); }
+.choice-editor { display: grid; gap: var(--space-2); min-width: 0; margin: 0; padding: 0; border: 0; justify-items: start; }
+.choice-edit-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; width: 100%; }
+.answer-list { display: grid; gap: var(--space-1); margin: 0; padding: 0; list-style: none; color: var(--chalk-secondary); font-size: var(--text-sm); }
+.answer-right { color: var(--success-light); font-weight: 600; }
+.answer-right svg { display: inline; width: 14px; height: 14px; margin-right: var(--space-1); vertical-align: -2px; }
+/* The countdown stays in view while scrolling through the questions */
+.quiz-timer { position: sticky; top: var(--space-3); z-index: 1; display: flex; width: fit-content; margin: 0 0 0 auto; background-color: var(--color-charcoal-700); font-size: var(--text-base); }
 /* The full date is for screen readers on the grid, where the column says the weekday */
 .month-date-full { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @media (max-width: 900px) {

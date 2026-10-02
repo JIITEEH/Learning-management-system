@@ -18,6 +18,7 @@ import ResetPassword from './screens/auth/ResetPassword.jsx';
 const Course = lazy(() => import('./screens/Course.jsx'));
 const Lesson = lazy(() => import('./screens/Lesson.jsx'));
 const Assignment = lazy(() => import('./screens/Assignment.jsx'));
+const Quiz = lazy(() => import('./screens/Quiz.jsx'));
 const Files = lazy(() => import('./screens/Files.jsx'));
 const Schedule = lazy(() => import('./screens/Schedule.jsx'));
 const Admin = lazy(() => import('./screens/admin/Admin.jsx'));
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="courses/:id" element={<RequirePermission code="course.read"><Course /></RequirePermission>} />
         <Route path="courses/:courseId/lessons/:lessonId" element={<RequirePermission code="lesson.read"><Lesson /></RequirePermission>} />
         <Route path="courses/:courseId/assignments/:assignmentId" element={<RequirePermission code="assignment.read"><Assignment /></RequirePermission>} />
+        <Route path="courses/:courseId/quizzes/:quizId" element={<RequirePermission code="quiz.read"><Quiz /></RequirePermission>} />
         <Route path="files" element={<RequirePermission code="file.read"><Files /></RequirePermission>} />
         <Route path="schedule" element={<RequirePermission code="schedule.read"><Schedule /></RequirePermission>} />
         <Route path="admin" element={<RequirePermission code="role.manage"><Admin /></RequirePermission>} />

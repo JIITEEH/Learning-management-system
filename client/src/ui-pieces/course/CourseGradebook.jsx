@@ -28,7 +28,8 @@ export default function CourseGradebook({ course }) {
       </div>
       <p className="field-hint">
         Scores count as soon as they are saved, returned or not. Missing work counts as 0 once its due date has
-        passed; work handed in but not graded yet is left out until it is.
+        passed; work handed in but not graded yet is left out until it is. A quiz counts each student's best
+        attempt, and 0 once it has closed if they never took it.
       </p>
       {students.length === 0 || assignments.length === 0 ? (
         <p className="empty">{students.length === 0 ? 'Nobody is enrolled yet.' : 'No assignments yet.'}</p>

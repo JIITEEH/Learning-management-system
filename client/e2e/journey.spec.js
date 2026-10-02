@@ -108,5 +108,28 @@ test('a course from setup to returned grade', async ({ browser }) => {
   await tab(instructor, 'Gradebook');
   await expect(instructor.getByText('45/50 (90%)')).toBeVisible();
 
+  // The instructor builds a one-question quiz and publishes it; the student takes it and is marked
+  await instructor.goto(coursePath);
+  await tab(instructor, 'Quizzes');
+  await instructor.getByRole('button', { name: 'New quiz' }).click();
+  await instructor.getByLabel('Title').fill('Quick check');
+  await instructor.getByRole('button', { name: 'Create quiz' }).click();
+  await expect(instructor.getByRole('heading', { name: 'Quick check' })).toBeVisible();
+  const quizPath = new URL(instructor.url()).pathname;
+  await instructor.getByRole('button', { name: 'Add a question' }).click();
+  await instructor.getByLabel('Question', { exact: true }).fill('Capital of France?');
+  await instructor.getByLabel('Option 1', { exact: true }).fill('Paris');
+  await instructor.getByLabel('Option 2', { exact: true }).fill('Lyon');
+  await instructor.getByRole('button', { name: 'Add question' }).click();
+  await expect(instructor.getByText('Capital of France?')).toBeVisible();
+  await instructor.getByRole('button', { name: 'Publish' }).click();
+  await expect(instructor.getByText('Published', { exact: true })).toBeVisible();
+
+  await student.goto(quizPath);
+  await student.getByRole('button', { name: 'Start the quiz' }).click();
+  await student.getByLabel('Paris').check();
+  await student.getByRole('button', { name: 'Hand in' }).click();
+  await expect(student.getByRole('heading', { name: 'Attempt 1: 1/1' })).toBeVisible();
+
   expect(problems.flat()).toEqual([]);
 });

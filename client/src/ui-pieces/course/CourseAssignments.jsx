@@ -47,7 +47,7 @@ export default function CourseAssignments({ course }) {
         <p className="card-intro">
           {data.myTotal.percent === null
             ? 'No returned grades yet.'
-            : `Your grade so far: ${data.myTotal.earned} of ${data.myTotal.possible} points (${data.myTotal.percent}%), counting returned work and anything missed after its due date.`}
+            : `Your grade so far: ${data.myTotal.earned} of ${data.myTotal.possible} points (${data.myTotal.percent}%), counting returned work, quiz scores, and anything missed after its due date.`}
         </p>
       )}
 

@@ -120,6 +120,21 @@ export const api = {
   returnAllGraded: (assignmentId) => request(`/assignments/${assignmentId}/return-all`, { method: 'POST' }),
   getGradebook: (courseId) => request(`/courses/${courseId}/gradebook`),
 
+  // Quizzes. Building one is for the course's instructor; taking one is for its students.
+  listQuizzes: (courseId) => request(`/courses/${courseId}/quizzes`),
+  createQuiz: (courseId, data) => request(`/courses/${courseId}/quizzes`, { method: 'POST', body: data }),
+  getQuiz: (id) => request(`/quizzes/${id}`),
+  updateQuiz: (id, data) => request(`/quizzes/${id}`, { method: 'PATCH', body: data }),
+  deleteQuiz: (id) => request(`/quizzes/${id}`, { method: 'DELETE' }),
+  addQuestion: (quizId, data) => request(`/quizzes/${quizId}/questions`, { method: 'POST', body: data }),
+  updateQuestion: (id, data) => request(`/quiz-questions/${id}`, { method: 'PATCH', body: data }),
+  deleteQuestion: (id) => request(`/quiz-questions/${id}`, { method: 'DELETE' }),
+  quizResults: (id) => request(`/quizzes/${id}/results`),
+  myAttempts: (quizId) => request(`/quizzes/${quizId}/attempts`),
+  startAttempt: (quizId) => request(`/quizzes/${quizId}/attempts`, { method: 'POST' }),
+  getAttempt: (id) => request(`/attempts/${id}`),
+  submitAttempt: (id, answers) => request(`/attempts/${id}/submit`, { method: 'POST', body: { answers } }),
+
   // Announcements and the dashboard
   listAnnouncements: (courseId) => request(`/courses/${courseId}/announcements`),
   postAnnouncement: (courseId, data) => request(`/courses/${courseId}/announcements`, { method: 'POST', body: data }),

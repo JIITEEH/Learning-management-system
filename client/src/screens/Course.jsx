@@ -11,6 +11,7 @@ import { Notice } from '../ui-pieces/basics/Feedback.jsx';
 import Tabs from '../ui-pieces/basics/Tabs.jsx';
 import CourseAnnouncements from '../ui-pieces/course/CourseAnnouncements.jsx';
 import CourseAssignments from '../ui-pieces/course/CourseAssignments.jsx';
+import QuizList from '../ui-pieces/quiz/QuizList.jsx';
 import CourseGradebook from '../ui-pieces/course/CourseGradebook.jsx';
 import CourseOutline from '../ui-pieces/course/CourseOutline.jsx';
 import CourseRoster from '../ui-pieces/course/CourseRoster.jsx';
@@ -68,6 +69,7 @@ export default function Course() {
     can('announcement.read') && { id: 'announcements', label: 'Announcements', content: <CourseAnnouncements course={course} /> },
     { id: 'lessons', label: 'Lessons', content: <CourseOutline course={course} /> },
     { id: 'assignments', label: 'Assignments', content: <CourseAssignments course={course} /> },
+    can('quiz.read') && { id: 'quizzes', label: 'Quizzes', content: <QuizList course={course} /> },
     manages && can('submission.read') && { id: 'gradebook', label: 'Gradebook', content: <CourseGradebook course={course} /> },
     can('schedule.read') && { id: 'schedule', label: 'Schedule', content: <CourseSchedule course={course} /> },
   ].filter(Boolean);

@@ -24,7 +24,7 @@ export default function Register() {
 
   if (created) {
     return (
-      <AuthLayout>
+      <AuthLayout title="Create an account">
         <h1>Account created</h1>
         <Notice tone="ok">
           {created.status === 'active'
@@ -39,7 +39,7 @@ export default function Register() {
   }
 
   return (
-    <AuthLayout>
+    <AuthLayout title="Create an account">
       <h1>Create an account</h1>
       <p className="card-intro">
         A new account joins as a student and waits for an administrator to approve it before it can sign in.

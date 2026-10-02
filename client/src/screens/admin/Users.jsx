@@ -176,6 +176,7 @@ export default function Users() {
 
   return (
     <main className="stack stack-wide" id="main">
+      <title>Accounts — LearnHub</title>
       <section className="card" aria-labelledby="users-title">
         <div className="card-head">
           <h1 id="users-title">Accounts</h1>

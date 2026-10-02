@@ -74,7 +74,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <AuthLayout>
+    <AuthLayout title="Choose a new password">
       <h1>Choose a new password</h1>
       {body}
       {!done && (

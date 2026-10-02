@@ -13,6 +13,7 @@ export default function Admin() {
 
   return (
     <main className="stack" id="main">
+      <title>Administration — LearnHub</title>
       <section className="card" aria-labelledby="admin-title">
         <h1 id="admin-title">Administration</h1>
         <p className="card-intro">Who has an account, what each role may do, which accounts are still waiting to be let in, and a record of every change.</p>

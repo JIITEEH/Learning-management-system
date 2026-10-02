@@ -17,7 +17,7 @@ export default function Login() {
   });
 
   return (
-    <AuthLayout>
+    <AuthLayout title="Sign in">
       <h1>Sign in</h1>
       <p className="card-intro">Use the email address your account was created with.</p>
       <Notice>{submit.error}</Notice>

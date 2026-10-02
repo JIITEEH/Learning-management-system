@@ -18,6 +18,7 @@ export default function Files() {
 
   return (
     <main className="stack stack-wide" id="main">
+      <title>Files — LearnHub</title>
       <section className="card" aria-labelledby="files-title">
         <div className="card-head">
           <h1 id="files-title">Files</h1>

@@ -31,6 +31,7 @@ export default function Account() {
 
   return (
     <main className="stack" id="main">
+      <title>Your account — LearnHub</title>
       <section className="card" aria-labelledby="details-title">
         <h1 id="details-title">Your account</h1>
         <p className="card-intro">These details come from the server each time this screen opens.</p>

@@ -18,7 +18,7 @@ export default function ForgotPassword() {
   });
 
   return (
-    <AuthLayout>
+    <AuthLayout title="Forgot your password">
       <h1>Forgot your password?</h1>
       {sentTo ? (
         <Notice tone="ok">

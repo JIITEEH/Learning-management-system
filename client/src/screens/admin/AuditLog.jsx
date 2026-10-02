@@ -69,6 +69,7 @@ export default function AuditLog() {
 
   return (
     <main className="stack stack-wide" id="main">
+      <title>Audit log — LearnHub</title>
       <section className="card" aria-labelledby="audit-title">
         <h1 id="audit-title">Audit log</h1>
         <p className="card-intro">

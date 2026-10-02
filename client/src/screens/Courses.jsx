@@ -112,6 +112,7 @@ export default function Courses() {
 
   return (
     <main className="stack stack-wide" id="main">
+      <title>Courses — LearnHub</title>
       <section className="card" aria-labelledby="courses-title">
         <div className="card-head">
           <h1 id="courses-title">Courses</h1>

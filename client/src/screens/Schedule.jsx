@@ -14,6 +14,7 @@ export default function Schedule() {
 
   return (
     <main className="stack stack-wide" id="main">
+      <title>Schedule — LearnHub</title>
       <Tabs label="Schedule views" tabs={tabs} initialId={searchParams.get('view') ?? undefined}>
         <h1>Schedule</h1>
         <p className="card-intro">Your classes week by week, and every due date month by month.</p>

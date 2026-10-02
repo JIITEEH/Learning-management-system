@@ -29,17 +29,26 @@ export function studentCourses(userId) {
   );
 }
 
-// Assignments a student has not handed in, in open courses, soonest due first (overdue ones
-// first of all). Only those with a due date: "due soon" means nothing without one.
+// Work a student still owes, in open courses, soonest first (overdue assignments first of all):
+// assignments not handed in, and published quizzes not taken that have not closed yet (a closed
+// quiz cannot be taken, so it is no longer something to do). Only those with a due date: "due
+// soon" means nothing without one.
 export function studentDueSoon(userId, limit = 8) {
   return query(
-    `SELECT a.id, a.title, a.due_at, c.id AS course_id, c.code AS course_code
+    `SELECT 'assignment' AS kind, a.id, a.title, a.due_at, c.id AS course_id, c.code AS course_code
        FROM assignments a
        JOIN courses c ON c.id = a.course_id AND c.status = 'published'
        JOIN enrollments e ON e.course_id = c.id AND e.user_id = :userId AND e.status = 'active'
       WHERE a.due_at IS NOT NULL
         AND NOT EXISTS (SELECT 1 FROM submissions s WHERE s.assignment_id = a.id AND s.user_id = :userId)
-      ORDER BY a.due_at
+     UNION ALL
+     SELECT 'quiz', q.id, q.title, q.due_at, c.id, c.code
+       FROM quizzes q
+       JOIN courses c ON c.id = q.course_id AND c.status = 'published'
+       JOIN enrollments e ON e.course_id = c.id AND e.user_id = :userId AND e.status = 'active'
+      WHERE q.is_published = 1 AND q.due_at > UTC_TIMESTAMP()
+        AND NOT EXISTS (SELECT 1 FROM quiz_attempts t WHERE t.quiz_id = q.id AND t.user_id = :userId AND t.submitted_at IS NOT NULL)
+      ORDER BY due_at
       LIMIT :limit`,
     // LIMIT takes a placeholder like any other value; MySQL's prepared statements want it as text
     { userId, limit: String(limit) },
@@ -76,14 +85,20 @@ export function workToGrade(userId, { seesAll }, limit = 8) {
   );
 }
 
-// Deadlines still ahead in courses someone teaches (or oversees)
+// Deadlines still ahead in courses someone teaches (or oversees): assignments due and quizzes
+// closing
 export function upcomingDeadlines(userId, { seesAll }, limit = 5) {
   return query(
-    `SELECT a.id, a.title, a.due_at, c.id AS course_id, c.code AS course_code
+    `SELECT 'assignment' AS kind, a.id, a.title, a.due_at, c.id AS course_id, c.code AS course_code
        FROM assignments a
        JOIN courses c ON c.id = a.course_id
       WHERE a.due_at >= UTC_TIMESTAMP() AND (:seesAll OR c.instructor_id = :userId)
-      ORDER BY a.due_at
+     UNION ALL
+     SELECT 'quiz', q.id, q.title, q.due_at, c.id, c.code
+       FROM quizzes q
+       JOIN courses c ON c.id = q.course_id
+      WHERE q.due_at >= UTC_TIMESTAMP() AND (:seesAll OR c.instructor_id = :userId)
+      ORDER BY due_at
       LIMIT :limit`,
     { userId, seesAll: seesAll ? 1 : 0, limit: String(limit) },
   );

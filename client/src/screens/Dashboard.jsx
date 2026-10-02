@@ -7,7 +7,7 @@ import { api } from '../api-client/api.js';
 import { useAuth } from '../shared-state/AuthContext.jsx';
 import useApi from '../reusable-logic/useApi.js';
 import { formatDate, formatDue, isPastDue, plural } from '../helpers/format.js';
-import { meetingsOn, timeRange } from '../helpers/schedule.js';
+import { deadlineLink, meetingsOn, timeRange } from '../helpers/schedule.js';
 import { EmptyState, Notice } from '../ui-pieces/basics/Feedback.jsx';
 
 // A dashboard card with a heading, and an empty message when it has nothing to list
@@ -44,6 +44,7 @@ export default function Dashboard() {
 
   return (
     <main className="board dashboard" id="main">
+      <title>Dashboard — LearnHub</title>
       <section className="card dashboard-welcome">
         <h1>Welcome back, {firstName}</h1>
         <p className="card-intro">Here is what needs you today.</p>
@@ -93,13 +94,13 @@ export default function Dashboard() {
       )}
 
       {dueSoon && (
-        <Card title="Due soon" Icon={CalendarClock} empty="Nothing due. Everything with a deadline is handed in." hasItems={dueSoon.length > 0}>
+        <Card title="Due soon" Icon={CalendarClock} empty="Nothing due. Everything with a deadline is handed in or taken." hasItems={dueSoon.length > 0}>
           <ul className="file-list">
             {dueSoon.map((item) => (
-              <li key={item.id} className="outline-row">
-                <Link to={courseLink(item, 'assignments')}>{item.courseCode} · {item.title}</Link>
+              <li key={`${item.kind}-${item.id}`} className="outline-row">
+                <Link to={deadlineLink(item)}>{item.courseCode} · {item.kind === 'quiz' ? 'Quiz: ' : ''}{item.title}</Link>
                 <span className={`tag ${isPastDue(item.dueAt) ? 'tag-warn' : ''}`}>
-                  {isPastDue(item.dueAt) ? 'Overdue' : formatDue(item.dueAt)}
+                  {isPastDue(item.dueAt) ? 'Overdue' : `${item.kind === 'quiz' ? 'Closes ' : ''}${formatDue(item.dueAt)}`}
                 </span>
               </li>
             ))}
@@ -142,9 +143,9 @@ export default function Dashboard() {
         <Card title="Upcoming deadlines" Icon={CalendarClock} empty="No deadlines ahead." hasItems={deadlines.length > 0}>
           <ul className="file-list">
             {deadlines.map((item) => (
-              <li key={item.id} className="outline-row">
-                <Link to={courseLink(item, 'assignments')}>{item.courseCode} · {item.title}</Link>
-                <span className="field-hint">{formatDue(item.dueAt)}</span>
+              <li key={`${item.kind}-${item.id}`} className="outline-row">
+                <Link to={deadlineLink(item)}>{item.courseCode} · {item.kind === 'quiz' ? 'Quiz: ' : ''}{item.title}</Link>
+                <span className="field-hint">{item.kind === 'quiz' ? 'Closes ' : ''}{formatDue(item.dueAt)}</span>
               </li>
             ))}
           </ul>

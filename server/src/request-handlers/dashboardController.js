@@ -33,7 +33,7 @@ export async function getDashboard(req, res) {
       lessonCount: Number(row.lesson_count),
       lessonsDone: Number(row.lessons_done),
     })),
-    dueSoon: dueSoon?.map((row) => ({ id: row.id, title: row.title, dueAt: row.due_at, courseId: row.course_id, courseCode: row.course_code })),
+    dueSoon: dueSoon?.map((row) => ({ kind: row.kind, id: row.id, title: row.title, dueAt: row.due_at, courseId: row.course_id, courseCode: row.course_code })),
     recentGrades: recentGrades?.map((row) => ({
       assignmentId: row.assignment_id,
       title: row.title,
@@ -44,7 +44,7 @@ export async function getDashboard(req, res) {
       courseCode: row.course_code,
     })),
     toGrade: toGrade?.map((row) => ({ id: row.id, title: row.title, waiting: Number(row.waiting), courseId: row.course_id, courseCode: row.course_code })),
-    deadlines: deadlines?.map((row) => ({ id: row.id, title: row.title, dueAt: row.due_at, courseId: row.course_id, courseCode: row.course_code })),
+    deadlines: deadlines?.map((row) => ({ kind: row.kind, id: row.id, title: row.title, dueAt: row.due_at, courseId: row.course_id, courseCode: row.course_code })),
     announcements: announcements?.map((row) => ({ id: row.id, title: row.title, createdAt: row.created_at, courseId: row.course_id, courseCode: row.course_code })),
     // A section that does not apply to this account is left out of the reply entirely
     totals: totals

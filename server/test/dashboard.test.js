@@ -77,4 +77,25 @@ describe('the dashboard', () => {
     const data = (await api.get('/dashboard', { as: outsider })).data;
     assert.deepEqual([data.courses, data.dueSoon, data.announcements], [[], [], []]);
   });
+
+  it('lists a quiz as due until it is taken, and never once it has closed', async () => {
+    const learner = await makeUser(api, 'student');
+    const { course: quizzing } = await makeCourse(api, instructor, [learner]);
+    const quiz = async (title, dueAt) => {
+      const made = (await api.post(`/courses/${quizzing.id}/quizzes`, { as: instructor, body: { title, dueAt } })).data.quiz;
+      await api.post(`/quizzes/${made.id}/questions`, { as: instructor, body: { kind: 'true_false', prompt: 'Yes?', answer: true } });
+      await api.patch(`/quizzes/${made.id}`, { as: instructor, body: { isPublished: true } });
+      return made;
+    };
+    const open = await quiz('Open quiz', daysFromNow(2));
+    await quiz('Closed quiz', daysFromNow(-1));
+    const due = async () => (await api.get('/dashboard', { as: learner })).data.dueSoon.map((item) => `${item.kind}:${item.title}`);
+    assert.deepEqual(await due(), ['quiz:Open quiz']);
+    const taught = (await api.get('/dashboard', { as: instructor })).data.deadlines;
+    assert.ok(taught.some((item) => item.kind === 'quiz' && item.title === 'Open quiz'));
+
+    const attempt = (await api.post(`/quizzes/${open.id}/attempts`, { as: learner })).data.attempt;
+    await api.post(`/attempts/${attempt.id}/submit`, { as: learner, body: { answers: [] } });
+    assert.deepEqual(await due(), []);
+  });
 });

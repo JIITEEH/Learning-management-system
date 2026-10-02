@@ -1,10 +1,12 @@
 // Assignments: listing a course's, creating, reading, editing and deleting them.
 import * as Assignment from '../database-queries/assignmentModel.js';
+import * as Attempt from '../database-queries/attemptModel.js';
 import * as File from '../database-queries/fileModel.js';
 import * as Notification from '../database-queries/notificationModel.js';
+import * as Quiz from '../database-queries/quizModel.js';
 import * as Submission from '../database-queries/submissionModel.js';
 import { discardFiles } from '../helpers/files.js';
-import { totalFor } from '../helpers/grades.js';
+import { quizItems, totalFor } from '../helpers/grades.js';
 import { optionalDateTime, optionalText, requireNumber, requireText } from '../helpers/validate.js';
 import { manageCourse, reachAssignment, reachCourse } from '../permission-rules/access.js';
 import { fileToJson } from './lessonController.js';
@@ -70,6 +72,18 @@ export async function listAssignments(req, res) {
       ? new Map((await Submission.listForStudentInCourse(req.user.id, course.id)).map((row) => [row.assignment_id, row]))
       : null;
 
+  // A student's running total counts quizzes too, the same way the gradebook does
+  let myTotal = null;
+  if (mine) {
+    const [quizzes, quizScores] = await Promise.all([
+      Quiz.listForCourse(course.id, { publishedOnly: true }),
+      Attempt.summaryForStudent(course.id, req.user.id),
+    ]);
+    const best = new Map(quizScores.map((row) => [row.quiz_id, Number(row.best_score)]));
+    const result = (item) => (item.isQuiz ? (best.get(item.id) ?? null) : studentResult(mine.get(item.id)));
+    myTotal = totalFor([...rows, ...quizItems(quizzes)], result);
+  }
+
   res.json({
     assignments: rows.map((row) => ({
       ...assignmentToJson(row),
@@ -77,8 +91,8 @@ export async function listAssignments(req, res) {
         ? { mySubmission: mine.has(row.id) ? submissionToJson(mine.get(row.id), row, { forStudent: true }) : null }
         : { submissionCount: Number(row.submission_count) }),
     })),
-    // A student's running total, counting only work that has been returned
-    myTotal: mine ? totalFor(rows, (row) => studentResult(mine.get(row.id))) : null,
+    // A student's running total: returned work, quiz scores, and anything missed after it was due
+    myTotal,
   });
 }
 

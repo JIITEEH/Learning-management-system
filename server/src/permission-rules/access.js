@@ -5,6 +5,7 @@ import * as Assignment from '../database-queries/assignmentModel.js';
 import * as Course from '../database-queries/courseModel.js';
 import * as Lesson from '../database-queries/lessonModel.js';
 import * as Module from '../database-queries/moduleModel.js';
+import * as Quiz from '../database-queries/quizModel.js';
 import { HttpError } from '../helpers/httpError.js';
 import { parseId } from '../helpers/validate.js';
 
@@ -63,4 +64,14 @@ export async function reachAssignment(req, assignmentIdValue, { manage = false }
   const courseId = assignment.course_id;
   const reached = manage ? await manageCourse(req, courseId) : await reachCourse(req, courseId);
   return { assignment, ...reached };
+}
+
+// A quiz still being built is hidden from the course's students as if it did not exist: 404, the
+// same answer as for a quiz in a course they are not in
+export async function reachQuiz(req, quizIdValue, { manage = false } = {}) {
+  const quiz = await Quiz.findById(parseId(quizIdValue, 'Quiz not found'));
+  if (!quiz) throw new HttpError(404, 'Quiz not found');
+  const reached = manage ? await manageCourse(req, quiz.course_id) : await reachCourse(req, quiz.course_id);
+  if (reached.relation === 'enrolled' && !quiz.is_published) throw new HttpError(404, 'Quiz not found');
+  return { quiz, ...reached };
 }

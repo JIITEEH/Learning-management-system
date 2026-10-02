@@ -16,7 +16,7 @@ database/
 │   ├── 01_identity.sql      roles, permissions, users, overrides
 │   ├── 02_catalog.sql       courses, modules, lessons
 │   ├── 03_enrollment.sql    enrollments, lesson progress
-│   ├── 04_assessment.sql    assignments, submissions
+│   ├── 04_assessment.sql    assignments, submissions, quizzes and their attempts
 │   ├── 05_files.sql         upload metadata
 │   ├── 06_scheduling.sql    weekly course meetings
 │   ├── 07_communication.sql announcements, notifications

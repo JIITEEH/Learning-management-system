@@ -24,6 +24,11 @@ DROP TABLE IF EXISTS schedules;
 DROP TABLE IF EXISTS files;
 
 -- 04 · assessment
+DROP TABLE IF EXISTS quiz_answers;
+DROP TABLE IF EXISTS quiz_attempts;
+DROP TABLE IF EXISTS quiz_options;
+DROP TABLE IF EXISTS quiz_questions;
+DROP TABLE IF EXISTS quizzes;
 DROP TABLE IF EXISTS submissions;
 DROP TABLE IF EXISTS assignments;
 

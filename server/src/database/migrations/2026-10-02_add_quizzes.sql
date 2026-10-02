@@ -1,59 +1,11 @@
--- 04 · Assessment
+-- Adds quizzes (roadmap step 10) to a database built before them. A fresh
+-- database gets the same from schema/04_assessment.sql and the seed files, and
+-- records this migration as already applied.
 --
--- Assignments and the work handed in against them. One submission per person
--- per assignment: resubmitting updates the existing row rather than adding a
--- second. Submitted and graded times are recorded by the server, never taken
--- from the browser. Attachments are not here -- they live in 05_files with
--- owner_type = 'submission'.
---
--- Quizzes are marked by the server the moment they are handed in. Their
--- questions, options, attempts and answers each have a table of their own.
--- A student may try a quiz up to max_attempts times; the best score counts.
--- The correct options never leave the server while a quiz can still be taken.
---
--- Tables: assignments, submissions, quizzes, quiz_questions, quiz_options,
---         quiz_attempts, quiz_answers
--- Depends on: 01_identity (users), 02_catalog (courses)
+-- Safe to run on a database that already has any part of it: IF NOT EXISTS and
+-- INSERT IGNORE skip what is already there.
 
-CREATE TABLE assignments (
-  id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  course_id    INT UNSIGNED NOT NULL,
-  title        VARCHAR(200) NOT NULL,
-  instructions TEXT NULL,
-  due_at       DATETIME NULL,
-  max_score    DECIMAL(6, 2) NOT NULL DEFAULT 100.00,
-  created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  KEY idx_assignments_course_due (course_id, due_at),
-  CONSTRAINT fk_assignments_course
-    FOREIGN KEY (course_id) REFERENCES courses (id) ON DELETE CASCADE
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
-
-CREATE TABLE submissions (
-  id             INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  assignment_id  INT UNSIGNED NOT NULL,
-  user_id        INT UNSIGNED NOT NULL,
-  body           MEDIUMTEXT NULL,
-  score          DECIMAL(6, 2) NULL,
-  feedback       TEXT NULL,
-  status         ENUM('submitted', 'graded', 'returned') NOT NULL DEFAULT 'submitted',
-  submitted_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  graded_at      TIMESTAMP NULL DEFAULT NULL,
-  graded_by      INT UNSIGNED NULL,
-  PRIMARY KEY (id),
-  -- One submission per person per assignment; resubmitting updates the row.
-  -- Attachments live in `files` with owner_type = 'submission'.
-  UNIQUE KEY uq_submissions_assignment_user (assignment_id, user_id),
-  KEY idx_submissions_user (user_id),
-  CONSTRAINT fk_submissions_assignment
-    FOREIGN KEY (assignment_id) REFERENCES assignments (id) ON DELETE CASCADE,
-  CONSTRAINT fk_submissions_user
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-  CONSTRAINT fk_submissions_grader
-    FOREIGN KEY (graded_by) REFERENCES users (id) ON DELETE SET NULL
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
-
-CREATE TABLE quizzes (
+CREATE TABLE IF NOT EXISTS quizzes (
   id                  INT UNSIGNED NOT NULL AUTO_INCREMENT,
   course_id           INT UNSIGNED NOT NULL,
   title               VARCHAR(200) NOT NULL,
@@ -75,7 +27,7 @@ CREATE TABLE quizzes (
 -- kind: 'single' (one right option), 'multiple' (every right option and no
 -- wrong one), 'true_false' (two options, True and False), 'short' (typed;
 -- its options are the accepted answers, compared ignoring case and spaces)
-CREATE TABLE quiz_questions (
+CREATE TABLE IF NOT EXISTS quiz_questions (
   id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
   quiz_id    INT UNSIGNED NOT NULL,
   position   SMALLINT UNSIGNED NOT NULL,
@@ -88,7 +40,7 @@ CREATE TABLE quiz_questions (
     FOREIGN KEY (quiz_id) REFERENCES quizzes (id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE quiz_options (
+CREATE TABLE IF NOT EXISTS quiz_options (
   id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
   question_id  INT UNSIGNED NOT NULL,
   position     SMALLINT UNSIGNED NOT NULL,
@@ -103,7 +55,7 @@ CREATE TABLE quiz_options (
 -- One row per try. ends_at is fixed when the attempt starts (the time limit,
 -- or the closing time if that comes sooner) so the server, not the browser,
 -- decides when time is up. score stays NULL until it is handed in.
-CREATE TABLE quiz_attempts (
+CREATE TABLE IF NOT EXISTS quiz_attempts (
   id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
   quiz_id         INT UNSIGNED NOT NULL,
   user_id         INT UNSIGNED NOT NULL,
@@ -124,7 +76,7 @@ CREATE TABLE quiz_attempts (
 
 -- What was answered, and how it was marked. option_ids lists the chosen
 -- options ('12,15'); text_answer holds a typed answer.
-CREATE TABLE quiz_answers (
+CREATE TABLE IF NOT EXISTS quiz_answers (
   id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
   attempt_id      INT UNSIGNED NOT NULL,
   question_id     INT UNSIGNED NOT NULL,
@@ -139,3 +91,15 @@ CREATE TABLE quiz_answers (
   CONSTRAINT fk_quiz_answers_question
     FOREIGN KEY (question_id) REFERENCES quiz_questions (id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO permissions (code, category, description) VALUES
+  ('quiz.read',   'assessment', 'View quizzes in courses they can see.'),
+  ('quiz.manage', 'assessment', 'Create and edit quizzes, and see everyone''s results.'),
+  ('quiz.take',   'assessment', 'Take quizzes.');
+
+-- The same grants as seed/03_role_permissions.sql
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT r.id, p.id FROM roles r JOIN permissions p
+WHERE (r.name = 'admin' AND p.code IN ('quiz.read', 'quiz.manage', 'quiz.take'))
+   OR (r.name = 'instructor' AND p.code IN ('quiz.read', 'quiz.manage'))
+   OR (r.name = 'student' AND p.code IN ('quiz.read', 'quiz.take'));

@@ -33,6 +33,9 @@ INSERT INTO permissions (code, category, description) VALUES
   ('submission.create', 'assessment','Submit work.'),
   ('submission.read',   'assessment','View submissions from others.'),
   ('submission.grade',  'assessment','Score and return submissions.'),
+  ('quiz.read',         'assessment','View quizzes in courses they can see.'),
+  ('quiz.manage',       'assessment','Create and edit quizzes, and see everyone''s results.'),
+  ('quiz.take',         'assessment','Take quizzes.'),
 
   ('file.upload',       'files',     'Upload files.'),
   ('file.read',         'files',     'Download files they have access to.'),

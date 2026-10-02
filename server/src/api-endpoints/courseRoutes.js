@@ -13,6 +13,7 @@ import { createAnnouncement, listAnnouncements } from '../request-handlers/annou
 import { createAssignment, listAssignments } from '../request-handlers/assignmentController.js';
 import { exportGradebook, getGradebook } from '../request-handlers/gradebookController.js';
 import { createModule, getOutline } from '../request-handlers/moduleController.js';
+import { createQuiz, listQuizzes } from '../request-handlers/quizController.js';
 import { createMeeting, listCourseSchedule } from '../request-handlers/scheduleController.js';
 import { requirePermission } from '../request-filters/auth.js';
 
@@ -32,6 +33,8 @@ router.get('/:id/modules', requirePermission('lesson.read'), getOutline);
 router.post('/:id/modules', requirePermission('lesson.manage'), createModule);
 router.get('/:id/assignments', requirePermission('assignment.read'), listAssignments);
 router.post('/:id/assignments', requirePermission('assignment.manage'), createAssignment);
+router.get('/:id/quizzes', requirePermission('quiz.read'), listQuizzes);
+router.post('/:id/quizzes', requirePermission('quiz.manage'), createQuiz);
 router.get('/:id/gradebook', requirePermission('submission.read'), getGradebook);
 router.get('/:id/gradebook.csv', requirePermission('submission.read'), exportGradebook);
 router.get('/:id/announcements', requirePermission('announcement.read'), listAnnouncements);

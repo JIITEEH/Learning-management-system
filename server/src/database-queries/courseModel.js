@@ -90,7 +90,7 @@ export function updateJoinCode(id, joinCode) {
 }
 
 // Deletes the course and everything in it, from the bottom up: progress, lessons, modules,
-// submissions, assignments, then the course (which takes its enrollments and schedules with it).
+// submissions, assignments, quiz answers, attempts, options, questions and quizzes, then the course (which takes its enrollments and schedules with it).
 // One transaction, so it happens completely or not at all. Uploaded files are not linked by the
 // schema, so the controller removes those.
 //
@@ -109,6 +109,13 @@ export function remove(id) {
       { id },
     );
     await connection.execute('DELETE FROM assignments WHERE course_id = :id', { id });
+    const inQuiz = 'JOIN quizzes q ON q.id = t.quiz_id WHERE q.course_id = :id';
+    await connection.execute(`DELETE a FROM quiz_answers a JOIN quiz_attempts t ON t.id = a.attempt_id ${inQuiz}`, { id });
+    await connection.execute(`DELETE t FROM quiz_attempts t ${inQuiz}`, { id });
+    const inQuestion = 'JOIN quiz_questions qq ON qq.id = o.question_id JOIN quizzes q ON q.id = qq.quiz_id WHERE q.course_id = :id';
+    await connection.execute(`DELETE o FROM quiz_options o ${inQuestion}`, { id });
+    await connection.execute('DELETE qq FROM quiz_questions qq JOIN quizzes q ON q.id = qq.quiz_id WHERE q.course_id = :id', { id });
+    await connection.execute('DELETE FROM quizzes WHERE course_id = :id', { id });
     await connection.execute('DELETE FROM courses WHERE id = :id', { id });
   });
 }

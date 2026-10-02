@@ -2,7 +2,7 @@
 //
 // Rows come back as the database spells them (full_name, not fullName). Turning a row into JSON
 // is the controller's job, because different endpoints show different parts of an account.
-import { query, queryOne } from '../database/index.js';
+import { query, queryOne, transaction } from '../database/index.js';
 
 // Every column a caller may see. password_hash is left out on purpose: only the two
 // find...WithPassword functions add it, so an accidental res.json(row) can never leak a hash.
@@ -99,6 +99,15 @@ export function recordSignIn(id) {
   return query('UPDATE users SET last_login_at = NOW() WHERE id = :id', { id });
 }
 
+// The account's quiz answers sit two links away (account -> attempt -> answer), deeper than this
+// MySQL release follows a cascade reliably, so they go first, by hand (see database/README.md)
 export function remove(id) {
-  return query('DELETE FROM users WHERE id = :id', { id });
+  return transaction(async (connection) => {
+    await connection.execute(
+      'DELETE a FROM quiz_answers a JOIN quiz_attempts t ON t.id = a.attempt_id WHERE t.user_id = :id',
+      { id },
+    );
+    await connection.execute('DELETE FROM quiz_attempts WHERE user_id = :id', { id });
+    await connection.execute('DELETE FROM users WHERE id = :id', { id });
+  });
 }

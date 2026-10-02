@@ -24,6 +24,7 @@ WHERE r.name = 'instructor' AND p.code IN (
   'enrollment.read', 'enrollment.manage',
   'assignment.read', 'assignment.manage',
   'submission.read', 'submission.grade',
+  'quiz.read', 'quiz.manage',
   'file.upload', 'file.read', 'file.delete',
   'schedule.read', 'schedule.manage',
   'announcement.read', 'announcement.manage'
@@ -38,6 +39,7 @@ WHERE r.name = 'student' AND p.code IN (
   'enrollment.self',
   'assignment.read',
   'submission.create',
+  'quiz.read', 'quiz.take',
   'file.upload', 'file.read',
   'schedule.read',
   'announcement.read'

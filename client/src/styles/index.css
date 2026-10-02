@@ -513,6 +513,64 @@ time,
 
 .nav-toggle { display: none; }
 
+/* --- Notifications: the bell and the panel under it (ui-pieces/layout/Notifications.jsx) */
+
+.notif { position: relative; flex: none; }
+.notif-badge {
+  position: absolute;
+  top: 2px; right: 0;
+  min-width: 18px; height: 18px;
+  padding: 0 5px;
+  border: 2px solid var(--color-charcoal-800);
+  border-radius: var(--radius-full);
+  background: var(--danger);
+  color: var(--chalk);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+}
+.notif-panel {
+  position: absolute;
+  top: calc(100% + var(--space-3));
+  right: 0;
+  z-index: var(--z-drawer);
+  display: grid;
+  gap: var(--space-3);
+  width: 380px;
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  padding: var(--space-4);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-charcoal-700);
+  background-image: var(--glass-fill);
+  box-shadow: var(--glass-highlight), var(--shadow-lg);
+}
+.notif-head { display: flex; gap: var(--space-2); align-items: center; justify-content: space-between; }
+.notif-head h2 { font-size: var(--text-lg); }
+.notif-list { display: grid; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
+.notif-item a {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  column-gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--chalk-secondary);
+  text-decoration: none;
+}
+@media (hover: hover) { .notif-item a:hover { background: rgb(255 255 255 / 0.08); text-decoration: none; } }
+.notif-item a > :not(.notif-dot) { grid-column: 2; }
+.notif-dot { grid-row: 1; align-self: center; width: 8px; height: 8px; border-radius: 50%; }
+.notif-unread .notif-dot { background: var(--primary-light); }
+.notif-title { color: var(--chalk); font-weight: 500; overflow-wrap: anywhere; }
+.notif-unread .notif-title { font-weight: 700; }
+.notif-body, .notif-time { font-size: var(--text-sm); overflow-wrap: anywhere; }
+.notif-time { color: var(--chalk-muted); }
+.notif-section { display: grid; gap: var(--space-2); justify-items: start; padding-top: var(--space-3); border-top: 1px solid var(--glass-border-soft); }
+.notif-section h3 { font-size: var(--text-base); }
+.notif-section .notif-list { width: 100%; }
+
 /* ==========================================================================
    Avatars — neutral until there is a real person to show
    ========================================================================== */
@@ -1271,6 +1329,11 @@ time,
 
 @media (max-width: 900px) {
   .shell { padding: var(--space-4) var(--space-4) var(--space-6); }
+
+  /* The bell sits mid-bar, so a panel hung from it would run off the left edge. It spans the
+     bar instead: with .notif no longer positioned, the panel is placed against the bar. */
+  .notif { position: static; }
+  .notif-panel { left: 0; right: 0; width: auto; }
 
   .topbar { padding: var(--space-3); }
   .brand { font-size: var(--text-md); gap: var(--space-2); }

@@ -6,6 +6,7 @@ import { ChevronDown, LogOut, Menu } from 'lucide-react';
 import { useAuth } from '../../shared-state/AuthContext.jsx';
 import { initials, roleLabel } from '../../helpers/format.js';
 import BrandMark from '../basics/BrandMark.jsx';
+import Notifications from './Notifications.jsx';
 
 // The navigation, in order. `needs` is a permission code: the link only shows for an account that
 // holds it. Hiding a link stops nobody typing the address, which is why the server checks the
@@ -90,6 +91,7 @@ export default function AppLayout() {
           </nav>
 
           <div className="topbar-actions">
+            <Notifications />
             <Link className="account-btn" to="/account">
               <span className="avatar" aria-hidden="true">
                 {initials(user.fullName)}

@@ -96,6 +96,14 @@ test('a course from setup to returned grade', async ({ browser }) => {
   await student.goto('/dashboard');
   await expect(student.getByText('45/50')).toBeVisible();
   await expect(student.getByRole('link', { name: /Welcome to the course/ })).toBeVisible();
+
+  // The bell tells the student their work came back, and following it marks it read
+  const bell = student.getByRole('button', { name: /^Notifications/ });
+  await expect(bell).toHaveAccessibleName('Notifications, 1 unread');
+  await bell.click();
+  await student.getByRole('link', { name: /Your work was graded/ }).click();
+  await expect(student).toHaveURL(new RegExp(`${assignmentPath}$`));
+  await expect(bell).toHaveAccessibleName('Notifications');
   await instructor.goto(coursePath);
   await tab(instructor, 'Gradebook');
   await expect(instructor.getByText('45/50 (90%)')).toBeVisible();

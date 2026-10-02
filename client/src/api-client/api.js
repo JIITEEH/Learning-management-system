@@ -136,6 +136,11 @@ export const api = {
   // `from` and `to` are Dates; the server wants them in UTC
   myDeadlines: (from, to) => request(`/schedules/deadlines${toQuery({ from: from.toISOString(), to: to.toISOString() })}`),
 
+  // Notifications: the signed-in account's own, newest first, with an unread count
+  listNotifications: () => request('/notifications'),
+  markNotificationRead: (id) => request(`/notifications/${id}/read`, { method: 'POST' }),
+  markAllNotificationsRead: () => request('/notifications/read-all', { method: 'POST' }),
+
   // Files. Downloads are plain links to fileDownloadUrl(id), so the browser saves them itself.
   listFiles: () => request('/files'),
   uploadLessonFiles: (lessonId, fileList) => {

@@ -79,3 +79,18 @@ export function toLocalInput(value) {
 
 // '2030-01-01T09:00' typed in Manila becomes '2030-01-01T01:00:00.000Z'; empty stays empty
 export const fromLocalInput = (value) => (value ? new Date(value).toISOString() : null);
+
+// "just now", "5m ago", "3h ago", "2d ago", then the date: how long ago something happened
+export function timeAgo(value) {
+  const date = parseTimestamp(value);
+  if (!date) return '';
+  const seconds = Math.round((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return 'just now';
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return formatDate(value);
+}

@@ -108,6 +108,10 @@ export function remove(id) {
       'DELETE s FROM submissions s JOIN assignments a ON a.id = s.assignment_id WHERE a.course_id = :id',
       { id },
     );
+    await connection.execute(
+      "DELETE r FROM deadline_reminders r JOIN assignments a ON a.id = r.item_id WHERE r.item_type = 'assignment' AND a.course_id = :id",
+      { id },
+    );
     await connection.execute('DELETE FROM assignments WHERE course_id = :id', { id });
     const inQuiz = 'JOIN quizzes q ON q.id = t.quiz_id WHERE q.course_id = :id';
     await connection.execute(`DELETE a FROM quiz_answers a JOIN quiz_attempts t ON t.id = a.attempt_id ${inQuiz}`, { id });
@@ -115,6 +119,10 @@ export function remove(id) {
     const inQuestion = 'JOIN quiz_questions qq ON qq.id = o.question_id JOIN quizzes q ON q.id = qq.quiz_id WHERE q.course_id = :id';
     await connection.execute(`DELETE o FROM quiz_options o ${inQuestion}`, { id });
     await connection.execute('DELETE qq FROM quiz_questions qq JOIN quizzes q ON q.id = qq.quiz_id WHERE q.course_id = :id', { id });
+    await connection.execute(
+      "DELETE r FROM deadline_reminders r JOIN quizzes q ON q.id = r.item_id WHERE r.item_type = 'quiz' AND q.course_id = :id",
+      { id },
+    );
     await connection.execute('DELETE FROM quizzes WHERE course_id = :id', { id });
     await connection.execute('DELETE FROM courses WHERE id = :id', { id });
   });

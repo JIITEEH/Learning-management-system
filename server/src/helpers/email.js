@@ -31,7 +31,7 @@ function getTransport() {
 }
 
 // Turns a mail server error into what to change in .env
-function explain(error) {
+export function explainEmailError(error) {
   const hints = {
     EAUTH:
       'The mail server rejected SMTP_USER and SMTP_PASS. With Gmail, SMTP_PASS must be an app password, not the account password.',
@@ -44,7 +44,7 @@ function explain(error) {
   return hint ? `${hint} (${error.message})` : error.message;
 }
 
-async function send({ to, subject, text, html }) {
+export async function sendEmail({ to, subject, text, html }) {
   const mailer = getTransport();
   if (!mailer) {
     if (config.isProduction) {
@@ -63,8 +63,8 @@ async function send({ to, subject, text, html }) {
 // reply takes the same time whether or not the address has an account, so the timing cannot
 // reveal who is registered.
 export function sendInBackground(message) {
-  send(message).catch((error) => {
-    console.error(`Could not email ${message.to}: ${explain(error)}`);
+  sendEmail(message).catch((error) => {
+    console.error(`Could not email ${message.to}: ${explainEmailError(error)}`);
   });
 }
 
@@ -124,4 +124,34 @@ export function passwordResetMessage({ to, fullName, url, minutes }) {
 </html>`;
 
   return { to, subject: 'Reset your LearnHub password', text, html };
+}
+
+// A deadline reminder (npm run reminders): the same words as the notification on the bell
+export function deadlineReminderMessage({ to, fullName, headline, detail, url }) {
+  const text = [`Hello ${fullName},`, '', `${headline}.`, '', detail, '', `Open it: ${url}`].join('\n');
+
+  const html = `<!doctype html>
+<html lang="en">
+<body style="margin:0;padding:0;background:#f3f6fc">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f3f6fc">
+    <tr><td align="center" style="padding:40px 16px">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#ffffff;border:1px solid #e3e8f3;border-radius:22px">
+        <tr><td style="padding:36px 32px;font-family:${FONT};color:#0f1629">
+          <p style="margin:0 0 24px;font-size:20px;font-weight:700;color:${BLUE}">LearnHub</p>
+          <h1 style="margin:0 0 16px;font-size:22px">${esc(headline)}</h1>
+          <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#455069">Hello ${esc(fullName)}, ${esc(detail)}</p>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px"><tr>
+            <td bgcolor="${BLUE}" style="border-radius:999px">
+              <a href="${esc(url)}" style="display:inline-block;padding:13px 32px;font-family:${FONT};font-size:15px;font-weight:600;color:#ffffff;text-decoration:none">Open it on LearnHub</a>
+            </td>
+          </tr></table>
+          <p style="margin:0;font-size:13px;line-height:1.6;color:#5f687d">You received this because you take this course on LearnHub.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  return { to, subject: `LearnHub: ${headline}`, text, html };
 }

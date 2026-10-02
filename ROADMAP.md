@@ -180,7 +180,16 @@ returned with its grade or a returned grade changed, and for being added to a
 course by its instructor. A draft course sends nothing, nobody is told about
 their own action, and a grade is never announced while it is still hidden from
 the student. The count refreshes every minute while the tab is in view; there
-is no email and no push to the phone.
+is no push to the phone.
+
+**Deadline reminders** (`npm run reminders`, meant to run once a day) copy the
+thesis management system's reminder job. A student is sent a notification and
+an email with the same words when an assignment is due, or a quiz closes,
+within the next 24 hours and they have not handed it in or taken it, and once
+an assignment has been overdue for up to 7 days (late work is still accepted).
+Each one is recorded in `deadline_reminders`, so nobody is reminded twice; a
+moved deadline is reminded about again. Students in draft courses, who dropped
+or finished a course, or whose account is suspended are left out.
 
 ### Step 10 as built: quizzes
 

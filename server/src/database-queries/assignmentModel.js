@@ -62,11 +62,12 @@ export function update({ id, title, instructions, dueAt, maxScore }) {
   );
 }
 
-// Deletes the assignment and its submissions in one transaction. Their files are not linked by
-// the schema, so the controller removes those.
+// Deletes the assignment, its submissions and the reminders sent about it, in one transaction.
+// Their files are not linked by the schema, so the controller removes those.
 export function remove(id) {
   return transaction(async (connection) => {
     await connection.execute('DELETE FROM submissions WHERE assignment_id = :id', { id });
+    await connection.execute("DELETE FROM deadline_reminders WHERE item_type = 'assignment' AND item_id = :id", { id });
     await connection.execute('DELETE FROM assignments WHERE id = :id', { id });
   });
 }

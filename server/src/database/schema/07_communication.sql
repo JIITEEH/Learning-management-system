@@ -10,7 +10,13 @@
 -- dismisses their own copy (the same design as the thesis management system).
 -- `link` is the address in the app to open; `read_at` stays empty until read.
 --
--- Tables: announcements, notifications
+-- Deadline reminders record each reminder `npm run reminders` has sent: one
+-- student, one assignment or quiz, one due date, one kind ('due_soon' or
+-- 'overdue'). The daily job checks it so nobody is reminded twice. item_id
+-- points at an assignment or a quiz, depending on item_type, so it has no
+-- foreign key; deleting an assignment, quiz or course removes its rows by hand.
+--
+-- Tables: announcements, notifications, deadline_reminders
 -- Depends on: 01_identity (announcements.author_id, notifications.user_id and
 --             notifications.actor_id -> users.id),
 --             02_catalog (announcements.course_id -> courses.id)
@@ -51,4 +57,18 @@ CREATE TABLE notifications (
   -- A notification outlives the account of whoever caused it
   CONSTRAINT fk_notifications_actor
     FOREIGN KEY (actor_id) REFERENCES users (id) ON DELETE SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE deadline_reminders (
+  user_id    INT UNSIGNED NOT NULL,
+  item_type  ENUM('assignment', 'quiz') NOT NULL,
+  item_id    INT UNSIGNED NOT NULL,
+  due_at     DATETIME NOT NULL,
+  kind       ENUM('due_soon', 'overdue') NOT NULL,
+  sent_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  -- The due date is part of the key: when a deadline moves, the new date is reminded about too
+  PRIMARY KEY (user_id, item_type, item_id, due_at, kind),
+  KEY idx_deadline_reminders_item (item_type, item_id),
+  CONSTRAINT fk_deadline_reminders_user
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

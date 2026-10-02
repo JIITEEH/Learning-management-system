@@ -14,6 +14,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS audit_log;
 
 -- 07 · communication
+DROP TABLE IF EXISTS deadline_reminders;
 DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS announcements;
 

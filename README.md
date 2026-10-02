@@ -164,6 +164,13 @@ people about new announcements and assignments, returned grades, and being
 added to a course. A database built before this needs `npm run db:migrate`
 once, to add the notifications table.
 
+Deadline reminders: `npm run reminders` tells each student, on the bell and by
+email, about work due or quizzes closing within a day that they have not done,
+and about assignments that went overdue in the last week. Nobody is told twice.
+Run it once a day; on a Mac or Linux machine, `crontab -e` and a line such as
+`0 7 * * * cd /path/to/web-portfolio && npm run reminders` does it every
+morning at 7.
+
 Administrators have an audit log at `/admin/audit`: who approved, suspended or
 deleted an account, changed a role, or removed a student from a course, and
 when. `npm run db:migrate` adds it to an existing database.

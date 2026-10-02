@@ -61,6 +61,7 @@ export function remove(id) {
       { id },
     );
     await connection.execute('DELETE FROM quiz_questions WHERE quiz_id = :id', { id });
+    await connection.execute("DELETE FROM deadline_reminders WHERE item_type = 'quiz' AND item_id = :id", { id });
     await connection.execute('DELETE FROM quizzes WHERE id = :id', { id });
   });
 }

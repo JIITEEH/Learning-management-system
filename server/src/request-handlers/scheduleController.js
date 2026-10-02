@@ -1,10 +1,14 @@
 // Weekly class meetings: a course's list, adding, editing and removing them, and a person's own
-// timetable across all their courses. Overlapping meetings in one course are allowed (a split lab
+// timetable across all their courses, and the deadlines that go on their month calendar.
+// Overlapping meetings in one course are allowed (a split lab
 // is on purpose) but the reply carries a warning naming what it overlaps.
+import * as Assignment from '../database-queries/assignmentModel.js';
 import * as Schedule from '../database-queries/scheduleModel.js';
+import { nowUtc } from '../helpers/grades.js';
 import { HttpError } from '../helpers/httpError.js';
-import { optionalText, parseId, readDay, requireNumber, requireTime } from '../helpers/validate.js';
+import { optionalDateTime, optionalText, parseId, readDay, requireNumber, requireTime } from '../helpers/validate.js';
 import { manageCourse, reachCourse } from '../permission-rules/access.js';
+import { isLate } from './assignmentController.js';
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -96,4 +100,41 @@ export async function deleteMeeting(req, res) {
 // school's calendar day.
 export async function mySchedule(req, res) {
   res.json({ schedules: (await Schedule.listForPerson(req.user.id)).map(toJson) });
+}
+
+// The longest stretch one request may ask for. A month grid shows at most six weeks (42 days);
+// this leaves room, while stopping one request from reading years of deadlines at once.
+const MAX_RANGE_DAYS = 62;
+
+// A student's mark on one deadline: 'handedIn', 'late', 'missing' (past due, nothing handed in),
+// or 'notYet'. Someone who teaches the course gets null, since the work is not theirs to hand in.
+function deadlineStatus(row, now) {
+  if (row.teaching) return null;
+  if (row.submitted_at) return isLate(row, row) ? 'late' : 'handedIn';
+  return row.due_at < now ? 'missing' : 'notYet';
+}
+
+// Assignments due from `from` up to (not including) `to`, for the month calendar. The browser
+// sends both as UTC times, because only it knows where the viewer's month starts and ends.
+export async function myDeadlines(req, res) {
+  const from = optionalDateTime(req.query.from, 'Start');
+  const to = optionalDateTime(req.query.to, 'End');
+  if (!from || !to) throw new HttpError(400, 'Give both a start and an end');
+  if (to <= from) throw new HttpError(400, 'The end must come after the start');
+  const days = (Date.parse(`${to}Z`) - Date.parse(`${from}Z`)) / 86400000;
+  if (days > MAX_RANGE_DAYS) throw new HttpError(400, `Ask for at most ${MAX_RANGE_DAYS} days at a time`);
+
+  const now = nowUtc();
+  const rows = await Assignment.listDueBetween(req.user.id, from, to);
+  res.json({
+    deadlines: rows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      dueAt: row.due_at,
+      courseId: row.course_id,
+      courseCode: row.course_code,
+      courseTitle: row.course_title,
+      status: deadlineStatus(row, now),
+    })),
+  });
 }

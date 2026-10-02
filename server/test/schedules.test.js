@@ -1,7 +1,7 @@
 import './setup.js';
 import assert from 'node:assert/strict';
 import { before, describe, it } from 'node:test';
-import { makeCourse, makeUser, startApi } from './helpers.js';
+import { daysFromNow, fileForm, makeCourse, makeUser, startApi } from './helpers.js';
 
 const api = await startApi();
 
@@ -87,5 +87,56 @@ describe('my week', () => {
     assert.deepEqual((await api.get('/schedules/me', { as: outsider })).data.schedules, []);
     const taught = (await api.get('/schedules/me', { as: instructor })).data.schedules;
     assert.ok(taught.some((meeting) => meeting.title === 'Not for the student'));
+  });
+});
+
+describe('deadline calendar', () => {
+  const range = (from, to) => `/schedules/deadlines?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+  const assign = async (courseId, title, dueAt) =>
+    (await api.post(`/courses/${courseId}/assignments`, { as: instructor, body: { title, dueAt } })).data.assignment;
+  const handIn = (assignment, who = student) =>
+    api.post(`/assignments/${assignment.id}/submission`, { as: who, form: fileForm([], { body: 'My work' }) });
+
+  it('shows a student the due dates in the range, each marked handed in, late, missing or not yet', async () => {
+    const { course: mine } = await makeCourse(api, instructor, [student]);
+    const handedIn = await assign(mine.id, 'Handed in', daysFromNow(2));
+    await assign(mine.id, 'Not yet', daysFromNow(3));
+    await assign(mine.id, 'Missing', daysFromNow(-2));
+    const late = await assign(mine.id, 'Late', daysFromNow(-1));
+    await assign(mine.id, 'Too far ahead', daysFromNow(40));
+    await assign(mine.id, 'No due date', null);
+    assert.equal((await handIn(handedIn)).status, 201);
+    assert.equal((await handIn(late)).status, 201);
+
+    const res = await api.get(range(daysFromNow(-5), daysFromNow(10)), { as: student });
+    assert.equal(res.status, 200);
+    const mark = Object.fromEntries(res.data.deadlines.filter((d) => d.courseId === mine.id).map((d) => [d.title, d.status]));
+    assert.deepEqual(mark, { Missing: 'missing', Late: 'late', 'Handed in': 'handedIn', 'Not yet': 'notYet' });
+  });
+
+  it('shows the instructor their own deadlines unmarked, and nobody else anything', async () => {
+    const { course: mine } = await makeCourse(api, instructor, [student]);
+    await assign(mine.id, 'Instructor sees this', daysFromNow(1));
+    const window = range(daysFromNow(0), daysFromNow(5));
+    const taught = (await api.get(window, { as: instructor })).data.deadlines;
+    assert.ok(taught.some((d) => d.title === 'Instructor sees this' && d.status === null));
+    assert.equal((await api.get(window, { as: outsider })).data.deadlines.length, 0);
+  });
+
+  it('hides a draft course from its students', async () => {
+    const { course: draft } = await makeCourse(api, instructor, [student], { publish: false });
+    await assign(draft.id, 'Still a draft', daysFromNow(1));
+    const seen = (await api.get(range(daysFromNow(0), daysFromNow(5)), { as: student })).data.deadlines;
+    assert.equal(seen.some((d) => d.title === 'Still a draft'), false);
+  });
+
+  it('refuses a missing, zoneless, backwards or over-long range', async () => {
+    const bad = [
+      '/schedules/deadlines',
+      range('2026-10-01T00:00', '2026-11-01T00:00'),
+      range('2026-11-01T00:00:00Z', '2026-10-01T00:00:00Z'),
+      range('2026-01-01T00:00:00Z', '2026-06-01T00:00:00Z'),
+    ];
+    for (const path of bad) assert.equal((await api.get(path, { as: student })).status, 400, path);
   });
 });

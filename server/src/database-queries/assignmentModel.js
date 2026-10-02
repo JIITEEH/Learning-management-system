@@ -24,6 +24,26 @@ export function listForCourse(courseId) {
   );
 }
 
+// Assignments due between two UTC times, in the courses someone teaches or takes (the same
+// courses as their weekly timetable: not dropped, and out of draft for a student). For a student
+// each row also carries when they handed it in, if they have, so the calendar can mark it.
+export function listDueBetween(userId, from, to) {
+  return query(
+    `SELECT a.id, a.title, a.due_at, c.id AS course_id, c.code AS course_code, c.title AS course_title,
+            c.instructor_id = :userId AS teaching, s.submitted_at
+       FROM assignments a
+       JOIN courses c ON c.id = a.course_id
+       LEFT JOIN submissions s ON s.assignment_id = a.id AND s.user_id = :userId
+      WHERE a.due_at >= :from AND a.due_at < :to
+        AND (c.instructor_id = :userId
+             OR (c.status <> 'draft' AND EXISTS (
+                  SELECT 1 FROM enrollments e
+                   WHERE e.course_id = c.id AND e.user_id = :userId AND e.status <> 'dropped')))
+      ORDER BY a.due_at, a.id`,
+    { userId, from, to },
+  );
+}
+
 // Returns the new id
 export async function create({ courseId, title, instructions, dueAt, maxScore }) {
   const result = await query(

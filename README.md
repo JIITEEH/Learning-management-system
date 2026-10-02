@@ -150,4 +150,10 @@ Weekly class schedules work: each course has a Schedule tab, everyone has a
 "My week" timetable across their courses, and the dashboard shows today's
 classes.
 
+The deadline calendar and notifications work (roadmap step 11): the Schedule
+screen has a Month view of every due date, and a bell in the top bar tells
+people about new announcements and assignments, returned grades, and being
+added to a course. A database built before this needs `npm run db:migrate`
+once, to add the notifications table.
+
 

@@ -36,7 +36,6 @@ build.
 
 - Quizzes with server-side auto-grading (roadmap step 10 — the largest
   single feature, and the one with no equivalent in ThesisTrack)
-- Notifications and a deadline calendar (roadmap step 11)
 - An audit log recording who changed what, such as an administrator
   removing a student from a course (roadmap step 5 asks for it; this
   project's database has no table for it yet)
@@ -166,6 +165,28 @@ marked; the dashboard shows today's classes. Times are school clock time.
 Changing a time mid-term is done by giving the old class a last date and
 adding a new one. No schema change was needed.
 
+### Step 11 as built: deadline calendar and notifications
+
+The Schedule screen has two views. **Week** is the timetable above; **Month**
+(`/schedule?view=month`) is a calendar of every assignment due date across a
+person's courses. Each due date sits on the day it falls on in the viewer's own
+time zone, and a student sees a mark on each one: handed in, late or missing.
+On a phone the month becomes a list of only the days with something due. The
+server address is `GET /api/schedules/deadlines?from=…&to=…`, at most 62 days
+at a time.
+
+**Notifications** copy the thesis management system's design: a
+`notifications` table with one row per recipient (added by the migration
+`2026-10-02_add_notifications.sql`), and a bell in the top bar with an unread
+count, a panel of the newest 20, "Mark all as read", and the next deadlines
+under "Coming up". Opening a notification marks it read. One is sent for a new
+announcement or assignment (to the course's active students), for work
+returned with its grade or a returned grade changed, and for being added to a
+course by its instructor. A draft course sends nothing, nobody is told about
+their own action, and a grade is never announced while it is still hidden from
+the student. The count refreshes every minute while the tab is in view; there
+is no email and no push to the phone.
+
 ### Launch
 
 | # | Step | Status | Notes for this stack |
@@ -173,8 +194,9 @@ adding a new one. No schema change was needed.
 | 12 | Testing and security review | **done** | Server tests with Node's own runner (`npm test`, 76 tests, each file on a throwaway database) and browser tests with Playwright (`npm run test:e2e`, every screen per role on desktop and phone, and one course journey), as in ThesisTrack. Both run in the GitHub check. |
 | 13 | Deploy and launch | **to do** | MySQL replaces SQLite, so the backup step is `mysqldump`, not `VACUUM INTO`. |
 
-Step 10 (quizzes) and step 11 (notifications and calendar) are held on the
-Later list above. The roadmap marks both as "Next" rather than MVP.
+Step 11 (notifications and calendar) is built; see above. Step 10 (quizzes)
+is held on the Later list above. The roadmap marks both as "Next" rather than
+MVP.
 
 ## Screens
 

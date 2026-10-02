@@ -141,7 +141,12 @@ students see their own running total.
 Announcements and dashboards work (roadmap step 9): each role's dashboard
 shows real progress, deadlines, work to grade and announcements.
 
-Tests cover it (roadmap step 12): 103 server tests for every permission and
+Quizzes work (roadmap step 10): instructors build them from four kinds of
+question, the server marks them the moment they are handed in, time limits
+are enforced by the server, and the best score counts in the gradebook. The
+right answers never reach a student's browser.
+
+Tests cover it (roadmap step 12): 116 server tests for every permission and
 privacy rule, and browser tests for every screen and one whole course.
 
 Backups work (the half of roadmap step 13 that does not need hosting):

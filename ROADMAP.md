@@ -34,8 +34,6 @@ Held back deliberately. Nothing above depends on any of it, and each can be
 added to a working system. New ideas go on this list rather than into the
 build.
 
-- Quizzes with server-side auto-grading (roadmap step 10 — the largest
-  single feature, and the one with no equivalent in ThesisTrack)
 - Discussion forums
 - Parent accounts
 - Analytics and charts
@@ -184,6 +182,30 @@ their own action, and a grade is never announced while it is still hidden from
 the student. The count refreshes every minute while the tab is in view; there
 is no email and no push to the phone.
 
+### Step 10 as built: quizzes
+
+The one feature with no ThesisTrack equivalent. Each course has a Quizzes tab,
+and each quiz a page at `/courses/:courseId/quizzes/:quizId`. Five tables in
+`schema/04_assessment.sql` (migration `2026-10-02_add_quizzes.sql`) and the
+codes `quiz.read`, `quiz.manage` and `quiz.take`.
+
+- **Questions:** single choice, multiple choice (every right option and no
+  wrong one), true or false, and short answer (matched ignoring capital
+  letters and extra spaces). Each is all or nothing.
+- **Marked by the server** the moment it is handed in. The right answers never
+  reach a student's browser: they get the questions only inside an attempt,
+  and afterwards see their score and which questions were right, not what the
+  right answers were.
+- **Time** is kept by the server: an attempt's end is fixed when it starts
+  (the time limit, or the closing time if sooner), and answers handed in more
+  than a minute after it are not counted. The countdown on screen hands the
+  answers in by itself at zero.
+- **Attempts:** up to 10, set per quiz; the best score counts, in the
+  gradebook, its CSV and a student's own total, and a closed quiz never taken
+  counts as 0, as missed assignments do.
+- A quiz is built unpublished, and publishing notifies the course's students.
+  Once anyone has started, its questions are fixed.
+
 ### The audit log, as built
 
 Roadmap step 5 asks for a record of who changed what. It copies the thesis
@@ -204,9 +226,8 @@ still reads correctly after either account is deleted.
 | 12 | Testing and security review | **done** | Server tests with Node's own runner (`npm test`, 76 tests, each file on a throwaway database) and browser tests with Playwright (`npm run test:e2e`, every screen per role on desktop and phone, and one course journey), as in ThesisTrack. Both run in the GitHub check. |
 | 13 | Deploy and launch | **partly done** | The restorable backup is built: `npm run db:backup` copies the database (with `mysqldump`, not `VACUUM INTO`) and the uploaded files, `-- --restore` puts one back, and old ones are pruned, as in ThesisTrack (see `server/src/database/README.md`). Putting the site online is left out at the owner's request. |
 
-Step 11 (notifications and calendar) is built; see above. Step 10 (quizzes)
-is held on the Later list above. The roadmap marks both as "Next" rather than
-MVP.
+Steps 10 (quizzes) and 11 (notifications and calendar), which the roadmap
+marks as "Next" rather than MVP, are both built; see above.
 
 ## Screens
 
@@ -221,12 +242,14 @@ Each screen is a file under `client/src/screens/`, shown at the address in
 | `/account` | `Account.jsx` | Every signed-in account | 4 — **built** |
 | `/dashboard` | `Dashboard.jsx` | Every role, different content | 9 — **built** |
 | `/courses` | `Courses.jsx` | Students and instructors | 5 — **built** |
-| `/courses/:id` | `Course.jsx` | One course, tabbed | 5 — **built** (Overview, People, Announcements from step 9, Lessons from step 6, Assignments from step 7, Gradebook from step 8, and Schedule) |
+| `/courses/:id` | `Course.jsx` | One course, tabbed | 5 — **built** (Overview, People, Announcements from step 9, Lessons from step 6, Assignments from step 7, Quizzes from step 10, Gradebook from step 8, and Schedule) |
 | `/courses/:courseId/lessons/:lessonId` | `Lesson.jsx` | A lesson, its files, previous / next | 6 — **built** |
 | `/courses/:courseId/assignments/:assignmentId` | `Assignment.jsx` | An assignment, handing in, and the instructor's list of submissions | 7 — **built** |
 | `/schedule` | `Schedule.jsx` | A person's week across all their courses; each course also has a Schedule tab | **built** after step 12, as its own piece |
 | `/files` | `Files.jsx` | Every lesson and submission file the viewer may see | 7 — **built** (moved from step 6, so it was built once, when both kinds of file existed) |
+| `/courses/:courseId/quizzes/:quizId` | `Quiz.jsx` | A quiz: building it, or taking it and seeing the results | 10 — **built** |
 | `/admin`, `/admin/users`, `/admin/roles` | `admin/Admin.jsx`, `admin/Users.jsx`, `admin/Roles.jsx` | Administrators | 4 — **built** |
+| `/admin/audit` | `admin/AuditLog.jsx` | Administrators (`audit.read`) | built with the audit log |
 | anything else | `NotFound.jsx` | Everyone | 4 — **built** |
 
 The gradebook is a tab of the course page rather than a screen of its own (step 8).

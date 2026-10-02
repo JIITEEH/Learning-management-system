@@ -1,6 +1,7 @@
 // Handing in work, and instructors reading it. Grading arrives in roadmap step 8.
 import * as Enrollment from '../database-queries/enrollmentModel.js';
 import * as File from '../database-queries/fileModel.js';
+import * as Notification from '../database-queries/notificationModel.js';
 import * as Submission from '../database-queries/submissionModel.js';
 import { checkFileTotal, discardFiles, recordUploads } from '../helpers/files.js';
 import { HttpError } from '../helpers/httpError.js';
@@ -117,6 +118,19 @@ export async function getSubmission(req, res) {
 
 // Saves a score (0 to the assignment's maximum) and feedback. Returned work stays returned, so a
 // corrected grade reaches the student at once.
+// Tells students their grade is ready to see. Only for returned work: until then the grade is
+// hidden from them, so a notification would point at nothing.
+function tellGraded(req, recipients, assignment, title) {
+  return Notification.notify({
+    recipients,
+    actorId: req.user.id,
+    type: 'grade',
+    title,
+    body: assignment.title,
+    link: `/courses/${assignment.course_id}/assignments/${assignment.id}`,
+  });
+}
+
 export async function gradeSubmission(req, res) {
   const submission = await Submission.findById(parseId(req.params.id, 'Submission not found'));
   if (!submission) throw new HttpError(404, 'Submission not found');
@@ -127,6 +141,8 @@ export async function gradeSubmission(req, res) {
   const feedback = optionalText(req.body?.feedback, 'Feedback', { max: 10000 });
 
   await Submission.grade({ id: submission.id, score, feedback, gradedBy: req.user.id });
+  // A regrade of work already returned shows the student the new score straight away
+  if (submission.status === 'returned') await tellGraded(req, [submission.user_id], assignment, 'Your grade was updated');
   res.json({ submission: submissionToJson(await Submission.findById(submission.id), assignment) });
 }
 
@@ -136,13 +152,14 @@ export async function returnSubmission(req, res) {
   if (!submission) throw new HttpError(404, 'Submission not found');
   const { assignment } = await reachAssignment(req, submission.assignment_id, { manage: true });
   if (submission.status === 'submitted') throw new HttpError(409, 'Grade this work before returning it');
-  await Submission.returnGraded({ id: submission.id });
+  await tellGraded(req, await Submission.returnGraded({ id: submission.id }), assignment, 'Your work was graded');
   res.json({ submission: submissionToJson(await Submission.findById(submission.id), assignment) });
 }
 
 // Releases every graded submission for an assignment at once, so a whole class gets results together
 export async function returnAllGraded(req, res) {
   const { assignment } = await reachAssignment(req, req.params.id, { manage: true });
-  const returned = await Submission.returnGraded({ assignmentId: assignment.id });
-  res.json({ returned });
+  const students = await Submission.returnGraded({ assignmentId: assignment.id });
+  await tellGraded(req, students, assignment, 'Your work was graded');
+  res.json({ returned: students.length });
 }

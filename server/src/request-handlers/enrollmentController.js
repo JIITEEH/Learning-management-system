@@ -2,6 +2,7 @@
 // people on a course's class list.
 import * as Course from '../database-queries/courseModel.js';
 import * as Enrollment from '../database-queries/enrollmentModel.js';
+import * as Notification from '../database-queries/notificationModel.js';
 import * as User from '../database-queries/userModel.js';
 import { HttpError } from '../helpers/httpError.js';
 import { oneOf, parseId } from '../helpers/validate.js';
@@ -64,6 +65,18 @@ export async function addToCourse(req, res) {
   if (existing && existing.status !== 'dropped') throw new HttpError(409, `${student.full_name} is already enrolled`);
 
   const id = await Enrollment.enroll(course.id, student.id);
+  // Someone else added them, so they would not otherwise know. A draft course stays hidden from
+  // its students until it opens, so they hear nothing yet.
+  if (course.status !== 'draft') {
+    await Notification.notify({
+      recipients: [student.id],
+      actorId: req.user.id,
+      type: 'enrollment',
+      title: `You were added to ${course.code}`,
+      body: course.title,
+      link: `/courses/${course.id}`,
+    });
+  }
   res.status(201).json({ enrollment: toJson(await Enrollment.findById(id)) });
 }
 

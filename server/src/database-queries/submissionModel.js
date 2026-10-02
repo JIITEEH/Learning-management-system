@@ -1,7 +1,7 @@
 // SQL for submissions (the submissions table, schema/04_assessment.sql): the work a student hands
 // in for an assignment. One row per student per assignment; handing in again updates that row.
 // `submitted_at` is always the server's clock, never a time sent by the browser.
-import { query, queryOne } from '../database/index.js';
+import { query, queryOne, transaction } from '../database/index.js';
 
 const SELECT_SUBMISSION = `
   SELECT s.id, s.assignment_id, s.user_id, s.body, s.score, s.feedback, s.status,
@@ -88,12 +88,13 @@ export function grade({ id, score, feedback, gradedBy }) {
   );
 }
 
-// Releases graded work to the student. Returns how many were released.
-export async function returnGraded({ id = null, assignmentId = null }) {
-  const result = await query(
-    `UPDATE submissions SET status = 'returned'
-      WHERE status = 'graded' AND (id = :id OR assignment_id = :assignmentId)`,
-    { id, assignmentId },
-  );
-  return result.affectedRows;
+// Releases graded work to the student. Returns the ids of the students whose work was released,
+// so each can be told. Read and changed in one transaction, so the list matches what changed.
+export function returnGraded({ id = null, assignmentId = null }) {
+  return transaction(async (connection) => {
+    const match = "status = 'graded' AND (id = :id OR assignment_id = :assignmentId)";
+    const [rows] = await connection.execute(`SELECT user_id FROM submissions WHERE ${match} FOR UPDATE`, { id, assignmentId });
+    await connection.execute(`UPDATE submissions SET status = 'returned' WHERE ${match}`, { id, assignmentId });
+    return rows.map((row) => row.user_id);
+  });
 }

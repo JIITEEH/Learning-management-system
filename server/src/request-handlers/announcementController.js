@@ -1,6 +1,7 @@
 // Course announcements: whoever can see a course can read its announcements; its instructor and
 // administrators post, edit and delete them.
 import * as Announcement from '../database-queries/announcementModel.js';
+import * as Notification from '../database-queries/notificationModel.js';
 import { HttpError } from '../helpers/httpError.js';
 import { optionalText, parseId, requireText } from '../helpers/validate.js';
 import { manageCourse, reachCourse } from '../permission-rules/access.js';
@@ -39,7 +40,19 @@ export async function createAnnouncement(req, res) {
     title: requireText(req.body?.title, 'Title'),
     body: optionalText(req.body?.body, 'Message', { max: 10000 }),
   });
-  res.status(201).json({ announcement: toJson(await Announcement.findById(id)) });
+  const announcement = await Announcement.findById(id);
+  // Students cannot open a draft course yet, so there is nobody to tell
+  if (course.status !== 'draft') {
+    await Notification.notify({
+      recipients: await Notification.courseStudentIds(course.id),
+      actorId: req.user.id,
+      type: 'announcement',
+      title: `New announcement in ${course.code}`,
+      body: announcement.title,
+      link: `/courses/${course.id}?tab=announcements`,
+    });
+  }
+  res.status(201).json({ announcement: toJson(announcement) });
 }
 
 export async function updateAnnouncement(req, res) {

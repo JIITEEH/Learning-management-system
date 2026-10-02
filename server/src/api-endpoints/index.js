@@ -9,6 +9,7 @@ import enrollmentRoutes from './enrollmentRoutes.js';
 import fileRoutes from './fileRoutes.js';
 import lessonRoutes from './lessonRoutes.js';
 import moduleRoutes from './moduleRoutes.js';
+import notificationRoutes from './notificationRoutes.js';
 import permissionRoutes from './permissionRoutes.js';
 import roleRoutes from './roleRoutes.js';
 import scheduleRoutes from './scheduleRoutes.js';
@@ -32,5 +33,6 @@ router.use('/files', fileRoutes);
 router.use('/announcements', announcementRoutes);
 router.use('/schedules', scheduleRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/notifications', notificationRoutes);
 
 export default router;

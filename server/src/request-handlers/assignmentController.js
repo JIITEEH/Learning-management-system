@@ -1,6 +1,7 @@
 // Assignments: listing a course's, creating, reading, editing and deleting them.
 import * as Assignment from '../database-queries/assignmentModel.js';
 import * as File from '../database-queries/fileModel.js';
+import * as Notification from '../database-queries/notificationModel.js';
 import * as Submission from '../database-queries/submissionModel.js';
 import { discardFiles } from '../helpers/files.js';
 import { totalFor } from '../helpers/grades.js';
@@ -84,7 +85,18 @@ export async function listAssignments(req, res) {
 export async function createAssignment(req, res) {
   const { course } = await manageCourse(req, req.params.id);
   const id = await Assignment.create({ courseId: course.id, ...readAssignment(req.body) });
-  res.status(201).json({ assignment: assignmentToJson(await Assignment.findById(id)) });
+  const assignment = await Assignment.findById(id);
+  if (course.status !== 'draft') {
+    await Notification.notify({
+      recipients: await Notification.courseStudentIds(course.id),
+      actorId: req.user.id,
+      type: 'assignment',
+      title: `New assignment in ${course.code}`,
+      body: assignment.title,
+      link: `/courses/${course.id}/assignments/${assignment.id}`,
+    });
+  }
+  res.status(201).json({ assignment: assignmentToJson(assignment) });
 }
 
 // The assignment, and for a student taking the course, their own submission with its files

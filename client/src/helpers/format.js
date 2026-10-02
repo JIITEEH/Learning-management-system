@@ -42,7 +42,7 @@ export function initials(fullName) {
 // The server sends times in UTC as 'YYYY-MM-DD HH:MM:SS' (MySQL's format). Turned into
 // 'YYYY-MM-DDTHH:MM:SSZ', which every browser reads (Safari cannot read the space) and which says
 // "this is UTC" (the Z), so toLocale...String() below shows the viewer's own local time.
-function parseTimestamp(value) {
+export function parseTimestamp(value) {
   const date = new Date(`${String(value).replace(' ', 'T')}Z`);
   return Number.isNaN(date.getTime()) ? null : date;
 }

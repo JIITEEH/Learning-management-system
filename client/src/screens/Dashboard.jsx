@@ -104,6 +104,7 @@ export default function Dashboard() {
               </li>
             ))}
           </ul>
+          {can('schedule.read') && <Link className="btn btn-sm" to="/schedule?view=month">See the month calendar</Link>}
         </Card>
       )}
 
@@ -147,6 +148,7 @@ export default function Dashboard() {
               </li>
             ))}
           </ul>
+          {can('schedule.read') && <Link className="btn btn-sm" to="/schedule?view=month">See the month calendar</Link>}
         </Card>
       )}
 

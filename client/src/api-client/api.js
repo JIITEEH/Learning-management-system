@@ -133,6 +133,8 @@ export const api = {
   updateMeeting: (id, data) => request(`/schedules/${id}`, { method: 'PATCH', body: data }),
   deleteMeeting: (id) => request(`/schedules/${id}`, { method: 'DELETE' }),
   mySchedule: () => request('/schedules/me'),
+  // `from` and `to` are Dates; the server wants them in UTC
+  myDeadlines: (from, to) => request(`/schedules/deadlines${toQuery({ from: from.toISOString(), to: to.toISOString() })}`),
 
   // Files. Downloads are plain links to fileDownloadUrl(id), so the browser saves them itself.
   listFiles: () => request('/files'),

@@ -5,9 +5,9 @@ import { expectNoSidewaysScroll, signIn, watchForProblems } from './support.js';
 // crashes, logs an error, gets a server error, or scrolls sideways. The server tests check what
 // each role may do; this catches screens that break while drawing.
 const ROLES = {
-  student: ['/dashboard', '/courses', '/schedule', '/files', '/account'],
-  instructor: ['/dashboard', '/courses', '/schedule', '/files', '/account'],
-  admin: ['/dashboard', '/courses', '/schedule', '/files', '/account', '/admin', '/admin/users', '/admin/roles'],
+  student: ['/dashboard', '/courses', '/schedule', '/schedule?view=month', '/files', '/account'],
+  instructor: ['/dashboard', '/courses', '/schedule', '/schedule?view=month', '/files', '/account'],
+  admin: ['/dashboard', '/courses', '/schedule', '/schedule?view=month', '/files', '/account', '/admin', '/admin/users', '/admin/roles'],
 };
 
 for (const [role, paths] of Object.entries(ROLES)) {

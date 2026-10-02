@@ -38,3 +38,13 @@ export function formatTime(value) {
 }
 
 export const timeRange = (meeting) => `${formatTime(meeting.startsAt)} – ${formatTime(meeting.endsAt)}`;
+
+// The days a month calendar shows: whole weeks, Monday to Sunday, from the week the month starts in
+// to the week it ends in (35 or 42 days, sometimes 28). `month` is any date in that month.
+export function monthGrid(month) {
+  const first = new Date(month.getFullYear(), month.getMonth(), 1);
+  const last = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+  const start = mondayOf(first);
+  const weeks = Math.round((mondayOf(last) - start) / (7 * 86400000)) + 1;
+  return Array.from({ length: weeks * 7 }, (_, index) => addDays(start, index));
+}

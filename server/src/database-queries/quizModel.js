@@ -65,6 +65,27 @@ export function remove(id) {
   });
 }
 
+// Quizzes closing between two UTC times, in the courses someone teaches or takes: the same
+// courses as their timetable and their assignment deadlines. A student sees published quizzes
+// only. `handed_in` counts their own finished attempts, so the calendar can mark it.
+export function listClosingBetween(userId, from, to) {
+  return query(
+    `SELECT q.id, q.title, q.due_at, c.id AS course_id, c.code AS course_code, c.title AS course_title,
+            c.instructor_id = :userId AS teaching,
+            (SELECT COUNT(*) FROM quiz_attempts t
+              WHERE t.quiz_id = q.id AND t.user_id = :userId AND t.submitted_at IS NOT NULL) AS handed_in
+       FROM quizzes q
+       JOIN courses c ON c.id = q.course_id
+      WHERE q.due_at >= :from AND q.due_at < :to
+        AND (c.instructor_id = :userId
+             OR (q.is_published = 1 AND c.status <> 'draft' AND EXISTS (
+                  SELECT 1 FROM enrollments e
+                   WHERE e.course_id = c.id AND e.user_id = :userId AND e.status <> 'dropped')))
+      ORDER BY q.due_at, q.id`,
+    { userId, from, to },
+  );
+}
+
 // --- Questions -------------------------------------------------------------------------------
 
 export function findQuestion(id) {

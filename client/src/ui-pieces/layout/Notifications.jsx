@@ -9,12 +9,14 @@ import { Bell } from 'lucide-react';
 import { api } from '../../api-client/api.js';
 import { useAuth } from '../../shared-state/AuthContext.jsx';
 import { formatDue, timeAgo } from '../../helpers/format.js';
+import { deadlineLink } from '../../helpers/schedule.js';
 
 const REFRESH_MS = 60 * 1000;
 const UPCOMING_DAYS = 14;
 const UPCOMING_SHOWN = 3;
 
-// The next deadlines still to meet: due in the next two weeks, and for a student not handed in yet
+// The next deadlines still to meet: assignments due and quizzes closing in the next two weeks, and
+// for a student, only those not handed in yet
 async function loadUpcoming() {
   const now = new Date();
   const { deadlines } = await api.myDeadlines(now, new Date(now.getTime() + UPCOMING_DAYS * 86400000));
@@ -144,10 +146,10 @@ export default function Notifications() {
               {upcoming?.length > 0 && (
                 <ul className="notif-list">
                   {upcoming.slice(0, UPCOMING_SHOWN).map((deadline) => (
-                    <li key={deadline.id} className="notif-item">
-                      <Link to={`/courses/${deadline.courseId}/assignments/${deadline.id}`}>
+                    <li key={`${deadline.kind}-${deadline.id}`} className="notif-item">
+                      <Link to={deadlineLink(deadline)}>
                         <span className="notif-title">{deadline.courseCode} · {deadline.title}</span>
-                        <span className="notif-time">Due {formatDue(deadline.dueAt)}</span>
+                        <span className="notif-time">{deadline.kind === 'quiz' ? 'Quiz closes' : 'Due'} {formatDue(deadline.dueAt)}</span>
                       </Link>
                     </li>
                   ))}

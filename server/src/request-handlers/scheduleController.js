@@ -3,6 +3,7 @@
 // Overlapping meetings in one course are allowed (a split lab
 // is on purpose) but the reply carries a warning naming what it overlaps.
 import * as Assignment from '../database-queries/assignmentModel.js';
+import * as Quiz from '../database-queries/quizModel.js';
 import * as Schedule from '../database-queries/scheduleModel.js';
 import { nowUtc } from '../helpers/grades.js';
 import { HttpError } from '../helpers/httpError.js';
@@ -108,13 +109,16 @@ const MAX_RANGE_DAYS = 62;
 
 // A student's mark on one deadline: 'handedIn', 'late', 'missing' (past due, nothing handed in),
 // or 'notYet'. Someone who teaches the course gets null, since the work is not theirs to hand in.
+// A quiz cannot be late: once it closes it cannot be taken at all.
 function deadlineStatus(row, now) {
   if (row.teaching) return null;
   if (row.submitted_at) return isLate(row, row) ? 'late' : 'handedIn';
+  if (Number(row.handed_in) > 0) return 'handedIn';
   return row.due_at < now ? 'missing' : 'notYet';
 }
 
-// Assignments due from `from` up to (not including) `to`, for the month calendar. The browser
+// Assignments due, and quizzes closing, from `from` up to (not including) `to`, for the month
+// calendar and the bell's "Coming up". The browser
 // sends both as UTC times, because only it knows where the viewer's month starts and ends.
 export async function myDeadlines(req, res) {
   const from = optionalDateTime(req.query.from, 'Start');
@@ -125,9 +129,17 @@ export async function myDeadlines(req, res) {
   if (days > MAX_RANGE_DAYS) throw new HttpError(400, `Ask for at most ${MAX_RANGE_DAYS} days at a time`);
 
   const now = nowUtc();
-  const rows = await Assignment.listDueBetween(req.user.id, from, to);
+  const [assignments, quizzes] = await Promise.all([
+    Assignment.listDueBetween(req.user.id, from, to),
+    Quiz.listClosingBetween(req.user.id, from, to),
+  ]);
+  const rows = [
+    ...assignments.map((row) => ({ ...row, kind: 'assignment' })),
+    ...quizzes.map((row) => ({ ...row, kind: 'quiz' })),
+  ].sort((a, b) => a.due_at.localeCompare(b.due_at));
   res.json({
     deadlines: rows.map((row) => ({
+      kind: row.kind,
       id: row.id,
       title: row.title,
       dueAt: row.due_at,

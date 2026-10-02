@@ -37,6 +37,10 @@ export function formatTime(value) {
   return new Date(2000, 0, 1, hours, minutes).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 }
 
+// Where a deadline from /schedules/deadlines opens: its assignment or its quiz
+export const deadlineLink = (deadline) =>
+  `/courses/${deadline.courseId}/${deadline.kind === 'quiz' ? 'quizzes' : 'assignments'}/${deadline.id}`;
+
 export const timeRange = (meeting) => `${formatTime(meeting.startsAt)} – ${formatTime(meeting.endsAt)}`;
 
 // The days a month calendar shows: whole weeks, Monday to Sunday, from the week the month starts in

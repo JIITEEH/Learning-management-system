@@ -130,6 +130,28 @@ describe('deadline calendar', () => {
     assert.equal(seen.some((d) => d.title === 'Still a draft'), false);
   });
 
+  it('shows quizzes by their closing time, marked once taken, and hides unpublished ones from students', async () => {
+    const { course: mine } = await makeCourse(api, instructor, [student]);
+    const makeQuiz = async (title, publish) => {
+      const quiz = (await api.post(`/courses/${mine.id}/quizzes`, { as: instructor, body: { title, dueAt: daysFromNow(2) } })).data.quiz;
+      const question = { kind: 'true_false', prompt: 'Water is wet.', answer: true };
+      await api.post(`/quizzes/${quiz.id}/questions`, { as: instructor, body: question });
+      if (publish) await api.patch(`/quizzes/${quiz.id}`, { as: instructor, body: { isPublished: true } });
+      return quiz;
+    };
+    const taken = await makeQuiz('Taken quiz', true);
+    await makeQuiz('Open quiz', true);
+    await makeQuiz('Hidden quiz', false);
+    const attempt = (await api.post(`/quizzes/${taken.id}/attempts`, { as: student })).data.attempt;
+    await api.post(`/attempts/${attempt.id}/submit`, { as: student, body: { answers: [] } });
+
+    const window = range(daysFromNow(0), daysFromNow(5));
+    const seen = (await api.get(window, { as: student })).data.deadlines.filter((d) => d.courseId === mine.id);
+    assert.deepEqual(seen.map((d) => [d.kind, d.title, d.status]), [['quiz', 'Taken quiz', 'handedIn'], ['quiz', 'Open quiz', 'notYet']]);
+    const taught = (await api.get(window, { as: instructor })).data.deadlines.filter((d) => d.courseId === mine.id);
+    assert.equal(taught.length, 3, 'the instructor also sees the quiz still being built');
+  });
+
   it('refuses a missing, zoneless, backwards or over-long range', async () => {
     const bad = [
       '/schedules/deadlines',

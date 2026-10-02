@@ -1,5 +1,5 @@
-// "Deadlines": a month calendar of assignment due dates across every course this person teaches
-// or takes, with buttons to move a month back or forward. A student sees a mark on each one
+// "Deadlines": a month calendar of assignment due dates and quiz closing times across every
+// course this person teaches or takes, with buttons to move a month back or forward. A student sees a mark on each one
 // (handed in, late, missing). Days outside the month are shown dimmed, with their deadlines too,
 // so the last week of one month and the first of the next read the same either way.
 //
@@ -11,7 +11,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../../api-client/api.js';
 import useApi from '../../reusable-logic/useApi.js';
 import { parseTimestamp } from '../../helpers/format.js';
-import { DAY_NAMES, WEEK_ORDER, addDays, dayString, monthGrid } from '../../helpers/schedule.js';
+import { DAY_NAMES, WEEK_ORDER, addDays, dayString, deadlineLink, monthGrid } from '../../helpers/schedule.js';
 import { Notice } from '../basics/Feedback.jsx';
 import DueBadge from './DueBadge.jsx';
 
@@ -78,9 +78,11 @@ export default function MonthView() {
                 <span className="month-date-full">{fullDate(date)}{key === today ? ' · Today' : ''}</span>
               </p>
               {deadlines.map((deadline) => (
-                <article key={deadline.id} className="meeting">
-                  <span className="meeting-time" data-numeric>{dueTime(deadline.due)}</span>
-                  <Link to={`/courses/${deadline.courseId}/assignments/${deadline.id}`} title={deadline.courseTitle}>
+                <article key={`${deadline.kind}-${deadline.id}`} className="meeting">
+                  <span className="meeting-time" data-numeric>
+                    {dueTime(deadline.due)}{deadline.kind === 'quiz' ? ' · Quiz closes' : ''}
+                  </span>
+                  <Link to={deadlineLink(deadline)} title={deadline.courseTitle}>
                     {deadline.courseCode} · {deadline.title}
                     <span className="visually-hidden"> ({deadline.courseTitle})</span>
                   </Link>
